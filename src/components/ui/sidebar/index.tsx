@@ -32,10 +32,10 @@ export {
 
 export {
   SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
   SidebarMenuAction,
   SidebarMenuBadge,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarMenuSkeleton,
   sidebarMenuButtonVariants
 } from "./sidebar-menu"
