@@ -23,19 +23,24 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   onAcceptRequest,
   onRequestUpdated
 }) => {
-  // Keep local state to force re-renders when needed
-  const [updateCount, setUpdateCount] = useState(0);
+  const [localRequests, setLocalRequests] = useState<Request[]>([]);
   
-  // Filter requests based on tab - make sure this is reactive to both requests and status changes
+  // Update local requests when prop requests change
+  useEffect(() => {
+    setLocalRequests(requests);
+    console.log("RequestsTabContent: Requests updated from props", requests);
+  }, [requests]);
+  
+  // Filter requests based on tab
   const filteredRequests = React.useMemo(() => {
     console.log("Filtering requests for status:", status);
-    console.log("Available requests:", requests);
+    console.log("Available requests:", localRequests);
     
     if (status === "all") {
-      return [...requests]; // Return a new array to ensure reactivity
+      return [...localRequests]; 
     }
-    return requests.filter(request => request.status === status);
-  }, [requests, status, updateCount]);
+    return localRequests.filter(request => request.status === status);
+  }, [localRequests, status]);
   
   // Log when filtered requests change
   useEffect(() => {
@@ -46,7 +51,9 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   useEffect(() => {
     const handleRequestUpdate = () => {
       console.log("RequestsTabContent: Global request update detected");
-      setUpdateCount(prev => prev + 1);
+      if (onRequestUpdated) {
+        onRequestUpdated();
+      }
     };
     
     window.addEventListener('requestUpdated', handleRequestUpdate);
@@ -56,12 +63,20 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
       window.removeEventListener('requestUpdated', handleRequestUpdate);
       window.removeEventListener('storage', handleRequestUpdate);
     };
-  }, []);
+  }, [onRequestUpdated]);
   
-  // Force update when a request status changes
-  const handleRequestUpdated = useCallback(() => {
-    console.log("Request updated callback called");
-    setUpdateCount(prev => prev + 1);
+  // Handle a request status change
+  const handleRequestStatusChange = useCallback((requestId: string, newStatus: RequestStatus) => {
+    console.log(`RequestsTabContent: Request ${requestId} status changed to ${newStatus}`);
+    
+    // Update local state to reflect the change immediately
+    setLocalRequests(prevRequests => 
+      prevRequests.map(req => 
+        req.id === requestId ? { ...req, status: newStatus } : req
+      )
+    );
+    
+    // Notify parent of update
     if (onRequestUpdated) {
       onRequestUpdated();
     }
@@ -72,12 +87,12 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
       {filteredRequests.length > 0 ? (
         filteredRequests.map((request) => (
           <RequestCard
-            key={`${request.id}-${request.status}-${updateCount}`} // Add a dynamic key to force re-render
+            key={`${request.id}-${request.status}`}
             request={request}
             formatDate={formatDate}
             onClearRequest={onClearRequest}
             onAccept={onAcceptRequest}
-            onRequestUpdated={handleRequestUpdated}
+            onRequestUpdated={() => handleRequestStatusChange(request.id, request.status)}
           />
         ))
       ) : (
