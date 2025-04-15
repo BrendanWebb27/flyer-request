@@ -32,9 +32,21 @@ const RequestCard: React.FC<RequestCardProps> = ({
         <RequestStatusBadge status={request.status} />
       </CardHeader>
       <CardContent className="flex-grow">
-        <RequestMetadata request={request} formatDate={formatDate} />
+        <RequestMetadata 
+          location={request.location}
+          details={request.details}
+          createdAt={request.createdAt}
+          formatDate={formatDate}
+          assignedTo={request.assignedTo}
+          estimatedArrival={request.estimatedArrival}
+          requestedBy={request.requestedBy}
+          completedAt={request.completedAt}
+        />
         <p className="mt-3 text-gray-700">{request.details}</p>
-        <RequestNotes notes={request.notes} />
+        <RequestNotes 
+          notes={request.notes} 
+          formatDate={formatDate}
+        />
       </CardContent>
       <CardFooter className="border-t pt-4">
         <RequestActions 
