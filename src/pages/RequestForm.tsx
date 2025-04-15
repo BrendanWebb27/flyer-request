@@ -31,13 +31,6 @@ const assetTypes = [
   { value: "broken-tool", label: "Broken Tool", icon: <Package className="h-4 w-4 mr-2" /> },
 ];
 
-const hazLocations = [
-  "A2L", "A2R", "A3L", "A3R", "A4L", "A4R", "A5L", "A5R", 
-  "A6L", "A6R", "A7L", "A7R", "A8L", "A8R", "A16L", "A16R", 
-  "A17L", "A17R", "A18L", "A18R", "A19L", "A19R", "B17L", 
-  "B17R", "B18L", "B18R", "B19L", "B19R"
-];
-
 const RequestForm: React.FC = () => {
   const form = useForm<RequestFormData>({
     defaultValues: {
@@ -98,23 +91,12 @@ const RequestForm: React.FC = () => {
                     <FormLabel className="flex items-center gap-2">
                       <MapPin size={16} className="text-flyerPurple-500" /> HAZ Location
                     </FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select HAZ Location" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {hazLocations.map((location) => (
-                          <SelectItem key={location} value={location}>
-                            {location}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter HAZ Location (e.g. A2L, B17R)" 
+                        {...field}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
