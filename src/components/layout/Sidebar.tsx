@@ -40,9 +40,20 @@ const Sidebar: React.FC = () => {
 
   const isActiveRoute = (route: string) => {
     if (route.includes("?")) {
-      // For routes with query parameters, check if the pathname matches and if the query param is present
+      // For routes with query parameters, check the pathname and the search params
       const [path, query] = route.split("?");
-      return location.pathname === path && location.search.includes(query);
+      const queryParams = new URLSearchParams(query);
+      const currentParams = new URLSearchParams(location.search);
+      
+      // Check if the pathnames match
+      if (location.pathname !== path) return false;
+      
+      // Check if the query parameter exists with the correct value
+      for (const [key, value] of queryParams.entries()) {
+        if (currentParams.get(key) !== value) return false;
+      }
+      
+      return true;
     }
     return location.pathname === route;
   };

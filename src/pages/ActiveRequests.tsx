@@ -86,6 +86,11 @@ const ActiveRequests: React.FC = () => {
       assignedTo: "Current Support Staff", // In a real app, you'd get the current user's name
       estimatedTime: data.estimatedTime 
     });
+    
+    toast({
+      title: "Request Accepted",
+      description: `You will arrive in approximately ${data.estimatedTime}`
+    });
   };
 
   // Only display tabs that the user has access to
