@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Request } from "@/components/support/RequestsTable";
+import { Request } from "@/types/request";
 import RequestStatusBadge from "./RequestStatusBadge";
 import RequestMetadata from "./RequestMetadata";
 import RequestActions from "./RequestActions";
