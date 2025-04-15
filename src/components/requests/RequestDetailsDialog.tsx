@@ -49,6 +49,11 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ request, on
         description: `You'll arrive in ${formattedTime}.`,
       });
       
+      // Force a page refresh after a short delay to update the UI
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage'));
+      }, 100);
+      
       setShowTimeInput(false);
     }
   };

@@ -45,6 +45,19 @@ const ActiveRequests: React.FC = () => {
     }
   }, [statusParam]);
   
+  // Listen for localStorage changes to refresh the component
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setRefreshTrigger(prev => prev + 1);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+  
   // Handle clearing a request
   const handleClearRequest = (id: string) => {
     const requestIndex = requests.findIndex(req => req.id === id);

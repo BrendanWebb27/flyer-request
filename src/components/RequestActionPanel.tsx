@@ -3,7 +3,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Check, Clock, Users } from "lucide-react";
@@ -40,6 +39,11 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
       title: "Request Accepted",
       description: `Request ${requestId} has been accepted and assigned to ${assignedTo}.`,
     });
+    
+    // Force a page refresh after a short delay to update the UI
+    setTimeout(() => {
+      window.dispatchEvent(new Event('storage'));
+    }, 100);
   };
   
   // Mock data for available personnel

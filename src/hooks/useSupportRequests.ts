@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Request, RequestStatus, Note } from "@/types/request";
 import { useToast } from "@/hooks/use-toast";
@@ -40,8 +39,8 @@ export const useSupportRequests = () => {
   }, [requests, toast]);
 
   const acceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
-    setRequests(
-      requests.map(request =>
+    setRequests(prevRequests => 
+      prevRequests.map(request =>
         request.id === id ? { 
           ...request, 
           status: "active" as RequestStatus, 
@@ -50,6 +49,9 @@ export const useSupportRequests = () => {
         } : request
       )
     );
+    
+    // Force an update to localStorage to trigger UI refresh
+    localStorage.setItem('lastRequestUpdate', new Date().toISOString());
   };
 
   const completeRequest = (id: string, note?: { text: string, author: string }) => {
@@ -82,6 +84,9 @@ export const useSupportRequests = () => {
       title: "Request Completed",
       description: `Request ${id} has been marked as completed`,
     });
+    
+    // Force an update to localStorage to trigger UI refresh
+    localStorage.setItem('lastRequestUpdate', new Date().toISOString());
   };
 
   const clearRequest = (id: string) => {
@@ -143,4 +148,3 @@ export const useSupportRequests = () => {
     countByStatus: (status: RequestStatus) => countRequestsByStatus(requests, status)
   };
 };
-
