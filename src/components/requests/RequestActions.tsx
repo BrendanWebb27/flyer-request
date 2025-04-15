@@ -25,9 +25,15 @@ interface RequestActionsProps {
   requestId: string;
   onClear: (id: string) => void;
   request?: Request;
+  onAccept?: (id: string, data: { estimatedTime: string }) => void;
 }
 
-export const RequestActions: React.FC<RequestActionsProps> = ({ requestId, onClear, request }) => {
+export const RequestActions: React.FC<RequestActionsProps> = ({ 
+  requestId, 
+  onClear, 
+  request,
+  onAccept 
+}) => {
   return (
     <div className="flex gap-2 self-end md:self-center">
       <AlertDialog>
@@ -69,7 +75,10 @@ export const RequestActions: React.FC<RequestActionsProps> = ({ requestId, onCle
         </DialogTrigger>
         <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           {request ? (
-            <RequestDetailsDialog request={request} />
+            <RequestDetailsDialog 
+              request={request} 
+              onAccept={onAccept}
+            />
           ) : (
             <div className="py-8 text-center">
               <p>Request details not available</p>

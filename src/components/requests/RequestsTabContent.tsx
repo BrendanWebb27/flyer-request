@@ -1,51 +1,57 @@
 
 import React from "react";
-import { Request, RequestStatus } from "@/types/request";
+import { Card } from "@/components/ui/card";
+import { RequestStatus, Request } from "@/types/request";
 import RequestCard from "./RequestCard";
+import RequestActions from "./RequestActions";
 
 interface RequestsTabContentProps {
   requests: Request[];
   status: RequestStatus | "all";
-  formatDate: (dateString: string) => string;
+  formatDate: (date: string) => string;
   onClearRequest: (id: string) => void;
   currentUserId: string;
+  onAcceptRequest?: (id: string, data: { estimatedTime: string }) => void;
 }
 
-export const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
+const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   requests,
   status,
   formatDate,
   onClearRequest,
   currentUserId,
+  onAcceptRequest
 }) => {
-  // Filter to just the current user's requests
-  const userRequests = requests.filter(request => request.requestedBy === currentUserId);
-  
-  const filteredRequests = (status: RequestStatus | "all") => {
-    if (status === "all") return userRequests;
-    return userRequests.filter(request => request.status === status);
-  };
-
-  const displayRequests = filteredRequests(status);
-
-  if (displayRequests.length === 0) {
-    return (
-      <div className="text-center p-10">
-        <p className="text-muted-foreground">No {status === "all" ? "" : status} requests found.</p>
-      </div>
-    );
-  }
+  const filteredRequests = React.useMemo(() => {
+    if (status === "all") {
+      return requests;
+    }
+    return requests.filter(request => request.status === status);
+  }, [requests, status]);
 
   return (
-    <div className="space-y-4">
-      {displayRequests.map(request => (
-        <RequestCard
-          key={request.id}
-          request={request}
-          formatDate={formatDate}
-          onClearRequest={onClearRequest}
-        />
-      ))}
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {filteredRequests.length > 0 ? (
+        filteredRequests.map((request) => (
+          <RequestCard
+            key={request.id}
+            request={request}
+            formatDate={formatDate}
+            actions={
+              <RequestActions
+                requestId={request.id}
+                onClear={onClearRequest}
+                request={request}
+                onAccept={onAcceptRequest}
+              />
+            }
+          />
+        ))
+      ) : (
+        <Card className="col-span-full p-6 text-center">
+          <p className="text-muted-foreground">No {status !== "all" ? status : ""} requests found.</p>
+        </Card>
+      )}
     </div>
   );
 };

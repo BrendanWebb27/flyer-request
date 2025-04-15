@@ -9,7 +9,7 @@ import RequestsTabContent from "@/components/requests/RequestsTabContent";
 
 const ActiveRequests: React.FC = () => {
   const { toast } = useToast();
-  const { requests, formatDate, clearRequest, undoClearRequest } = useSupportRequests();
+  const { requests, formatDate, clearRequest, undoClearRequest, acceptRequest } = useSupportRequests();
   const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
   
   // This would come from authentication in a real app
@@ -50,6 +50,14 @@ const ActiveRequests: React.FC = () => {
     }, 10000); // 10 seconds
   };
 
+  // Handle accepting a request with estimated time
+  const handleAcceptRequest = (id: string, data: { estimatedTime: string }) => {
+    acceptRequest(id, { 
+      assignedTo: "Current Support Staff", // In a real app, you'd get the current user's name
+      estimatedTime: data.estimatedTime 
+    });
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">My Requests</h1>
@@ -70,6 +78,7 @@ const ActiveRequests: React.FC = () => {
               formatDate={formatDate}
               onClearRequest={handleClearRequest}
               currentUserId={currentUserId}
+              onAcceptRequest={handleAcceptRequest}
             />
           </TabsContent>
         ))}
