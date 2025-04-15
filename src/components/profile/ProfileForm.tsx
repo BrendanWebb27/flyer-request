@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,17 +39,17 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ profile, setProfile, isEditin
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="organization">Organization</Label>
+        <Label htmlFor="organization">Work Center</Label>
         {isEditing ? (
           <Select 
-            defaultValue={profile.organization}
+            value={profile.organization}
             onValueChange={(value) => setProfile({...profile, organization: value})}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select organization" />
+              <SelectValue placeholder="Select Work Center" />
             </SelectTrigger>
             <SelectContent>
-              {organizations.map(org => (
+              {["Support", "APG", "AVI", "E&E", "ENG", "WPN"].map(org => (
                 <SelectItem key={org} value={org}>{org}</SelectItem>
               ))}
             </SelectContent>

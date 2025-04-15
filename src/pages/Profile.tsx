@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -34,13 +33,12 @@ const Profile: React.FC = () => {
   };
 
   const organizations = [
-    "IT Department", 
-    "Human Resources", 
-    "Finance", 
-    "Marketing", 
-    "Operations", 
-    "Customer Service",
-    "Executive Office"
+    "Support", 
+    "APG", 
+    "AVI", 
+    "E&E", 
+    "ENG", 
+    "WPN"
   ];
 
   return (
