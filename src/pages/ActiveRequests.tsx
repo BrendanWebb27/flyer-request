@@ -108,12 +108,13 @@ const ActiveRequests: React.FC = () => {
 
   // Filter requests based on user role
   const filteredRequests = React.useMemo(() => {
-    // For general users, only show their own requests
     if (!isSupport) {
+      // For general users, only show their own requests
       return requests.filter(req => req.requestedBy === currentUserId);
     }
-    return requests; // Support users see all requests
-  }, [requests, isSupport, currentUserId, refreshTrigger]); // Added refreshTrigger dependency
+    // Support users see all requests without filtering by requestedBy
+    return requests;
+  }, [requests, isSupport, currentUserId, refreshTrigger]);
 
   // Only display tabs that the user has access to
   const availableTabs = isSupport 

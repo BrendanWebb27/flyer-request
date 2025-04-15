@@ -14,6 +14,10 @@ export const useSupportRequests = () => {
   useEffect(() => {
     // Check for newly assigned requests
     const notifiedRequests = JSON.parse(localStorage.getItem('notifiedRequests') || '[]');
+    const isSupport = localStorage.getItem("supportAccessGranted") === "true";
+    
+    // Skip notifications if user is support staff
+    if (isSupport) return;
     
     requests.forEach(request => {
       // If request is active, has an assigned person, and hasn't been notified yet
@@ -139,3 +143,4 @@ export const useSupportRequests = () => {
     countByStatus: (status: RequestStatus) => countRequestsByStatus(requests, status)
   };
 };
+
