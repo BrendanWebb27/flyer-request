@@ -6,9 +6,15 @@ interface ProfileActionsProps {
   isEditing: boolean;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   onSave: () => void;
+  isSupport?: boolean;
 }
 
-const ProfileActions: React.FC<ProfileActionsProps> = ({ isEditing, setIsEditing, onSave }) => {
+const ProfileActions: React.FC<ProfileActionsProps> = ({ 
+  isEditing, 
+  setIsEditing, 
+  onSave,
+  isSupport = false 
+}) => {
   return (
     <>
       {isEditing ? (
