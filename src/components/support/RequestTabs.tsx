@@ -10,7 +10,7 @@ interface RequestTabsProps {
 const RequestTabs: React.FC<RequestTabsProps> = ({ children, defaultValue }) => {
   return (
     <Tabs defaultValue={defaultValue} className="w-full">
-      <TabsList className="w-full md:w-auto mb-4">
+      <TabsList className="grid grid-cols-4 mb-4">
         <TabsTrigger value="all">All</TabsTrigger>
         <TabsTrigger value="pending">Pending</TabsTrigger>
         <TabsTrigger value="active">Active</TabsTrigger>
