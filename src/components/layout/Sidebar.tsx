@@ -60,7 +60,7 @@ const Sidebar: React.FC = () => {
   return (
     <>
       <div className="fixed top-4 left-4 z-50 md:hidden">
-        <SidebarTrigger asChild>
+        <SidebarTrigger>
           <button className="p-2 rounded-md bg-flyerPurple-500 text-white hover:bg-flyerPurple-600 transition-colors">
             <Menu size={20} />
           </button>
@@ -74,7 +74,7 @@ const Sidebar: React.FC = () => {
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.route}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton>
                   <Link
                     to={item.route}
                     className={cn(
