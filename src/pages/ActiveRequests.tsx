@@ -18,6 +18,9 @@ const ActiveRequests: React.FC = () => {
   // Check for support access
   const isSupport = localStorage.getItem("supportAccessGranted") === "true";
   
+  // This would come from authentication in a real app
+  const currentUserId = "user123";
+  
   // Extract status from URL query params
   const urlParams = new URLSearchParams(location.search);
   const statusParam = urlParams.get("status") as RequestStatus | null;
@@ -40,9 +43,6 @@ const ActiveRequests: React.FC = () => {
       setActiveTab("all");
     }
   }, [statusParam]);
-  
-  // This would come from authentication in a real app
-  const currentUserId = "user123";
   
   // Handle clearing a request
   const handleClearRequest = (id: string) => {
@@ -91,12 +91,24 @@ const ActiveRequests: React.FC = () => {
       title: "Request Accepted",
       description: `You will arrive in approximately ${data.estimatedTime}`
     });
+    
+    // After accepting, navigate to active tab
+    setActiveTab("active");
   };
+
+  // Filter requests based on user role
+  const filteredRequests = React.useMemo(() => {
+    // For general users, only show their own requests
+    if (!isSupport) {
+      return requests.filter(req => req.requestedBy === currentUserId);
+    }
+    return requests; // Support users see all requests
+  }, [requests, isSupport, currentUserId]);
 
   // Only display tabs that the user has access to
   const availableTabs = isSupport 
     ? ["all", "pending", "active", "completed"] 
-    : ["all", "active", "completed"];
+    : ["all", "pending", "active"];
 
   return (
     <div className="space-y-6">
@@ -114,7 +126,7 @@ const ActiveRequests: React.FC = () => {
         {availableTabs.map((tab) => (
           <TabsContent key={tab} value={tab}>
             <RequestsTabContent
-              requests={requests}
+              requests={filteredRequests}
               status={tab as RequestStatus | "all"}
               formatDate={formatDate}
               onClearRequest={handleClearRequest}

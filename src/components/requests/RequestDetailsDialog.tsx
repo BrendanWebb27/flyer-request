@@ -41,7 +41,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ request, on
       onAccept(request.id, { estimatedTime: formattedTime });
       
       toast({
-        title: "Request Approved",
+        title: "Request Accepted",
         description: `You'll arrive in ${formattedTime}.`,
       });
       
@@ -104,7 +104,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ request, on
             className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
           >
             <Check size={16} className="mr-2" />
-            Approve Request
+            Accept Request
           </Button>
         </DialogFooter>
       )}
