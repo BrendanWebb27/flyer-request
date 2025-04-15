@@ -42,7 +42,8 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           
           <RequestActions 
             requestId={request.id} 
-            onClear={onClearRequest} 
+            onClear={onClearRequest}
+            request={request}
           />
         </div>
       </CardContent>
