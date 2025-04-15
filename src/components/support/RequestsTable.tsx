@@ -35,7 +35,11 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Request Queue</CardTitle>
+        <CardTitle>
+          {activeTab === "all" 
+            ? "All Requests" 
+            : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Requests`}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
