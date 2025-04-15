@@ -15,6 +15,9 @@ const ActiveRequests: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
+  // Check for support access
+  const isSupport = localStorage.getItem("supportAccessGranted") === "true";
+  
   // Extract status from URL query params
   const urlParams = new URLSearchParams(location.search);
   const statusParam = urlParams.get("status") as RequestStatus | null;
@@ -40,9 +43,6 @@ const ActiveRequests: React.FC = () => {
   
   // This would come from authentication in a real app
   const currentUserId = "user123";
-  
-  // Check for support access
-  const isSupport = localStorage.getItem("supportAccessGranted") === "true";
   
   // Handle clearing a request
   const handleClearRequest = (id: string) => {
