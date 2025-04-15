@@ -7,14 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AssetTypeSelector from './AssetTypeSelector';
-
-interface RequestFormData {
-  location: string;
-  details: string;
-  urgency: string;
-  estimatedDuration: string;
-  assetType: string;
-}
+import { RequestFormData } from '@/types/request';
 
 const RequestFormFields: React.FC = () => {
   const form = useFormContext<RequestFormData>();

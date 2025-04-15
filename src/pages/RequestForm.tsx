@@ -8,14 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import RequestFormFields from '@/components/forms/RequestFormFields';
-
-type RequestFormData = {
-  location: string;
-  details: string;
-  urgency: string;
-  estimatedDuration: string;
-  assetType: string;
-};
+import { RequestFormData } from '@/types/request';
+import { submitFlyerRequest } from '@/utils/requestSubmission';
 
 const RequestForm: React.FC = () => {
   const form = useForm<RequestFormData>({
@@ -34,9 +28,8 @@ const RequestForm: React.FC = () => {
   const onSubmit = async (data: RequestFormData) => {
     setLoading(true);
     
-    // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await submitFlyerRequest(data);
       
       toast({
         title: "Request Submitted",
@@ -60,7 +53,7 @@ const RequestForm: React.FC = () => {
       <h1 className="text-3xl font-bold tracking-tight mb-6">Request a Flyer</h1>
       
       <FormProvider {...form}>
-        <Form>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <Card>
               <CardHeader>
