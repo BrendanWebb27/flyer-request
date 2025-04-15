@@ -14,7 +14,14 @@ import RequestsTable from "@/components/support/RequestsTable";
 const SupportDashboard: React.FC = () => {
   const { toast } = useToast();
   const [hasAccess, setHasAccess] = useState(false);
-  const { requests, acceptRequest, completeRequest, formatDate, countByStatus } = useSupportRequests();
+  const { 
+    requests, 
+    acceptRequest, 
+    completeRequest, 
+    formatDate, 
+    countByStatus,
+    addNote
+  } = useSupportRequests();
   
   // Check if user has already been granted access
   useEffect(() => {
@@ -65,6 +72,7 @@ const SupportDashboard: React.FC = () => {
               formatDate={formatDate}
               acceptRequest={acceptRequest}
               completeRequest={completeRequest}
+              addNote={addNote}
             />
           </TabsContent>
         ))}

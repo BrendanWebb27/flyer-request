@@ -1,13 +1,22 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import RequestActionPanel from "@/components/RequestActionPanel";
 
 export type RequestStatus = "pending" | "active" | "completed" | "cancelled";
+
+export interface Note {
+  text: string;
+  timestamp: string;
+  author: string;
+}
 
 export interface Request {
   id: string;
@@ -18,6 +27,9 @@ export interface Request {
   estimatedDuration: string;
   assignedTo?: string;
   estimatedArrival?: string;
+  requestedBy: string;
+  completedAt?: string;
+  notes?: Note[];
 }
 
 interface RequestsTableProps {
@@ -25,7 +37,8 @@ interface RequestsTableProps {
   activeTab: string;
   formatDate: (dateString: string) => string;
   acceptRequest: (id: string, data: { assignedTo: string; estimatedTime: string }) => void;
-  completeRequest: (id: string) => void;
+  completeRequest: (id: string, note?: { text: string, author: string }) => void;
+  addNote?: (id: string, note: { text: string, author: string }) => void;
 }
 
 const RequestsTable: React.FC<RequestsTableProps> = ({
@@ -33,8 +46,12 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
   activeTab,
   formatDate,
   acceptRequest,
-  completeRequest
+  completeRequest,
+  addNote
 }) => {
+  const [completionNote, setCompletionNote] = useState("");
+  const [activeRequest, setActiveRequest] = useState<string | null>(null);
+
   const filteredRequests = (status: RequestStatus | "all") => {
     if (status === "all") return requests;
     return requests.filter(request => request.status === status);
@@ -51,6 +68,19 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
       case "cancelled":
         return <Badge variant="destructive">Cancelled</Badge>;
     }
+  };
+
+  const handleCompleteWithNote = (id: string) => {
+    if (completionNote.trim()) {
+      completeRequest(id, { 
+        text: completionNote, 
+        author: "Support Staff" // In a real app, this would be the current user
+      });
+    } else {
+      completeRequest(id);
+    }
+    setCompletionNote("");
+    setActiveRequest(null);
   };
 
   return (
@@ -101,14 +131,41 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
                       )}
                       
                       {request.status === "active" && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200"
-                          onClick={() => completeRequest(request.id)}
-                        >
-                          Complete
-                        </Button>
+                        <Sheet>
+                          <SheetTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200"
+                              onClick={() => setActiveRequest(request.id)}
+                            >
+                              Complete
+                            </Button>
+                          </SheetTrigger>
+                          <SheetContent>
+                            <SheetHeader>
+                              <SheetTitle>Complete Request {request.id}</SheetTitle>
+                            </SheetHeader>
+                            <div className="space-y-4 mt-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="completionNote">Add a completion note (optional)</Label>
+                                <Textarea 
+                                  id="completionNote"
+                                  placeholder="What was done to complete this request?"
+                                  value={completionNote}
+                                  onChange={(e) => setCompletionNote(e.target.value)}
+                                  rows={4}
+                                />
+                              </div>
+                              <Button 
+                                className="w-full"
+                                onClick={() => handleCompleteWithNote(request.id)}
+                              >
+                                Mark as Complete
+                              </Button>
+                            </div>
+                          </SheetContent>
+                        </Sheet>
                       )}
                       
                       <Button variant="ghost" size="sm">
