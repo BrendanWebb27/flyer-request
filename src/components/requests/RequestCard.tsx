@@ -1,62 +1,50 @@
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Request } from "@/types/request";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import RequestStatusBadge from "./RequestStatusBadge";
 import RequestMetadata from "./RequestMetadata";
-import RequestActions from "./RequestActions";
 import RequestNotes from "./RequestNotes";
+import { Request } from "@/types/request";
+import RequestActions from "./RequestActions";
 
 interface RequestCardProps {
   request: Request;
-  formatDate: (dateString: string) => string;
+  formatDate: (date: string) => string;
   onClearRequest: (id: string) => void;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
+  onRequestUpdated?: () => void; // New callback to trigger UI updates
 }
 
-export const RequestCard: React.FC<RequestCardProps> = ({ 
+const RequestCard: React.FC<RequestCardProps> = ({ 
   request, 
   formatDate, 
-  onClearRequest,
-  onAccept
+  onClearRequest, 
+  onAccept,
+  onRequestUpdated
 }) => {
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <RequestStatusBadge status={request.status} />
-              <span className="text-sm font-medium text-muted-foreground">
-                {request.id}
-              </span>
-            </div>
-            
-            <RequestMetadata 
-              location={request.location}
-              details={request.details}
-              createdAt={request.createdAt}
-              formatDate={formatDate}
-              assignedTo={request.assignedTo}
-              estimatedArrival={request.estimatedArrival}
-              requestedBy={request.requestedBy}
-              completedAt={request.completedAt}
-            />
-
-            <RequestNotes 
-              notes={request.notes} 
-              formatDate={formatDate} 
-            />
-          </div>
-          
-          <RequestActions 
-            requestId={request.id} 
-            onClear={onClearRequest}
-            request={request}
-            onAccept={onAccept}
-          />
+    <Card className="flex flex-col">
+      <CardHeader className="flex flex-row items-start justify-between">
+        <div>
+          <CardTitle className="text-lg">Request {request.id}</CardTitle>
+          <p className="text-sm text-gray-500">{request.location}</p>
         </div>
+        <RequestStatusBadge status={request.status} />
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <RequestMetadata request={request} formatDate={formatDate} />
+        <p className="mt-3 text-gray-700">{request.details}</p>
+        <RequestNotes notes={request.notes} />
       </CardContent>
+      <CardFooter className="border-t pt-4">
+        <RequestActions 
+          requestId={request.id}
+          onClear={onClearRequest}
+          request={request}
+          onAccept={onAccept}
+          onRequestUpdated={onRequestUpdated}
+        />
+      </CardFooter>
     </Card>
   );
 };

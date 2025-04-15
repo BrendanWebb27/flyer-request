@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ const ActiveRequests: React.FC = () => {
   const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // Added to force re-renders
   
   // Check for support access
   const isSupport = localStorage.getItem("supportAccessGranted") === "true";
@@ -94,7 +95,16 @@ const ActiveRequests: React.FC = () => {
     
     // After accepting, navigate to active tab
     setActiveTab("active");
+    
+    // Force a refresh of the component
+    setRefreshTrigger(prev => prev + 1);
   };
+  
+  // Force refresh component when a request is updated
+  const handleRequestUpdated = useCallback(() => {
+    // Force a refresh of the component
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   // Filter requests based on user role
   const filteredRequests = React.useMemo(() => {
@@ -103,7 +113,7 @@ const ActiveRequests: React.FC = () => {
       return requests.filter(req => req.requestedBy === currentUserId);
     }
     return requests; // Support users see all requests
-  }, [requests, isSupport, currentUserId]);
+  }, [requests, isSupport, currentUserId, refreshTrigger]); // Added refreshTrigger dependency
 
   // Only display tabs that the user has access to
   const availableTabs = isSupport 
@@ -132,6 +142,7 @@ const ActiveRequests: React.FC = () => {
               onClearRequest={handleClearRequest}
               currentUserId={currentUserId}
               onAcceptRequest={isSupport ? handleAcceptRequest : undefined}
+              onRequestUpdated={handleRequestUpdated}
             />
           </TabsContent>
         ))}

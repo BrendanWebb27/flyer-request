@@ -26,13 +26,15 @@ interface RequestActionsProps {
   onClear: (id: string) => void;
   request?: Request;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
+  onRequestUpdated?: () => void;  // New callback to trigger parent updates
 }
 
 export const RequestActions: React.FC<RequestActionsProps> = ({ 
   requestId, 
   onClear, 
   request,
-  onAccept 
+  onAccept,
+  onRequestUpdated
 }) => {
   const [open, setOpen] = useState(false);
   
@@ -40,6 +42,11 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     if (onAccept) {
       onAccept(id, data);
       setOpen(false); // Close dialog after accepting
+      
+      // Trigger parent update after accepting
+      if (onRequestUpdated) {
+        setTimeout(() => onRequestUpdated(), 100); // Small timeout to ensure state updates
+      }
     }
   };
 
