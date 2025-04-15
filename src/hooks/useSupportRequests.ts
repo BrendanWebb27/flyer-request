@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Request, RequestStatus } from "@/components/support/RequestsTable";
 import { useToast } from "@/hooks/use-toast";
+import { Note } from "@/types/request";
 
 // Initial mock data
 const initialRequests: Request[] = [
@@ -111,7 +112,7 @@ export const useSupportRequests = () => {
       requests.map(request =>
         request.id === id ? { 
           ...request, 
-          status: "active", 
+          status: "active" as RequestStatus, 
           assignedTo: data.assignedTo,
           estimatedArrival: data.estimatedTime 
         } : request
@@ -123,9 +124,9 @@ export const useSupportRequests = () => {
     setRequests(
       requests.map(request => {
         if (request.id === id) {
-          const updatedRequest = { 
+          const updatedRequest: Request = { 
             ...request, 
-            status: "completed",
+            status: "completed" as RequestStatus,
             completedAt: new Date().toISOString()
           };
           
