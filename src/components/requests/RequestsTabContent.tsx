@@ -1,5 +1,5 @@
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { RequestStatus, Request } from "@/types/request";
 import RequestCard from "./RequestCard";
@@ -11,7 +11,7 @@ interface RequestsTabContentProps {
   onClearRequest: (id: string) => void;
   currentUserId: string;
   onAcceptRequest?: (id: string, data: { estimatedTime: string }) => void;
-  onRequestUpdated?: () => void; // New callback to notify parent of updates
+  onRequestUpdated?: () => void; // Callback to notify parent of updates
 }
 
 const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
@@ -25,14 +25,23 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
 }) => {
   // Filter requests based on tab
   const filteredRequests = React.useMemo(() => {
+    console.log("Filtering requests for status:", status);
+    console.log("Available requests:", requests);
+    
     if (status === "all") {
       return requests;
     }
     return requests.filter(request => request.status === status);
   }, [requests, status]);
   
+  // Log when filtered requests change
+  useEffect(() => {
+    console.log("Filtered requests updated:", filteredRequests);
+  }, [filteredRequests]);
+  
   // Force update when a request status changes
   const handleRequestUpdated = useCallback(() => {
+    console.log("Request updated callback called");
     if (onRequestUpdated) {
       onRequestUpdated();
     }

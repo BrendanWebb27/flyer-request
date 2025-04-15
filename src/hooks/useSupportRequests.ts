@@ -40,13 +40,22 @@ export const useSupportRequests = () => {
 
   // Effect to listen for storage events from other components
   useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'requestsUpdate' && event.newValue) {
-        setRequests(JSON.parse(event.newValue));
+    const handleStorageChange = (event: StorageEvent | Event) => {
+      if (event instanceof StorageEvent) {
+        if (event.key === 'requestsUpdate' && event.newValue) {
+          setRequests(JSON.parse(event.newValue));
+        }
+      } else {
+        // If it's a custom event, just refresh from localStorage
+        const savedRequests = localStorage.getItem('requestsUpdate');
+        if (savedRequests) {
+          setRequests(JSON.parse(savedRequests));
+        }
       }
     };
     
     window.addEventListener('storage', handleStorageChange);
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -64,6 +73,7 @@ export const useSupportRequests = () => {
         : request
     );
 
+    console.log("Accepting request, updated requests:", updatedRequests);
     setRequests(updatedRequests);
     
     // Save to localStorage and broadcast the change
@@ -83,30 +93,31 @@ export const useSupportRequests = () => {
   };
 
   const completeRequest = (id: string, note?: { text: string, author: string }) => {
-    setRequests(
-      requests.map(request => {
-        if (request.id === id) {
-          const updatedRequest: Request = { 
-            ...request, 
-            status: "completed" as RequestStatus,
-            completedAt: new Date().toISOString()
-          };
-          
-          if (note) {
-            updatedRequest.notes = [
-              ...(request.notes || []), 
-              {
-                ...note,
-                timestamp: new Date().toISOString()
-              }
-            ];
-          }
-          
-          return updatedRequest;
+    const updatedRequests = requests.map(request => {
+      if (request.id === id) {
+        const updatedRequest: Request = { 
+          ...request, 
+          status: "completed" as RequestStatus,
+          completedAt: new Date().toISOString()
+        };
+        
+        if (note) {
+          updatedRequest.notes = [
+            ...(request.notes || []), 
+            {
+              ...note,
+              timestamp: new Date().toISOString()
+            }
+          ];
         }
-        return request;
-      })
-    );
+        
+        return updatedRequest;
+      }
+      return request;
+    });
+    
+    setRequests(updatedRequests);
+    localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
     
     toast({
       title: "Request Completed",
@@ -114,6 +125,12 @@ export const useSupportRequests = () => {
     });
     
     localStorage.setItem('lastRequestUpdate', new Date().toISOString());
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'requestsUpdate',
+      newValue: JSON.stringify(updatedRequests)
+    }));
   };
 
   const clearRequest = (id: string) => {
@@ -121,7 +138,9 @@ export const useSupportRequests = () => {
     if (requestToClear) {
       setClearedRequests([...clearedRequests, requestToClear]);
       
-      setRequests(requests.filter(r => r.id !== id));
+      const updatedRequests = requests.filter(r => r.id !== id);
+      setRequests(updatedRequests);
+      localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
     }
   };
 
@@ -137,28 +156,30 @@ export const useSupportRequests = () => {
       }
       
       setRequests(newRequests);
+      localStorage.setItem('requestsUpdate', JSON.stringify(newRequests));
       setClearedRequests(clearedRequests.filter(r => r.id !== id));
     }
   };
 
   const addNote = (id: string, note: { text: string, author: string }) => {
-    setRequests(
-      requests.map(request => {
-        if (request.id === id) {
-          return {
-            ...request,
-            notes: [
-              ...(request.notes || []),
-              {
-                ...note,
-                timestamp: new Date().toISOString()
-              } as Note
-            ]
-          };
-        }
-        return request;
-      })
-    );
+    const updatedRequests = requests.map(request => {
+      if (request.id === id) {
+        return {
+          ...request,
+          notes: [
+            ...(request.notes || []),
+            {
+              ...note,
+              timestamp: new Date().toISOString()
+            } as Note
+          ]
+        };
+      }
+      return request;
+    });
+    
+    setRequests(updatedRequests);
+    localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
   };
 
   return {

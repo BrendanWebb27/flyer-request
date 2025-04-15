@@ -53,10 +53,8 @@ const ActiveRequests: React.FC = () => {
   
   // Listen for localStorage changes to refresh the component
   useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate') {
-        setRefreshTrigger(prev => prev + 1);
-      }
+    const handleStorageChange = () => {
+      setRefreshTrigger(prev => prev + 1);
     };
     
     window.addEventListener('storage', handleStorageChange);
@@ -116,6 +114,12 @@ const ActiveRequests: React.FC = () => {
     setRefreshTrigger(prev => prev + 1);
   };
   
+  // Force refresh when requests change
+  useEffect(() => {
+    // This effect runs when requests change (including when they're loaded from localStorage)
+    console.log("Requests updated in ActiveRequests component");
+  }, [requests]);
+  
   // Filter requests based on user role
   const filteredRequests = React.useMemo(() => {
     if (!isSupport) {
@@ -153,6 +157,7 @@ const ActiveRequests: React.FC = () => {
               onClearRequest={handleClearRequest}
               currentUserId={currentUserId}
               onAcceptRequest={isSupport ? handleAcceptRequest : undefined}
+              onRequestUpdated={() => setRefreshTrigger(prev => prev + 1)}
             />
           </TabsContent>
         ))}
