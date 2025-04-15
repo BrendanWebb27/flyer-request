@@ -15,11 +15,12 @@ const Profile: React.FC = () => {
   
   // Mock user profile data
   const [profile, setProfile] = useState({
-    username: "john.doe",
+    manNumber: "12345",
     organization: "IT Department",
     workShift: "dayshift",
     isFlyer: true,
-    flyerRole: "primary"
+    flyerRole: "primary",
+    isSupport: true // Mock support status for demonstration
   });
 
   const handleSaveProfile = () => {
@@ -62,7 +63,7 @@ const Profile: React.FC = () => {
             
             <div className="flex-1 space-y-4">
               <div className="space-y-1">
-                <Label className="text-base font-medium">@{profile.username}</Label>
+                <Label className="text-base font-medium">Man Number: {profile.manNumber}</Label>
               </div>
               
               <div className="flex flex-wrap gap-3">
@@ -76,7 +77,7 @@ const Profile: React.FC = () => {
                   <span className="capitalize">{profile.workShift}</span>
                 </div>
                 
-                {profile.isFlyer && (
+                {profile.isSupport && profile.isFlyer && (
                   <div className="flex items-center gap-1 bg-flyerPurple-100 text-flyerPurple-700 px-3 py-1 rounded-full text-sm font-medium">
                     Flyer {profile.flyerRole === "primary" ? "Primary" : "Alternate"}
                   </div>
@@ -87,11 +88,11 @@ const Profile: React.FC = () => {
           
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="manNumber">Man Number & Name</Label>
               <Input 
-                id="username" 
-                value={profile.username} 
-                onChange={(e) => setProfile({...profile, username: e.target.value})}
+                id="manNumber" 
+                value={profile.manNumber} 
+                onChange={(e) => setProfile({...profile, manNumber: e.target.value})}
                 disabled={!isEditing} 
               />
             </div>
@@ -136,48 +137,51 @@ const Profile: React.FC = () => {
               </ToggleGroup>
             </div>
             
-            <div className="space-y-2">
-              <Label>Flyer Status</Label>
-              {isEditing ? (
-                <div className="space-y-3">
-                  <ToggleGroup 
-                    type="single" 
-                    variant="outline" 
-                    disabled={!isEditing}
-                    value={profile.isFlyer ? "yes" : "no"}
-                    onValueChange={(value) => {
-                      if (value === "yes") setProfile({...profile, isFlyer: true});
-                      if (value === "no") setProfile({...profile, isFlyer: false});
-                    }}
-                    className="justify-start"
-                  >
-                    <ToggleGroupItem value="yes" className="px-4">I am a flyer</ToggleGroupItem>
-                    <ToggleGroupItem value="no" className="px-4">I am not a flyer</ToggleGroupItem>
-                  </ToggleGroup>
-                  
-                  {profile.isFlyer && (
+            {/* Only show Flyer Status for support members */}
+            {profile.isSupport && (
+              <div className="space-y-2">
+                <Label>Flyer Status</Label>
+                {isEditing ? (
+                  <div className="space-y-3">
                     <ToggleGroup 
                       type="single" 
                       variant="outline" 
                       disabled={!isEditing}
-                      value={profile.flyerRole}
+                      value={profile.isFlyer ? "yes" : "no"}
                       onValueChange={(value) => {
-                        if (value) setProfile({...profile, flyerRole: value});
+                        if (value === "yes") setProfile({...profile, isFlyer: true});
+                        if (value === "no") setProfile({...profile, isFlyer: false});
                       }}
                       className="justify-start"
                     >
-                      <ToggleGroupItem value="primary" className="px-4">Primary</ToggleGroupItem>
-                      <ToggleGroupItem value="alternate" className="px-4">Alternate</ToggleGroupItem>
+                      <ToggleGroupItem value="yes" className="px-4">I am a flyer</ToggleGroupItem>
+                      <ToggleGroupItem value="no" className="px-4">I am not a flyer</ToggleGroupItem>
                     </ToggleGroup>
-                  )}
-                </div>
-              ) : (
-                <Input 
-                  value={profile.isFlyer ? `Flyer - ${profile.flyerRole === "primary" ? "Primary" : "Alternate"}` : "Not a flyer"} 
-                  disabled 
-                />
-              )}
-            </div>
+                    
+                    {profile.isFlyer && (
+                      <ToggleGroup 
+                        type="single" 
+                        variant="outline" 
+                        disabled={!isEditing}
+                        value={profile.flyerRole}
+                        onValueChange={(value) => {
+                          if (value) setProfile({...profile, flyerRole: value});
+                        }}
+                        className="justify-start"
+                      >
+                        <ToggleGroupItem value="primary" className="px-4">Primary</ToggleGroupItem>
+                        <ToggleGroupItem value="alternate" className="px-4">Alternate</ToggleGroupItem>
+                      </ToggleGroup>
+                    )}
+                  </div>
+                ) : (
+                  <Input 
+                    value={profile.isFlyer ? `Flyer - ${profile.flyerRole === "primary" ? "Primary" : "Alternate"}` : "Not a flyer"} 
+                    disabled 
+                  />
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex justify-end gap-4">
