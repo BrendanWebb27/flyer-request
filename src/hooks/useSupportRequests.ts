@@ -1,103 +1,27 @@
 
-import { useState, useEffect } from "react";
-import { Request, RequestStatus, Note } from "@/types/request";
+import { useState } from "react";
+import { Request } from "@/types/request";
 import { useToast } from "@/hooks/use-toast";
-import { initialRequests } from "@/data/mockRequests";
+import { loadRequests, saveRequests } from "@/utils/requestPersistence";
+import { acceptRequest, completeRequest, addNoteToRequest } from "@/utils/requestOperations";
 import { formatDate, countRequestsByStatus } from "@/utils/requestUtils";
+import { useRequestNotifications } from "@/hooks/useRequestNotifications";
+import { useRequestSync } from "@/hooks/useRequestSync";
 
 export const useSupportRequests = () => {
   const { toast } = useToast();
-  const [requests, setRequests] = useState<Request[]>(() => {
-    // Try to load from localStorage first
-    const savedRequests = localStorage.getItem('requestsUpdate');
-    return savedRequests ? JSON.parse(savedRequests) : initialRequests;
-  });
+  const [requests, setRequests] = useState<Request[]>(() => loadRequests());
   const [clearedRequests, setClearedRequests] = useState<Request[]>([]);
 
-  useEffect(() => {
-    const notifiedRequests = JSON.parse(localStorage.getItem('notifiedRequests') || '[]');
-    const isSupport = localStorage.getItem("supportAccessGranted") === "true";
-    
-    if (isSupport) return;
-    
-    requests.forEach(request => {
-      if (
-        request.status === 'active' && 
-        request.assignedTo && 
-        request.estimatedArrival && 
-        !notifiedRequests.includes(request.id)
-      ) {
-        toast({
-          title: "Request Accepted",
-          description: `Your request has been accepted and assigned to ${request.assignedTo}. Estimated arrival: ${request.estimatedArrival}.`,
-        });
-        
-        notifiedRequests.push(request.id);
-        localStorage.setItem('notifiedRequests', JSON.stringify(notifiedRequests));
-      }
-    });
-  }, [requests, toast]);
+  // Hook to handle notifications for requests
+  useRequestNotifications(requests);
+  
+  // Hook to sync requests across tabs/components
+  useRequestSync(setRequests);
 
-  // Effect to listen for storage events from other components
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent | Event) => {
-      if (event instanceof StorageEvent) {
-        if (event.key === 'requestsUpdate' && event.newValue) {
-          setRequests(JSON.parse(event.newValue));
-        }
-      } else {
-        // If it's a custom event, just refresh from localStorage
-        const savedRequests = localStorage.getItem('requestsUpdate');
-        if (savedRequests) {
-          setRequests(JSON.parse(savedRequests));
-        }
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('requestUpdated', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('requestUpdated', handleStorageChange);
-    };
-  }, []);
-
-  const acceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
-    console.log("Before update - Request status for", id, ":", requests.find(req => req.id === id)?.status);
-    
-    // Create a new array of requests, don't modify the existing one
-    const updatedRequests = requests.map(request => 
-      request.id === id 
-        ? { 
-            ...request, 
-            status: "active" as RequestStatus, // Explicitly set status to "active"
-            assignedTo: data.assignedTo,
-            estimatedArrival: data.estimatedTime 
-          }
-        : request
-    );
-    
-    console.log("After update - Updated requests:", updatedRequests);
-    console.log("After update - Request status for", id, ":", updatedRequests.find(req => req.id === id)?.status);
-    
-    // Save to localStorage before updating state
-    localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
-    
-    // Update state
+  const handleAcceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
+    const updatedRequests = acceptRequest(requests, id, data);
     setRequests(updatedRequests);
-    
-    // Update timestamp for change detection
-    localStorage.setItem('lastRequestUpdate', new Date().toISOString());
-    
-    // Dispatch a custom event to force updates across components
-    window.dispatchEvent(new CustomEvent('requestUpdated', { detail: { id } }));
-    
-    // Also dispatch a storage event for components listening for that
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: 'requestsUpdate',
-      newValue: JSON.stringify(updatedRequests)
-    }));
     
     toast({
       title: "Request Accepted",
@@ -105,45 +29,14 @@ export const useSupportRequests = () => {
     });
   };
 
-  const completeRequest = (id: string, note?: { text: string, author: string }) => {
-    const updatedRequests = requests.map(request => {
-      if (request.id === id) {
-        const updatedRequest: Request = { 
-          ...request, 
-          status: "completed" as RequestStatus,
-          completedAt: new Date().toISOString()
-        };
-        
-        if (note) {
-          updatedRequest.notes = [
-            ...(request.notes || []), 
-            {
-              ...note,
-              timestamp: new Date().toISOString()
-            }
-          ];
-        }
-        
-        return updatedRequest;
-      }
-      return request;
-    });
-    
+  const handleCompleteRequest = (id: string, note?: { text: string, author: string }) => {
+    const updatedRequests = completeRequest(requests, id, note);
     setRequests(updatedRequests);
-    localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
     
     toast({
       title: "Request Completed",
       description: `Request ${id} has been marked as completed`,
     });
-    
-    localStorage.setItem('lastRequestUpdate', new Date().toISOString());
-    
-    // Dispatch event to notify other components
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: 'requestsUpdate',
-      newValue: JSON.stringify(updatedRequests)
-    }));
   };
 
   const clearRequest = (id: string) => {
@@ -153,7 +46,7 @@ export const useSupportRequests = () => {
       
       const updatedRequests = requests.filter(r => r.id !== id);
       setRequests(updatedRequests);
-      localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
+      saveRequests(updatedRequests);
     }
   };
 
@@ -169,40 +62,24 @@ export const useSupportRequests = () => {
       }
       
       setRequests(newRequests);
-      localStorage.setItem('requestsUpdate', JSON.stringify(newRequests));
+      saveRequests(newRequests);
       setClearedRequests(clearedRequests.filter(r => r.id !== id));
     }
   };
 
-  const addNote = (id: string, note: { text: string, author: string }) => {
-    const updatedRequests = requests.map(request => {
-      if (request.id === id) {
-        return {
-          ...request,
-          notes: [
-            ...(request.notes || []),
-            {
-              ...note,
-              timestamp: new Date().toISOString()
-            } as Note
-          ]
-        };
-      }
-      return request;
-    });
-    
+  const handleAddNote = (id: string, note: { text: string, author: string }) => {
+    const updatedRequests = addNoteToRequest(requests, id, note);
     setRequests(updatedRequests);
-    localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
   };
 
   return {
     requests,
-    acceptRequest,
-    completeRequest,
+    acceptRequest: handleAcceptRequest,
+    completeRequest: handleCompleteRequest,
     clearRequest,
     undoClearRequest,
-    addNote,
+    addNote: handleAddNote,
     formatDate,
-    countByStatus: (status: RequestStatus) => countRequestsByStatus(requests, status)
+    countByStatus: (status: any) => countRequestsByStatus(requests, status)
   };
 };
