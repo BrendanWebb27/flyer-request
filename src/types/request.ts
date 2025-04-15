@@ -19,7 +19,6 @@ export interface Request {
   details: string;
   createdAt: string;
   status: RequestStatus;
-  estimatedDuration: string;
   assignedTo?: string;
   estimatedArrival?: string;
   requestedBy: string;

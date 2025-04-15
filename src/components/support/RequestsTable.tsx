@@ -100,7 +100,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
               <TableHead>ID</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Created</TableHead>
-              <TableHead>Est. Duration</TableHead>
+              <TableHead>Estimated Arrival</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
@@ -112,7 +112,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
                   <TableCell>{request.id}</TableCell>
                   <TableCell>{request.location}</TableCell>
                   <TableCell>{formatDate(request.createdAt)}</TableCell>
-                  <TableCell>{request.estimatedDuration}</TableCell>
+                  <TableCell>{request.estimatedArrival || 'Not specified'}</TableCell>
                   <TableCell>{getStatusBadge(request.status)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
