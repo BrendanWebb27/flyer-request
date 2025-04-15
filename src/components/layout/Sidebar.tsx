@@ -20,10 +20,23 @@ import {
   LogOut,
   Menu,
   HeadphonesIcon,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
+
+type UserRole = "support" | "general";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  
+  // In a real app, this would come from auth context or state
+  // For this example, we'll check localStorage to determine the role
+  const [userRole, setUserRole] = React.useState<UserRole>("general");
+  
+  React.useEffect(() => {
+    const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
+    setUserRole(hasAccess ? "support" : "general");
+  }, []);
 
   const isActiveRoute = (route: string) => {
     return location.pathname === route;
@@ -34,28 +47,47 @@ const Sidebar: React.FC = () => {
       icon: Home,
       label: "Dashboard",
       route: "/dashboard",
+      roles: ["general", "support"],
     },
     {
       icon: FileText,
       label: "New Request",
       route: "/request",
+      roles: ["general", "support"],
     },
     {
       icon: Clock,
       label: "Active Requests",
       route: "/active",
+      roles: ["general", "support"],
+    },
+    {
+      icon: AlertCircle,
+      label: "Pending Requests",
+      route: "/active?status=pending",
+      roles: ["support"],
+    },
+    {
+      icon: CheckCircle2,
+      label: "Completed Requests",
+      route: "/active?status=completed",
+      roles: ["support"],
     },
     {
       icon: HeadphonesIcon,
       label: "Support Dashboard",
       route: "/support",
+      roles: ["support"],
     },
     {
       icon: UserCircle,
       label: "Profile",
       route: "/profile",
+      roles: ["general", "support"],
     },
   ];
+
+  const filteredNavItems = navItems.filter(item => item.roles.includes(userRole));
 
   return (
     <>
@@ -69,10 +101,15 @@ const Sidebar: React.FC = () => {
       <SidebarComponent>
         <SidebarHeader className="p-4 flex flex-col items-center justify-center">
           <h1 className="text-2xl font-bold text-white">FlyerRequest</h1>
+          {userRole === "support" && (
+            <div className="mt-1 px-2 py-1 bg-green-500 text-xs font-medium rounded-full text-white">
+              Support Staff
+            </div>
+          )}
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {navItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <SidebarMenuItem key={item.route}>
                 <SidebarMenuButton>
                   <Link
@@ -93,7 +130,15 @@ const Sidebar: React.FC = () => {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4">
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors">
+          <button 
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+            onClick={() => {
+              // Clear access in localStorage and reload
+              localStorage.removeItem("supportAccessGranted");
+              localStorage.removeItem("organizationAccess");
+              window.location.href = "/";
+            }}
+          >
             <LogOut size={20} />
             <span>Sign Out</span>
           </button>

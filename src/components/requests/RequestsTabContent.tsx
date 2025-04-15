@@ -3,7 +3,6 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { RequestStatus, Request } from "@/types/request";
 import RequestCard from "./RequestCard";
-import RequestActions from "./RequestActions";
 
 interface RequestsTabContentProps {
   requests: Request[];
@@ -37,14 +36,8 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
             key={request.id}
             request={request}
             formatDate={formatDate}
-            actions={
-              <RequestActions
-                requestId={request.id}
-                onClear={onClearRequest}
-                request={request}
-                onAccept={onAcceptRequest}
-              />
-            }
+            onClear={onClearRequest}
+            onAccept={onAcceptRequest}
           />
         ))
       ) : (

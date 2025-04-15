@@ -12,7 +12,7 @@ const RequestDetailsItem: React.FC<RequestDetailsItemProps> = ({ label, children
   return (
     <div className="space-y-1">
       <h3 className="font-medium text-sm text-muted-foreground">{label}</h3>
-      <div className="text-sm">{children}</div>
+      <div className="text-sm font-medium">{children}</div>
     </div>
   );
 };

@@ -1,20 +1,50 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
 import { RequestStatus } from "@/types/request";
 import RequestsTabContent from "@/components/requests/RequestsTabContent";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ActiveRequests: React.FC = () => {
   const { toast } = useToast();
   const { requests, formatDate, clearRequest, undoClearRequest, acceptRequest } = useSupportRequests();
   const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Extract status from URL query params
+  const urlParams = new URLSearchParams(location.search);
+  const statusParam = urlParams.get("status") as RequestStatus | null;
+  const [activeTab, setActiveTab] = useState<string>(statusParam || "all");
+
+  // Update URL when tab changes
+  useEffect(() => {
+    if (statusParam !== activeTab && activeTab !== "all") {
+      navigate(`/active?status=${activeTab}`, { replace: true });
+    } else if (statusParam !== activeTab && activeTab === "all") {
+      navigate("/active", { replace: true });
+    }
+  }, [activeTab, navigate, statusParam]);
+
+  // Update active tab when URL changes
+  useEffect(() => {
+    if (statusParam && ["pending", "active", "completed"].includes(statusParam)) {
+      setActiveTab(statusParam);
+    } else if (statusParam === null) {
+      setActiveTab("all");
+    }
+  }, [statusParam]);
   
   // This would come from authentication in a real app
   const currentUserId = "user123";
   
+  // Check for support access
+  const isSupport = localStorage.getItem("supportAccessGranted") === "true";
+  
+  // Handle clearing a request
   const handleClearRequest = (id: string) => {
     const requestIndex = requests.findIndex(req => req.id === id);
     clearRequest(id);
@@ -58,19 +88,25 @@ const ActiveRequests: React.FC = () => {
     });
   };
 
+  // Only display tabs that the user has access to
+  const availableTabs = isSupport 
+    ? ["all", "pending", "active", "completed"] 
+    : ["all", "active"];
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">My Requests</h1>
 
-      <Tabs defaultValue="all" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
+          {availableTabs.map(tab => (
+            <TabsTrigger key={tab} value={tab}>
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        {["all", "pending", "active", "completed"].map((tab) => (
+        {availableTabs.map((tab) => (
           <TabsContent key={tab} value={tab}>
             <RequestsTabContent
               requests={requests}
@@ -78,7 +114,7 @@ const ActiveRequests: React.FC = () => {
               formatDate={formatDate}
               onClearRequest={handleClearRequest}
               currentUserId={currentUserId}
-              onAcceptRequest={handleAcceptRequest}
+              onAcceptRequest={isSupport ? handleAcceptRequest : undefined}
             />
           </TabsContent>
         ))}
