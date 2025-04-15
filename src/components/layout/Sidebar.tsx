@@ -19,6 +19,7 @@ import {
   UserCircle,
   LogOut,
   Menu,
+  HeadphonesIcon,
 } from "lucide-react";
 
 const Sidebar: React.FC = () => {
@@ -32,7 +33,7 @@ const Sidebar: React.FC = () => {
     {
       icon: Home,
       label: "Dashboard",
-      route: "/",
+      route: "/dashboard",
     },
     {
       icon: FileText,
@@ -43,6 +44,11 @@ const Sidebar: React.FC = () => {
       icon: Clock,
       label: "Active Requests",
       route: "/active",
+    },
+    {
+      icon: HeadphonesIcon,
+      label: "Support Dashboard",
+      route: "/support",
     },
     {
       icon: UserCircle,

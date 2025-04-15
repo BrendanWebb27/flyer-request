@@ -11,6 +11,7 @@ import RequestForm from "./pages/RequestForm";
 import ActiveRequests from "./pages/ActiveRequests";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import SupportDashboard from "./pages/SupportDashboard";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/request" element={<RequestForm />} />
             <Route path="/active" element={<ActiveRequests />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/support" element={<SupportDashboard />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
