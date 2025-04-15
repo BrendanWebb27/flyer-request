@@ -7,9 +7,10 @@ interface RequestMetadataProps {
   details: string;
   createdAt: string;
   formatDate: (dateString: string) => string;
-  estimatedDuration?: string;
   assignedTo?: string;
   estimatedArrival?: string;
+  requestedBy?: string;
+  completedAt?: string;
 }
 
 export const RequestMetadata: React.FC<RequestMetadataProps> = ({
@@ -17,9 +18,10 @@ export const RequestMetadata: React.FC<RequestMetadataProps> = ({
   details,
   createdAt,
   formatDate,
-  estimatedDuration,
   assignedTo,
-  estimatedArrival
+  estimatedArrival,
+  requestedBy,
+  completedAt
 }) => {
   return (
     <div className="space-y-2">
@@ -33,13 +35,13 @@ export const RequestMetadata: React.FC<RequestMetadataProps> = ({
       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mt-1">
         <div className="flex items-center gap-1">
           <Calendar size={14} />
-          <span>{formatDate(createdAt)}</span>
+          <span>Created: {formatDate(createdAt)}</span>
         </div>
         
-        {estimatedDuration && (
+        {requestedBy && (
           <div className="flex items-center gap-1">
-            <Clock size={14} />
-            <span>{estimatedDuration}</span>
+            <User size={14} />
+            <span>Requested by: {requestedBy}</span>
           </div>
         )}
         
@@ -54,6 +56,13 @@ export const RequestMetadata: React.FC<RequestMetadataProps> = ({
           <div className="flex items-center gap-1">
             <Clock size={14} />
             <span>Arrives in: {estimatedArrival}</span>
+          </div>
+        )}
+        
+        {completedAt && (
+          <div className="flex items-center gap-1">
+            <Clock size={14} />
+            <span>Completed: {formatDate(completedAt)}</span>
           </div>
         )}
       </div>
