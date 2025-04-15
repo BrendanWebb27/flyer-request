@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, ChevronRight, Tool, Package } from 'lucide-react';
+import { MapPin, Clock, ChevronRight, Package } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 
@@ -25,10 +25,17 @@ const assetTypes = [
   { value: "apg-ctk", label: "APG CTK", icon: <Package className="h-4 w-4 mr-2" /> },
   { value: "wpn-ctk", label: "WPN CTK", icon: <Package className="h-4 w-4 mr-2" /> },
   { value: "eng-ctk", label: "ENG CTK", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "tool-turnover", label: "Tool Turnover", icon: <Tool className="h-4 w-4 mr-2" /> },
+  { value: "tool-turnover", label: "Tool Turnover", icon: <Package className="h-4 w-4 mr-2" /> },
   { value: "connex", label: "CONNEX", icon: <Package className="h-4 w-4 mr-2" /> },
   { value: "tow-flex", label: "Tow Flex", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "broken-tool", label: "Broken Tool", icon: <Tool className="h-4 w-4 mr-2" /> },
+  { value: "broken-tool", label: "Broken Tool", icon: <Package className="h-4 w-4 mr-2" /> },
+];
+
+const hazLocations = [
+  "A2L", "A2R", "A3L", "A3R", "A4L", "A4R", "A5L", "A5R", 
+  "A6L", "A6R", "A7L", "A7R", "A8L", "A8R", "A16L", "A16R", 
+  "A17L", "A17R", "A18L", "A18R", "A19L", "A19R", "B17L", 
+  "B17R", "B18L", "B18R", "B19L", "B19R"
 ];
 
 const RequestForm: React.FC = () => {
@@ -83,20 +90,34 @@ const RequestForm: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="location" className="flex items-center gap-2">
-                  <MapPin size={16} className="text-flyerPurple-500" /> Location
-                </Label>
-                <Input
-                  id="location"
-                  placeholder="Building name, floor, room number, etc."
-                  {...form.register('location', { required: 'Location is required' })}
-                  className={form.formState.errors.location ? 'border-red-500' : ''}
-                />
-                {form.formState.errors.location && (
-                  <p className="text-sm text-red-500">{form.formState.errors.location.message}</p>
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin size={16} className="text-flyerPurple-500" /> HAZ Location
+                    </FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select HAZ Location" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {hazLocations.map((location) => (
+                          <SelectItem key={location} value={location}>
+                            {location}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
                 )}
-              </div>
+              />
               
               <FormField
                 control={form.control}
