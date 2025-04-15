@@ -42,18 +42,27 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
     if (onAccept) {
+      console.log("RequestActions: Accepting request with ID:", id);
       onAccept(id, data);
-      setOpen(false); // Close dialog after accepting
       
-      // Force refresh UI by navigating to active tab
+      // Close dialog immediately
+      setOpen(false);
+      
+      // Force UI refresh with multiple approaches
       setTimeout(() => {
-        // Navigate to active tab after a brief delay to allow state updates
+        console.log("RequestActions: Navigating to active tab");
+        
+        // Navigate to active tab
         navigate("/active?status=active");
         
         // Also trigger parent component's update callback
         if (onRequestUpdated) {
+          console.log("RequestActions: Calling onRequestUpdated callback");
           onRequestUpdated();
         }
+        
+        // Dispatch a global event as another way to trigger updates
+        window.dispatchEvent(new Event('storage'));
       }, 100);
     }
   };

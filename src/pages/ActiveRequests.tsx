@@ -51,16 +51,20 @@ const ActiveRequests: React.FC = () => {
     }
   }, [statusParam]);
   
-  // Listen for localStorage changes to refresh the component
+  // Listen for request updates to refresh the component
   useEffect(() => {
-    const handleStorageChange = () => {
+    const handleStorageChange = (event: StorageEvent | CustomEvent) => {
+      console.log("ActiveRequests: Storage or custom event detected", 
+        event instanceof StorageEvent ? event.key : "CustomEvent");
       setRefreshTrigger(prev => prev + 1);
     };
     
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('requestUpdated', handleStorageChange);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('requestUpdated', handleStorageChange);
     };
   }, []);
   
@@ -102,6 +106,8 @@ const ActiveRequests: React.FC = () => {
 
   // Handle accepting a request with estimated time
   const handleAcceptRequest = (id: string, data: { estimatedTime: string }) => {
+    console.log("ActiveRequests: Accepting request", id, data);
+    
     acceptRequest(id, { 
       assignedTo: "Current Support Staff", // In a real app, you'd get the current user's name
       estimatedTime: data.estimatedTime 
@@ -118,7 +124,7 @@ const ActiveRequests: React.FC = () => {
   useEffect(() => {
     // This effect runs when requests change (including when they're loaded from localStorage)
     console.log("Requests updated in ActiveRequests component");
-  }, [requests]);
+  }, [requests, refreshTrigger]);
   
   // Filter requests based on user role
   const filteredRequests = React.useMemo(() => {

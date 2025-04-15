@@ -1,5 +1,4 @@
-
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { RequestStatus, Request } from "@/types/request";
 import RequestCard from "./RequestCard";
@@ -23,6 +22,9 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   onAcceptRequest,
   onRequestUpdated
 }) => {
+  // Keep local state to force re-renders when needed
+  const [updateCount, setUpdateCount] = useState(0);
+  
   // Filter requests based on tab
   const filteredRequests = React.useMemo(() => {
     console.log("Filtering requests for status:", status);
@@ -32,16 +34,33 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
       return requests;
     }
     return requests.filter(request => request.status === status);
-  }, [requests, status]);
+  }, [requests, status, updateCount]);
   
   // Log when filtered requests change
   useEffect(() => {
     console.log("Filtered requests updated:", filteredRequests);
   }, [filteredRequests]);
   
+  // Listen for global request updates
+  useEffect(() => {
+    const handleRequestUpdate = () => {
+      console.log("RequestsTabContent: Global request update detected");
+      setUpdateCount(prev => prev + 1);
+    };
+    
+    window.addEventListener('requestUpdated', handleRequestUpdate);
+    window.addEventListener('storage', handleRequestUpdate);
+    
+    return () => {
+      window.removeEventListener('requestUpdated', handleRequestUpdate);
+      window.removeEventListener('storage', handleRequestUpdate);
+    };
+  }, []);
+  
   // Force update when a request status changes
   const handleRequestUpdated = useCallback(() => {
     console.log("Request updated callback called");
+    setUpdateCount(prev => prev + 1);
     if (onRequestUpdated) {
       onRequestUpdated();
     }

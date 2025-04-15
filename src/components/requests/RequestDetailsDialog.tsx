@@ -54,15 +54,18 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
         description: `You'll arrive in ${formattedTime}.`,
       });
       
+      // Reset form state and close input
+      form.reset();
+      setShowTimeInput(false);
+      
       // Close the dialog after accepting
       if (onClose) {
         onClose();
       }
-      
-      setShowTimeInput(false);
     }
   };
 
+  // Check if request is pending - use this to determine if we show the "Accept" button
   const isPending = request.status === "pending";
 
   return (

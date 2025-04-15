@@ -62,25 +62,37 @@ export const useSupportRequests = () => {
   }, []);
 
   const acceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
-    const updatedRequests = requests.map(request => 
-      request.id === id 
-        ? { 
-            ...request, 
-            status: "active" as RequestStatus, 
-            assignedTo: data.assignedTo,
-            estimatedArrival: data.estimatedTime 
-          } 
-        : request
-    );
-
-    console.log("Accepting request, updated requests:", updatedRequests);
-    setRequests(updatedRequests);
+    console.log("Before update - Request status for", id, ":", requests.find(req => req.id === id)?.status);
     
-    // Save to localStorage and broadcast the change
-    localStorage.setItem('lastRequestUpdate', new Date().toISOString());
+    const updatedRequests = requests.map(request => {
+      if (request.id === id) {
+        console.log("Updating request status to active for ID:", id);
+        return { 
+          ...request, 
+          status: "active" as RequestStatus, 
+          assignedTo: data.assignedTo,
+          estimatedArrival: data.estimatedTime 
+        };
+      }
+      return request;
+    });
+
+    console.log("After update - Updated requests:", updatedRequests);
+    console.log("After update - Request status for", id, ":", updatedRequests.find(req => req.id === id)?.status);
+    
+    // Save to localStorage before updating state to ensure consistency
     localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
     
-    // Dispatch event to notify other components
+    // Update state after localStorage to ensure they're in sync
+    setRequests(updatedRequests);
+    
+    // Update timestamp for change detection
+    localStorage.setItem('lastRequestUpdate', new Date().toISOString());
+    
+    // Dispatch a custom event to force updates across components
+    window.dispatchEvent(new CustomEvent('requestUpdated', { detail: { id } }));
+    
+    // Also dispatch a storage event for components listening for that
     window.dispatchEvent(new StorageEvent('storage', {
       key: 'requestsUpdate',
       newValue: JSON.stringify(updatedRequests)
