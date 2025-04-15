@@ -16,8 +16,6 @@ const RequestForm: React.FC = () => {
     defaultValues: {
       location: "",
       details: "",
-      urgency: "normal",
-      estimatedDuration: "15min",
       assetType: "apg-ctk"
     }
   });

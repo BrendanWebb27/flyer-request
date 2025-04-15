@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AssetTypeSelector from './AssetTypeSelector';
 import { RequestFormData } from '@/types/request';
 
@@ -57,63 +56,6 @@ const RequestFormFields: React.FC = () => {
                   {...field}
                 />
               </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="urgency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Urgency</FormLabel>
-              <Select 
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select urgency" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="estimatedDuration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="flex items-center gap-2">
-                <Clock size={16} className="text-flyerPurple-500" /> Estimated Duration
-              </FormLabel>
-              <Select 
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="5min">5 minutes</SelectItem>
-                  <SelectItem value="15min">15 minutes</SelectItem>
-                  <SelectItem value="30min">30 minutes</SelectItem>
-                  <SelectItem value="1hour">1 hour</SelectItem>
-                  <SelectItem value="2hours">2+ hours</SelectItem>
-                </SelectContent>
-              </Select>
             </FormItem>
           )}
         />
