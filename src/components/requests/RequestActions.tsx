@@ -20,13 +20,14 @@ import {
 } from "@/components/ui/dialog";
 import { Request } from "@/types/request";
 import RequestDetailsDialog from "./RequestDetailsDialog";
+import { useNavigate } from "react-router-dom";
 
 interface RequestActionsProps {
   requestId: string;
   onClear: (id: string) => void;
   request?: Request;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
-  onRequestUpdated?: () => void;  // New callback to trigger parent updates
+  onRequestUpdated?: () => void;  // Callback to trigger parent updates
 }
 
 export const RequestActions: React.FC<RequestActionsProps> = ({ 
@@ -37,16 +38,23 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   onRequestUpdated
 }) => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
     if (onAccept) {
       onAccept(id, data);
       setOpen(false); // Close dialog after accepting
       
-      // Trigger parent update after accepting
-      if (onRequestUpdated) {
-        setTimeout(() => onRequestUpdated(), 100); // Small timeout to ensure state updates
-      }
+      // Force refresh UI by navigating to active tab
+      setTimeout(() => {
+        // Navigate to active tab after a brief delay to allow state updates
+        navigate("/active?status=active");
+        
+        // Also trigger parent component's update callback
+        if (onRequestUpdated) {
+          onRequestUpdated();
+        }
+      }, 100);
     }
   };
 
@@ -94,6 +102,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
             <RequestDetailsDialog 
               request={request} 
               onAccept={handleAccept}
+              onClose={() => setOpen(false)}
             />
           ) : (
             <div className="py-8 text-center">

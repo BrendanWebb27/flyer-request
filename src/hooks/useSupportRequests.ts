@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Request, RequestStatus, Note } from "@/types/request";
 import { useToast } from "@/hooks/use-toast";
@@ -6,7 +7,11 @@ import { formatDate, countRequestsByStatus } from "@/utils/requestUtils";
 
 export const useSupportRequests = () => {
   const { toast } = useToast();
-  const [requests, setRequests] = useState<Request[]>(initialRequests);
+  const [requests, setRequests] = useState<Request[]>(() => {
+    // Try to load from localStorage first
+    const savedRequests = localStorage.getItem('requestsUpdate');
+    return savedRequests ? JSON.parse(savedRequests) : initialRequests;
+  });
   const [clearedRequests, setClearedRequests] = useState<Request[]>([]);
 
   useEffect(() => {
@@ -33,6 +38,20 @@ export const useSupportRequests = () => {
     });
   }, [requests, toast]);
 
+  // Effect to listen for storage events from other components
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'requestsUpdate' && event.newValue) {
+        setRequests(JSON.parse(event.newValue));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   const acceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
     const updatedRequests = requests.map(request => 
       request.id === id 
@@ -47,8 +66,15 @@ export const useSupportRequests = () => {
 
     setRequests(updatedRequests);
     
+    // Save to localStorage and broadcast the change
     localStorage.setItem('lastRequestUpdate', new Date().toISOString());
     localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'requestsUpdate',
+      newValue: JSON.stringify(updatedRequests)
+    }));
     
     toast({
       title: "Request Accepted",

@@ -17,13 +17,18 @@ import RequestDetailsNotes from "./RequestDetailsNotes";
 interface RequestDetailsDialogProps {
   request: Request;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
+  onClose?: () => void;
 }
 
 const formSchema = z.object({
   estimatedTime: z.string().min(1, "Estimated time is required"),
 });
 
-const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ request, onAccept }) => {
+const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ 
+  request, 
+  onAccept,
+  onClose
+}) => {
   const [showTimeInput, setShowTimeInput] = useState(false);
   const { toast } = useToast();
   
@@ -49,10 +54,10 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ request, on
         description: `You'll arrive in ${formattedTime}.`,
       });
       
-      // Force a page refresh after a short delay to update the UI
-      setTimeout(() => {
-        window.dispatchEvent(new Event('storage'));
-      }, 100);
+      // Close the dialog after accepting
+      if (onClose) {
+        onClose();
+      }
       
       setShowTimeInput(false);
     }
