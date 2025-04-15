@@ -16,13 +16,10 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Request } from "@/types/request";
-import RequestStatusBadge from "./RequestStatusBadge";
+import RequestDetailsDialog from "./RequestDetailsDialog";
 
 interface RequestActionsProps {
   requestId: string;
@@ -72,71 +69,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({ requestId, onCle
         </DialogTrigger>
         <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
           {request ? (
-            <>
-              <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle>Request {request.id}</DialogTitle>
-                  <RequestStatusBadge status={request.status} />
-                </div>
-                <DialogDescription>
-                  Created on {new Date(request.createdAt).toLocaleString()}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4 space-y-4">
-                <div>
-                  <h3 className="font-medium text-sm text-muted-foreground mb-1">Location</h3>
-                  <p>{request.location}</p>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium text-sm text-muted-foreground mb-1">Details</h3>
-                  <p>{request.details}</p>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium text-sm text-muted-foreground mb-1">Requested By</h3>
-                  <p>{request.requestedBy}</p>
-                </div>
-                
-                {request.assignedTo && (
-                  <div>
-                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Assigned To</h3>
-                    <p>{request.assignedTo}</p>
-                  </div>
-                )}
-                
-                {request.estimatedArrival && (
-                  <div>
-                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Estimated Arrival</h3>
-                    <p>{request.estimatedArrival}</p>
-                  </div>
-                )}
-                
-                {request.completedAt && (
-                  <div>
-                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Completed At</h3>
-                    <p>{new Date(request.completedAt).toLocaleString()}</p>
-                  </div>
-                )}
-                
-                {request.notes && request.notes.length > 0 && (
-                  <div>
-                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Notes</h3>
-                    <div className="space-y-2">
-                      {request.notes.map((note, index) => (
-                        <div key={index} className="bg-muted p-3 rounded-md">
-                          <p className="text-sm">{note.text}</p>
-                          <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                            <span>{note.author}</span>
-                            <span>{new Date(note.timestamp).toLocaleString()}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
+            <RequestDetailsDialog request={request} />
           ) : (
             <div className="py-8 text-center">
               <p>Request details not available</p>
