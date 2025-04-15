@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { RequestStatus } from "@/components/support/RequestsTable";
+import { RequestStatus } from "@/types/request";
 
 interface RequestStatusBadgeProps {
   status: RequestStatus;

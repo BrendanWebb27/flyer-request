@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Request, RequestStatus } from "@/components/support/RequestsTable";
+import { Request, RequestStatus } from "@/types/request";
 import RequestCard from "./RequestCard";
 
 interface RequestsTabContentProps {

@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { RequestStatus } from "@/components/support/RequestsTable";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
+import { RequestStatus } from "@/types/request";
 import RequestsTabContent from "@/components/requests/RequestsTabContent";
 
 const ActiveRequests: React.FC = () => {
