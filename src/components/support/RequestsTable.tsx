@@ -25,6 +25,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
 }) => {
   const [activeRequest, setActiveRequest] = useState<string | null>(null);
 
+  // Filter requests based on the active tab
   const filteredRequests = React.useMemo(() => {
     if (activeTab === "all") {
       return requests;

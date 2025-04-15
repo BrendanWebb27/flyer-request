@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -31,12 +31,12 @@ const Sidebar: React.FC = () => {
   
   // In a real app, this would come from auth context or state
   // For this example, we'll check localStorage to determine the role
-  const [userRole, setUserRole] = React.useState<UserRole>("general");
+  const [userRole, setUserRole] = useState<UserRole>("general");
   
-  React.useEffect(() => {
+  useEffect(() => {
     const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
     setUserRole(hasAccess ? "support" : "general");
-  }, []);
+  }, [location.pathname]); // Re-check on route change
 
   const isActiveRoute = (route: string) => {
     if (route.includes("?")) {
