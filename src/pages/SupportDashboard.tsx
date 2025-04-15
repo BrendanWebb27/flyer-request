@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { MapPin, Clock, Calendar, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import RequestActionPanel from "@/components/RequestActionPanel";
+import OrganizationAccessControl from "@/components/OrganizationAccessControl";
 
 type RequestStatus = "pending" | "active" | "completed" | "cancelled";
 
@@ -25,6 +26,16 @@ interface Request {
 
 const SupportDashboard: React.FC = () => {
   const { toast } = useToast();
+  const [hasAccess, setHasAccess] = useState(false);
+  
+  // Check if user has already been granted access
+  useEffect(() => {
+    const accessGranted = localStorage.getItem("supportAccessGranted") === "true";
+    if (accessGranted) {
+      setHasAccess(true);
+    }
+  }, []);
+
   // Mock data for requests
   const [requests, setRequests] = useState<Request[]>([
     {
@@ -127,10 +138,38 @@ const SupportDashboard: React.FC = () => {
     return requests.filter(request => request.status === status);
   };
 
+  // If user doesn't have access, show the access control component
+  if (!hasAccess) {
+    return <OrganizationAccessControl onAccessGranted={() => setHasAccess(true)} />;
+  }
+
+  // Organization information (in a real app, this would come from context or state)
+  const organization = localStorage.getItem("organizationAccess") || "Organization";
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Support Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Support Dashboard</h1>
+          <p className="text-muted-foreground">
+            Managing support requests for <span className="font-medium">{organization}</span>
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => {
+            localStorage.removeItem("supportAccessGranted");
+            localStorage.removeItem("organizationAccess");
+            setHasAccess(false);
+            toast({
+              title: "Signed Out",
+              description: "You have been signed out of the support dashboard",
+            });
+          }}
+        >
+          Change Organization
+        </Button>
       </div>
       
       <div className="grid gap-4 md:grid-cols-3">
