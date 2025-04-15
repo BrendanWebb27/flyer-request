@@ -91,7 +91,7 @@ const ActiveRequests: React.FC = () => {
   // Only display tabs that the user has access to
   const availableTabs = isSupport 
     ? ["all", "pending", "active", "completed"] 
-    : ["all", "active"];
+    : ["all", "active", "completed"];
 
   return (
     <div className="space-y-6">
