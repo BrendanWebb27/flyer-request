@@ -105,11 +105,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({ requestId, onCle
                   </div>
                 )}
                 
-                <div>
-                  <h3 className="font-medium text-sm text-muted-foreground mb-1">Estimated Duration</h3>
-                  <p>{request.estimatedDuration}</p>
-                </div>
-                
                 {request.estimatedArrival && (
                   <div>
                     <h3 className="font-medium text-sm text-muted-foreground mb-1">Estimated Arrival</h3>
@@ -126,7 +121,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({ requestId, onCle
                 
                 {request.notes && request.notes.length > 0 && (
                   <div>
-                    <h3 className="font-medium text-sm text-muted-foreground mb-2">Notes</h3>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Notes</h3>
                     <div className="space-y-2">
                       {request.notes.map((note, index) => (
                         <div key={index} className="bg-muted p-3 rounded-md">
