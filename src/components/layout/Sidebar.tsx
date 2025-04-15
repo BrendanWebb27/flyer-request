@@ -39,6 +39,11 @@ const Sidebar: React.FC = () => {
   }, []);
 
   const isActiveRoute = (route: string) => {
+    if (route.includes("?")) {
+      // For routes with query parameters, check if the pathname matches and if the query param is present
+      const [path, query] = route.split("?");
+      return location.pathname === path && location.search.includes(query);
+    }
     return location.pathname === route;
   };
 
@@ -71,7 +76,7 @@ const Sidebar: React.FC = () => {
       icon: CheckCircle2,
       label: "Completed Requests",
       route: "/active?status=completed",
-      roles: ["support"],
+      roles: ["general", "support"],
     },
     {
       icon: HeadphonesIcon,
