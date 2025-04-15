@@ -10,11 +10,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const ActiveRequests: React.FC = () => {
   const { toast } = useToast();
-  const { requests, formatDate, clearRequest, undoClearRequest, acceptRequest } = useSupportRequests();
+  const { 
+    requests, 
+    formatDate, 
+    clearRequest, 
+    undoClearRequest, 
+    acceptRequest 
+  } = useSupportRequests();
   const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // Added to force re-renders
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // Check for support access
   const isSupport = localStorage.getItem("supportAccessGranted") === "true";
@@ -47,8 +53,10 @@ const ActiveRequests: React.FC = () => {
   
   // Listen for localStorage changes to refresh the component
   useEffect(() => {
-    const handleStorageChange = () => {
-      setRefreshTrigger(prev => prev + 1);
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate') {
+        setRefreshTrigger(prev => prev + 1);
+      }
     };
     
     window.addEventListener('storage', handleStorageChange);
@@ -101,11 +109,6 @@ const ActiveRequests: React.FC = () => {
       estimatedTime: data.estimatedTime 
     });
     
-    toast({
-      title: "Request Accepted",
-      description: `You will arrive in approximately ${data.estimatedTime}`
-    });
-    
     // After accepting, navigate to active tab
     setActiveTab("active");
     
@@ -113,12 +116,6 @@ const ActiveRequests: React.FC = () => {
     setRefreshTrigger(prev => prev + 1);
   };
   
-  // Force refresh component when a request is updated
-  const handleRequestUpdated = useCallback(() => {
-    // Force a refresh of the component
-    setRefreshTrigger(prev => prev + 1);
-  }, []);
-
   // Filter requests based on user role
   const filteredRequests = React.useMemo(() => {
     if (!isSupport) {
@@ -156,7 +153,6 @@ const ActiveRequests: React.FC = () => {
               onClearRequest={handleClearRequest}
               currentUserId={currentUserId}
               onAcceptRequest={isSupport ? handleAcceptRequest : undefined}
-              onRequestUpdated={handleRequestUpdated}
             />
           </TabsContent>
         ))}

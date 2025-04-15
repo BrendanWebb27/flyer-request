@@ -9,17 +9,13 @@ export const useSupportRequests = () => {
   const [requests, setRequests] = useState<Request[]>(initialRequests);
   const [clearedRequests, setClearedRequests] = useState<Request[]>([]);
 
-  // Use localStorage to show notification for accepted requests
   useEffect(() => {
-    // Check for newly assigned requests
     const notifiedRequests = JSON.parse(localStorage.getItem('notifiedRequests') || '[]');
     const isSupport = localStorage.getItem("supportAccessGranted") === "true";
     
-    // Skip notifications if user is support staff
     if (isSupport) return;
     
     requests.forEach(request => {
-      // If request is active, has an assigned person, and hasn't been notified yet
       if (
         request.status === 'active' && 
         request.assignedTo && 
@@ -31,7 +27,6 @@ export const useSupportRequests = () => {
           description: `Your request has been accepted and assigned to ${request.assignedTo}. Estimated arrival: ${request.estimatedArrival}.`,
         });
         
-        // Add to notified list
         notifiedRequests.push(request.id);
         localStorage.setItem('notifiedRequests', JSON.stringify(notifiedRequests));
       }
@@ -39,19 +34,26 @@ export const useSupportRequests = () => {
   }, [requests, toast]);
 
   const acceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
-    setRequests(prevRequests => 
-      prevRequests.map(request =>
-        request.id === id ? { 
-          ...request, 
-          status: "active" as RequestStatus, 
-          assignedTo: data.assignedTo,
-          estimatedArrival: data.estimatedTime 
-        } : request
-      )
+    const updatedRequests = requests.map(request => 
+      request.id === id 
+        ? { 
+            ...request, 
+            status: "active" as RequestStatus, 
+            assignedTo: data.assignedTo,
+            estimatedArrival: data.estimatedTime 
+          } 
+        : request
     );
+
+    setRequests(updatedRequests);
     
-    // Force an update to localStorage to trigger UI refresh
     localStorage.setItem('lastRequestUpdate', new Date().toISOString());
+    localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
+    
+    toast({
+      title: "Request Accepted",
+      description: `Request ${id} has been moved to active status.`,
+    });
   };
 
   const completeRequest = (id: string, note?: { text: string, author: string }) => {
@@ -85,17 +87,14 @@ export const useSupportRequests = () => {
       description: `Request ${id} has been marked as completed`,
     });
     
-    // Force an update to localStorage to trigger UI refresh
     localStorage.setItem('lastRequestUpdate', new Date().toISOString());
   };
 
   const clearRequest = (id: string) => {
     const requestToClear = requests.find(r => r.id === id);
     if (requestToClear) {
-      // Store the request in case we need to restore it
       setClearedRequests([...clearedRequests, requestToClear]);
       
-      // Remove from active list
       setRequests(requests.filter(r => r.id !== id));
     }
   };
@@ -103,7 +102,6 @@ export const useSupportRequests = () => {
   const undoClearRequest = (id: string, index: number) => {
     const requestToRestore = clearedRequests.find(r => r.id === id);
     if (requestToRestore) {
-      // Add back to the requests at the original position if possible
       const newRequests = [...requests];
       
       if (index >= 0 && index <= newRequests.length) {
