@@ -1,17 +1,13 @@
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, ChevronRight, Package } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { ChevronRight } from 'lucide-react';
+import RequestFormFields from '@/components/forms/RequestFormFields';
 
 type RequestFormData = {
   location: string;
@@ -20,16 +16,6 @@ type RequestFormData = {
   estimatedDuration: string;
   assetType: string;
 };
-
-const assetTypes = [
-  { value: "apg-ctk", label: "APG CTK", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "wpn-ctk", label: "WPN CTK", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "eng-ctk", label: "ENG CTK", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "tool-turnover", label: "Tool Turnover", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "connex", label: "CONNEX", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "tow-flex", label: "Tow Flex", icon: <Package className="h-4 w-4 mr-2" /> },
-  { value: "broken-tool", label: "Broken Tool", icon: <Package className="h-4 w-4 mr-2" /> },
-];
 
 const RequestForm: React.FC = () => {
   const form = useForm<RequestFormData>({
@@ -73,140 +59,40 @@ const RequestForm: React.FC = () => {
     <div className="max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold tracking-tight mb-6">Request a Flyer</h1>
       
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Card>
-            <CardHeader>
-              <CardTitle>New Flyer Request</CardTitle>
-              <CardDescription>
-                Fill out the details below to request a flyer to your location.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <MapPin size={16} className="text-flyerPurple-500" /> HAZ Location
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter HAZ Location (e.g. A2L, B17R)" 
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="assetType"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="flex items-center gap-2">
-                      <Package size={16} className="text-flyerPurple-500" /> Asset Type
-                    </FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="grid grid-cols-2 gap-2"
-                      >
-                        {assetTypes.map((assetType) => (
-                          <FormItem key={assetType.value} className="flex items-center space-x-2 space-y-0 rounded-md border p-3 cursor-pointer hover:bg-accent">
-                            <FormControl>
-                              <RadioGroupItem value={assetType.value} />
-                            </FormControl>
-                            <FormLabel className="flex items-center cursor-pointer font-normal">
-                              {assetType.icon}
-                              {assetType.label}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </RadioGroup>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              
-              <div className="space-y-2">
-                <Label htmlFor="details">Request Details</Label>
-                <Textarea
-                  id="details"
-                  placeholder="Describe what you need the flyer to do..."
-                  rows={4}
-                  {...form.register('details', { required: 'Details are required' })}
-                  className={form.formState.errors.details ? 'border-red-500' : ''}
-                />
-                {form.formState.errors.details && (
-                  <p className="text-sm text-red-500">{form.formState.errors.details.message}</p>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="urgency">Urgency</Label>
-                  <Select 
-                    defaultValue="normal"
-                    onValueChange={(value) => form.setValue('urgency', value)}
-                  >
-                    <SelectTrigger id="urgency">
-                      <SelectValue placeholder="Select urgency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="estimatedDuration" className="flex items-center gap-2">
-                    <Clock size={16} className="text-flyerPurple-500" /> Estimated Duration
-                  </Label>
-                  <Select 
-                    defaultValue="15min"
-                    onValueChange={(value) => form.setValue('estimatedDuration', value)}
-                  >
-                    <SelectTrigger id="estimatedDuration">
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="5min">5 minutes</SelectItem>
-                      <SelectItem value="15min">15 minutes</SelectItem>
-                      <SelectItem value="30min">30 minutes</SelectItem>
-                      <SelectItem value="1hour">1 hour</SelectItem>
-                      <SelectItem value="2hours">2+ hours</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button 
-                type="submit" 
-                className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <span className="animate-spin mr-2">⏳</span> Submitting...
-                  </span>
-                ) : (
-                  <span className="flex items-center">
-                    Submit Request <ChevronRight size={16} className="ml-1" />
-                  </span>
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
-      </Form>
+      <FormProvider {...form}>
+        <Form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <Card>
+              <CardHeader>
+                <CardTitle>New Flyer Request</CardTitle>
+                <CardDescription>
+                  Fill out the details below to request a flyer to your location.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RequestFormFields />
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button 
+                  type="submit" 
+                  className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="flex items-center">
+                      <span className="animate-spin mr-2">⏳</span> Submitting...
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      Submit Request <ChevronRight size={16} className="ml-1" />
+                    </span>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
+      </FormProvider>
     </div>
   );
 };
