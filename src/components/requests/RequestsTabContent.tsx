@@ -36,7 +36,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
             key={request.id}
             request={request}
             formatDate={formatDate}
-            onClear={onClearRequest}
+            onClearRequest={onClearRequest}
             onAccept={onAcceptRequest}
           />
         ))

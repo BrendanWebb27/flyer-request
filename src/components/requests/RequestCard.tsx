@@ -11,12 +11,14 @@ interface RequestCardProps {
   request: Request;
   formatDate: (dateString: string) => string;
   onClearRequest: (id: string) => void;
+  onAccept?: (id: string, data: { estimatedTime: string }) => void;
 }
 
 export const RequestCard: React.FC<RequestCardProps> = ({ 
   request, 
   formatDate, 
-  onClearRequest 
+  onClearRequest,
+  onAccept
 }) => {
   return (
     <Card>
@@ -51,6 +53,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
             requestId={request.id} 
             onClear={onClearRequest}
             request={request}
+            onAccept={onAccept}
           />
         </div>
       </CardContent>
