@@ -80,13 +80,13 @@ const Sidebar: React.FC = () => {
     {
       icon: AlertCircle,
       label: "Pending Requests",
-      route: "/active?status=pending",
+      route: "/support?status=pending",
       roles: ["support"],
     },
     {
       icon: CheckCircle2,
       label: "Completed Requests",
-      route: "/active?status=completed",
+      route: "/support?status=completed",
       roles: ["general", "support"],
     },
     {

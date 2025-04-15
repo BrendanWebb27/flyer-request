@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { TabsContent } from "@/components/ui/tabs";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
+import { useLocation, useNavigate } from "react-router-dom";
+import { RequestStatus } from "@/types/request";
 
 // Component imports
 import OrganizationAccessControl from "@/components/OrganizationAccessControl";
@@ -22,6 +24,14 @@ const SupportDashboard: React.FC = () => {
     countByStatus,
     addNote
   } = useSupportRequests();
+  
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Extract status from URL query params
+  const urlParams = new URLSearchParams(location.search);
+  const statusParam = urlParams.get("status") as RequestStatus | "all" | null;
+  const activeTab = statusParam || "all";
   
   // Check if user has already been granted access
   useEffect(() => {
@@ -63,7 +73,7 @@ const SupportDashboard: React.FC = () => {
         completedCount={countByStatus("completed")}
       />
 
-      <RequestTabs defaultValue="pending">
+      <RequestTabs defaultValue={activeTab}>
         {["all", "pending", "active", "completed"].map((tab) => (
           <TabsContent key={tab} value={tab}>
             <RequestsTable
