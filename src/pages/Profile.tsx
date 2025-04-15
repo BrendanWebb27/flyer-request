@@ -16,11 +16,8 @@ const Profile: React.FC = () => {
   // Mock user profile data
   const [profile, setProfile] = useState({
     username: "john.doe",
-    fullName: "John Doe",
     organization: "IT Department",
-    email: "john.doe@example.com",
-    phone: "(555) 123-4567",
-    workShift: "morning",
+    workShift: "dayshift",
     isFlyer: true,
     flyerRole: "primary"
   });
@@ -65,8 +62,7 @@ const Profile: React.FC = () => {
             
             <div className="flex-1 space-y-4">
               <div className="space-y-1">
-                <Label className="text-base font-medium">{profile.fullName}</Label>
-                <p className="text-sm text-muted-foreground">Username: @{profile.username}</p>
+                <Label className="text-base font-medium">@{profile.username}</Label>
               </div>
               
               <div className="flex flex-wrap gap-3">
@@ -77,7 +73,7 @@ const Profile: React.FC = () => {
                 
                 <div className="flex items-center gap-1 bg-muted px-3 py-1 rounded-full text-sm">
                   <Clock size={14} className="text-flyerPurple-500" />
-                  <span className="capitalize">{profile.workShift} Shift</span>
+                  <span className="capitalize">{profile.workShift}</span>
                 </div>
                 
                 {profile.isFlyer && (
@@ -90,70 +86,35 @@ const Profile: React.FC = () => {
           </div>
           
           <div className="space-y-4 pt-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input 
-                  id="username" 
-                  value={profile.username} 
-                  onChange={(e) => setProfile({...profile, username: e.target.value})}
-                  disabled={!isEditing} 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input 
-                  id="fullName" 
-                  value={profile.fullName} 
-                  onChange={(e) => setProfile({...profile, fullName: e.target.value})}
-                  disabled={!isEditing} 
-                />
-              </div>
-            </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input 
-                id="email" 
-                type="email" 
-                value={profile.email} 
-                onChange={(e) => setProfile({...profile, email: e.target.value})}
+                id="username" 
+                value={profile.username} 
+                onChange={(e) => setProfile({...profile, username: e.target.value})}
                 disabled={!isEditing} 
               />
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input 
-                  id="phone" 
-                  value={profile.phone} 
-                  onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                  disabled={!isEditing} 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="organization">Organization</Label>
-                {isEditing ? (
-                  <Select 
-                    defaultValue={profile.organization}
-                    onValueChange={(value) => setProfile({...profile, organization: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select organization" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {organizations.map(org => (
-                        <SelectItem key={org} value={org}>{org}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Input id="organization" value={profile.organization} disabled />
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="organization">Organization</Label>
+              {isEditing ? (
+                <Select 
+                  defaultValue={profile.organization}
+                  onValueChange={(value) => setProfile({...profile, organization: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select organization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {organizations.map(org => (
+                      <SelectItem key={org} value={org}>{org}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input id="organization" value={profile.organization} disabled />
+              )}
             </div>
             
             <div className="space-y-2">
@@ -166,12 +127,12 @@ const Profile: React.FC = () => {
                 onValueChange={(value) => {
                   if (value) setProfile({...profile, workShift: value});
                 }}
-                className="justify-start"
+                className="justify-start flex-wrap"
               >
-                <ToggleGroupItem value="morning" className="px-4">Morning</ToggleGroupItem>
-                <ToggleGroupItem value="afternoon" className="px-4">Afternoon</ToggleGroupItem>
-                <ToggleGroupItem value="evening" className="px-4">Evening</ToggleGroupItem>
-                <ToggleGroupItem value="night" className="px-4">Night</ToggleGroupItem>
+                <ToggleGroupItem value="midshift" className="px-4">Mid-shift</ToggleGroupItem>
+                <ToggleGroupItem value="dayshift" className="px-4">Dayshift</ToggleGroupItem>
+                <ToggleGroupItem value="swingshift" className="px-4">Swing-shift</ToggleGroupItem>
+                <ToggleGroupItem value="fourthshift" className="px-4">Fourth shift</ToggleGroupItem>
               </ToggleGroup>
             </div>
             
