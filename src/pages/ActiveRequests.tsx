@@ -115,9 +115,14 @@ const ActiveRequests: React.FC = () => {
     
     // After accepting, navigate to active tab
     setActiveTab("active");
+    navigate(`/active?status=active&t=${Date.now()}`);
     
     // Force a refresh of the component
     setRefreshTrigger(prev => prev + 1);
+    
+    // Dispatch events to update all components
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('requestUpdated'));
   };
   
   // Force refresh when requests change
@@ -126,14 +131,14 @@ const ActiveRequests: React.FC = () => {
     console.log("Requests updated in ActiveRequests component");
   }, [requests, refreshTrigger]);
   
-  // Filter requests based on user role
+  // Filter requests based on user role and ensure it's reactive
   const filteredRequests = React.useMemo(() => {
     if (!isSupport) {
       // For general users, only show their own requests
-      return requests.filter(req => req.requestedBy === currentUserId);
+      return [...requests].filter(req => req.requestedBy === currentUserId);
     }
     // Support users see all requests without filtering by requestedBy
-    return requests;
+    return [...requests];
   }, [requests, isSupport, currentUserId, refreshTrigger]);
 
   // Only display tabs that the user has access to
@@ -155,7 +160,7 @@ const ActiveRequests: React.FC = () => {
         </TabsList>
 
         {availableTabs.map((tab) => (
-          <TabsContent key={tab} value={tab}>
+          <TabsContent key={`${tab}-${refreshTrigger}`} value={tab}>
             <RequestsTabContent
               requests={filteredRequests}
               status={tab as RequestStatus | "all"}

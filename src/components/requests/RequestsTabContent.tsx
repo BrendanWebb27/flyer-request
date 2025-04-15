@@ -1,3 +1,4 @@
+
 import React, { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { RequestStatus, Request } from "@/types/request";
@@ -25,13 +26,13 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   // Keep local state to force re-renders when needed
   const [updateCount, setUpdateCount] = useState(0);
   
-  // Filter requests based on tab
+  // Filter requests based on tab - make sure this is reactive to both requests and status changes
   const filteredRequests = React.useMemo(() => {
     console.log("Filtering requests for status:", status);
     console.log("Available requests:", requests);
     
     if (status === "all") {
-      return requests;
+      return [...requests]; // Return a new array to ensure reactivity
     }
     return requests.filter(request => request.status === status);
   }, [requests, status, updateCount]);
@@ -71,7 +72,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
       {filteredRequests.length > 0 ? (
         filteredRequests.map((request) => (
           <RequestCard
-            key={request.id}
+            key={`${request.id}-${request.status}-${updateCount}`} // Add a dynamic key to force re-render
             request={request}
             formatDate={formatDate}
             onClearRequest={onClearRequest}

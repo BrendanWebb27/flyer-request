@@ -52,8 +52,8 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       setTimeout(() => {
         console.log("RequestActions: Navigating to active tab");
         
-        // Navigate to active tab
-        navigate("/active?status=active");
+        // Navigate to active tab with a unique timestamp to force a fresh load
+        navigate(`/active?status=active&t=${Date.now()}`);
         
         // Also trigger parent component's update callback
         if (onRequestUpdated) {
@@ -61,8 +61,9 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
           onRequestUpdated();
         }
         
-        // Dispatch a global event as another way to trigger updates
+        // Dispatch multiple events to ensure all components update
         window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('requestUpdated'));
       }, 100);
     }
   };

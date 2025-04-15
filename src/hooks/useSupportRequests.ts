@@ -55,35 +55,36 @@ export const useSupportRequests = () => {
     };
     
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('requestUpdated', handleStorageChange);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('requestUpdated', handleStorageChange);
     };
   }, []);
 
   const acceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
     console.log("Before update - Request status for", id, ":", requests.find(req => req.id === id)?.status);
     
-    const updatedRequests = requests.map(request => {
-      if (request.id === id) {
-        console.log("Updating request status to active for ID:", id);
-        return { 
-          ...request, 
-          status: "active" as RequestStatus, 
-          assignedTo: data.assignedTo,
-          estimatedArrival: data.estimatedTime 
-        };
-      }
-      return request;
-    });
-
+    // Create a new array of requests, don't modify the existing one
+    const updatedRequests = requests.map(request => 
+      request.id === id 
+        ? { 
+            ...request, 
+            status: "active" as RequestStatus, // Explicitly set status to "active"
+            assignedTo: data.assignedTo,
+            estimatedArrival: data.estimatedTime 
+          }
+        : request
+    );
+    
     console.log("After update - Updated requests:", updatedRequests);
     console.log("After update - Request status for", id, ":", updatedRequests.find(req => req.id === id)?.status);
     
-    // Save to localStorage before updating state to ensure consistency
+    // Save to localStorage before updating state
     localStorage.setItem('requestsUpdate', JSON.stringify(updatedRequests));
     
-    // Update state after localStorage to ensure they're in sync
+    // Update state
     setRequests(updatedRequests);
     
     // Update timestamp for change detection

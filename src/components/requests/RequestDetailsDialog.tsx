@@ -58,9 +58,11 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
       form.reset();
       setShowTimeInput(false);
       
-      // Close the dialog after accepting
+      // Force close the dialog 
       if (onClose) {
-        onClose();
+        setTimeout(() => {
+          onClose();
+        }, 100);
       }
     }
   };
