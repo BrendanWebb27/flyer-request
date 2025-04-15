@@ -35,9 +35,13 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ request, on
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log("Form submitted with values:", values);
+    
     if (onAccept) {
       // Convert input to format: "X minutes"
       const formattedTime = `${values.estimatedTime} minutes`;
+      console.log("Calling onAccept with:", request.id, { estimatedTime: formattedTime });
+      
       onAccept(request.id, { estimatedTime: formattedTime });
       
       toast({

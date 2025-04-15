@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Trash2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -34,6 +34,15 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   request,
   onAccept 
 }) => {
+  const [open, setOpen] = useState(false);
+  
+  const handleAccept = (id: string, data: { estimatedTime: string }) => {
+    if (onAccept) {
+      onAccept(id, data);
+      setOpen(false); // Close dialog after accepting
+    }
+  };
+
   return (
     <div className="flex gap-2 self-end md:self-center">
       <AlertDialog>
@@ -63,7 +72,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         </AlertDialogContent>
       </AlertDialog>
       
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button 
             size="sm" 
@@ -77,7 +86,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
           {request ? (
             <RequestDetailsDialog 
               request={request} 
-              onAccept={onAccept}
+              onAccept={handleAccept}
             />
           ) : (
             <div className="py-8 text-center">
