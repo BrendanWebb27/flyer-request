@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { clearExpiredUserData, updateUserActivityTimestamp } from "@/utils/userDataExpiration";
+import { clearExpiredUserData, updateUserActivityTimestamp, getVerifiedEmails, getEmailOrganization } from "@/utils/userDataExpiration";
 
 interface UserProfile {
   name?: string;
@@ -18,8 +18,10 @@ interface UserProfile {
 export function useProfileAccess() {
   // Check if the user has support access
   const [isSupport, setIsSupport] = useState(false);
+  // Track if user is verified
+  const [isVerified, setIsVerified] = useState(false);
   
-  // Load support status on initial mount and check for expired data
+  // Load support status and verification status on initial mount and check for expired data
   useEffect(() => {
     // Check for expired user data first
     const wasDataCleared = clearExpiredUserData();
@@ -29,6 +31,18 @@ export function useProfileAccess() {
       const checkSupportAccess = () => {
         const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
         setIsSupport(hasAccess);
+        
+        // Check if user is verified
+        const isEmailVerified = localStorage.getItem("emailVerified") === "true";
+        setIsVerified(isEmailVerified);
+        
+        // Auto-verify if email is in the verified list
+        const verifiedEmails = getVerifiedEmails();
+        const userEmail = localStorage.getItem("supportUserEmail");
+        if (userEmail && verifiedEmails.includes(userEmail) && !isEmailVerified) {
+          localStorage.setItem("emailVerified", "true");
+          setIsVerified(true);
+        }
         
         // Update activity timestamp when checking access
         if (hasAccess) {
@@ -79,6 +93,11 @@ export function useProfileAccess() {
     window.dispatchEvent(new Event("storage"));
   };
   
+  // Helper to check if user is verified
+  const isUserVerified = () => {
+    return localStorage.getItem("emailVerified") === "true";
+  };
+  
   // Helper to check if a user's organization is support
   const isSupportOrganization = (organization: string) => {
     return organization === "Support";
@@ -111,7 +130,7 @@ export function useProfileAccess() {
     
     // Check if we should include the current user in support staff
     const isCurrentUserSupport = currentProfile && 
-                                 currentProfile.organization === "Support";
+                               currentProfile.organization === "Support";
     
     // Get any stored support profiles 
     let supportProfiles: UserProfile[] = [];
@@ -189,6 +208,8 @@ export function useProfileAccess() {
 
   return {
     isSupport,
+    isVerified,
+    isUserVerified,
     getSupportAccess,
     setSupportAccess,
     isSupportOrganization,
