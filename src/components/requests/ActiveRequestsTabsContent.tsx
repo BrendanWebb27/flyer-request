@@ -1,6 +1,7 @@
 
 import React, { useMemo } from "react";
 import { TabsContent } from "@/components/ui/tabs";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 import { Request, RequestStatus } from "@/types/request";
 import RequestsTabContent from "./RequestsTabContent";
 
@@ -32,8 +33,8 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
   // Create a stable key for the TabsContent components
   const tabContentKey = useMemo(() => `tabs-content-${refreshCount}-${Date.now()}`, [refreshCount]);
   
-  // Check if user is support staff
-  const isSupport = localStorage.getItem("supportAccessGranted") === "true";
+  // Use our custom hook to check support access
+  const { isSupport } = useProfileAccess();
   
   return (
     <div key={tabContentKey}>

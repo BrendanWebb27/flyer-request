@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,13 +12,15 @@ import ActiveRequests from "./pages/ActiveRequests";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import SupportDashboard from "./pages/SupportDashboard";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 const queryClient = new QueryClient();
 
 // Route guard component for support-only routes
 const SupportRoute = ({ children }: { children: JSX.Element }) => {
-  // User must be in the Support organization to access support routes
-  const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
+  // Use our custom hook to check support access
+  const { getSupportAccess } = useProfileAccess();
+  const hasAccess = getSupportAccess();
   
   if (!hasAccess) {
     return <Navigate to="/dashboard" replace />;
@@ -29,24 +30,8 @@ const SupportRoute = ({ children }: { children: JSX.Element }) => {
 };
 
 const App = () => {
-  // State to trigger re-render when access changes
-  const [isSupport, setIsSupport] = useState(false);
-  
-  useEffect(() => {
-    const checkAccess = () => {
-      const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
-      setIsSupport(hasAccess);
-    };
-    
-    checkAccess();
-    
-    // Listen for localStorage changes
-    window.addEventListener("storage", checkAccess);
-    
-    return () => {
-      window.removeEventListener("storage", checkAccess);
-    };
-  }, []);
+  // Use the hook to track support status changes
+  const { isSupport } = useProfileAccess();
 
   return (
     <QueryClientProvider client={queryClient}>

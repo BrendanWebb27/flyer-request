@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import ProfileForm from "@/components/profile/ProfileForm";
@@ -10,13 +11,14 @@ import ProfileActions from "@/components/profile/ProfileActions";
 
 const Profile: React.FC = () => {
   const { toast } = useToast();
+  const { getUserProfile, saveUserProfile, isSupport, isSupportOrganization } = useProfileAccess();
   const [isEditing, setIsEditing] = useState(false);
   
   // Load profile data from localStorage or use defaults
   const [profile, setProfile] = useState(() => {
-    const savedProfile = localStorage.getItem("userProfile");
+    const savedProfile = getUserProfile();
     if (savedProfile) {
-      return JSON.parse(savedProfile);
+      return savedProfile;
     }
     return {
       manNumber: "12345",
@@ -30,25 +32,19 @@ const Profile: React.FC = () => {
 
   // Check if the organization is "Support" and update isSupport accordingly
   useEffect(() => {
-    const isUserSupport = profile.organization === "Support";
+    const isUserSupport = isSupportOrganization(profile.organization);
     if (profile.isSupport !== isUserSupport) {
       setProfile(prev => ({
         ...prev,
         isSupport: isUserSupport
       }));
     }
-  }, [profile.organization]);
+  }, [profile.organization, isSupportOrganization]);
 
   // Save profile data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("userProfile", JSON.stringify(profile));
-    
-    // Update support access flag for sidebar and role-based features
-    localStorage.setItem("supportAccessGranted", profile.isSupport ? "true" : "false");
-    
-    // Trigger a storage event for other components to detect the change
-    window.dispatchEvent(new Event("storage"));
-  }, [profile]);
+    saveUserProfile(profile);
+  }, [profile, saveUserProfile]);
 
   const handleSaveProfile = () => {
     // Simulate API call

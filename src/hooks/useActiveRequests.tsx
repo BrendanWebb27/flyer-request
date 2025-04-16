@@ -1,8 +1,8 @@
-
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 import { RequestStatus } from "@/types/request";
 
 export const useActiveRequests = () => {
@@ -21,14 +21,13 @@ export const useActiveRequests = () => {
   const refreshTriggerRef = useRef(0);
   const [refreshCount, setRefreshCount] = useState(0);
   
-  const isSupport = localStorage.getItem("supportAccessGranted") === "true";
+  const { isSupport } = useProfileAccess();
   const currentUserId = "user123";
   
   const urlParams = new URLSearchParams(location.search);
   const statusParam = urlParams.get("status") as RequestStatus | null;
   const [activeTab, setActiveTab] = useState<string>(statusParam || "all");
 
-  // This effect ensures we're always in sync with URL parameters
   useEffect(() => {
     if (statusParam !== activeTab && statusParam) {
       console.log("Syncing activeTab with URL param:", statusParam);
@@ -39,31 +38,24 @@ export const useActiveRequests = () => {
     }
   }, [statusParam, location.search]);
 
-  // Listen for request status changes 
   useEffect(() => {
     const handleStatusChange = (event: Event) => {
       console.log("Request status change detected, updating UI");
       
-      // Force a refresh after status changes
       setRefreshCount(prev => prev + 1);
       
-      // Get details from the event if available
       const customEvent = event as CustomEvent;
       if (customEvent.detail) {
         console.log("Status change details:", customEvent.detail);
         
-        // If this is a request acceptance, update the tab to match
         if (customEvent.detail.newStatus === 'active') {
           setActiveTab('active');
           navigate(`/active?status=active`, { replace: true });
-        }
-        // If this is a request completion, update the tab to completed
-        else if (customEvent.detail.newStatus === 'completed') {
+        } else if (customEvent.detail.newStatus === 'completed') {
           setActiveTab('completed');
           navigate(`/active?status=completed`, { replace: true });
         }
         
-        // If forceUpdate flag is set, do an immediate refresh
         if (customEvent.detail.forceUpdate) {
           setTimeout(() => {
             setRefreshCount(prev => prev + 1);
@@ -121,7 +113,6 @@ export const useActiveRequests = () => {
     console.log("useActiveRequests: Handling accept for request", { id, data });
     
     try {
-      // Accept the request
       acceptRequest(id, { 
         assignedTo: "Current Support Staff", 
         estimatedTime: data.estimatedTime 
@@ -132,15 +123,12 @@ export const useActiveRequests = () => {
         description: `You'll arrive in ${data.estimatedTime}.`,
       });
       
-      // Update the active tab to show active requests
       setActiveTab("active");
       setTimeout(() => {
         navigate(`/active?status=active`, { replace: true });
         
-        // Force refresh to ensure UI updates
         setRefreshCount(prev => prev + 1);
         
-        // Dispatch event for any other components that need to know
         window.dispatchEvent(new CustomEvent('requestStatusChanged', {
           detail: { id, newStatus: 'active', forceUpdate: true }
         }));
@@ -154,14 +142,12 @@ export const useActiveRequests = () => {
         variant: "destructive"
       });
     }
-    
   }, [acceptRequest, navigate, toast]);
 
   const handleCompleteRequest = useCallback((id: string, note: { text: string, author: string }) => {
     console.log("useActiveRequests: Handling complete for request", { id, note });
     
     try {
-      // Complete the request
       completeRequest(id, note);
       
       toast({
@@ -169,12 +155,10 @@ export const useActiveRequests = () => {
         description: "The request has been marked as completed.",
       });
       
-      // Update the active tab to show completed requests
       setActiveTab("completed");
       setTimeout(() => {
         navigate(`/active?status=completed`, { replace: true });
         
-        // Force refresh to ensure UI updates
         setRefreshCount(prev => prev + 1);
       }, 300);
       

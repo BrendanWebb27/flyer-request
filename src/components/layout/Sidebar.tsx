@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -26,27 +26,15 @@ type UserRole = "support" | "general";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { isSupport } = useProfileAccess();
   
-  // In a real app, this would come from auth context or state
-  // For this example, we'll check localStorage to determine the role
+  // State to manage the user role
   const [userRole, setUserRole] = useState<UserRole>("general");
   
+  // Update role when support status changes
   useEffect(() => {
-    const checkSupport = () => {
-      const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
-      setUserRole(hasAccess ? "support" : "general");
-    };
-    
-    // Check on mount and whenever location changes
-    checkSupport();
-    
-    // Listen for storage events (profile updates)
-    window.addEventListener("storage", checkSupport);
-    
-    return () => {
-      window.removeEventListener("storage", checkSupport);
-    };
-  }, [location.pathname]); // Re-check on route change
+    setUserRole(isSupport ? "support" : "general");
+  }, [isSupport]);
 
   // Fixed isActiveRoute function that properly checks for exact route matches
   const isActiveRoute = (route: string) => {
