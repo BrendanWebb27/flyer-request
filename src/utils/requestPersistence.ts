@@ -21,6 +21,19 @@ export const saveRequests = (requests: Request[]): void => {
   }));
 };
 
+// Reset requests to initial demo data
+export const resetDemoData = (): void => {
+  localStorage.removeItem('requestsUpdate');
+  localStorage.removeItem('lastRequestUpdate');
+  localStorage.removeItem('notifiedRequests');
+  
+  // Reset to initial data
+  saveRequests([...initialRequests]);
+  
+  // Dispatch reset event
+  window.dispatchEvent(new CustomEvent('requestDataReset'));
+};
+
 // Track which requests have had notifications sent
 export const getNotifiedRequests = (): string[] => {
   return JSON.parse(localStorage.getItem('notifiedRequests') || '[]');
