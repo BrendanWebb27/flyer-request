@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +20,9 @@ const ActiveRequests: React.FC = () => {
   const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  // Use a ref for the refresh trigger to avoid re-renders
+  const refreshTriggerRef = useRef(0);
+  const [refreshCount, setRefreshCount] = useState(0);
   
   // Check for support access
   const isSupport = localStorage.getItem("supportAccessGranted") === "true";
@@ -33,13 +35,26 @@ const ActiveRequests: React.FC = () => {
   const statusParam = urlParams.get("status") as RequestStatus | null;
   const [activeTab, setActiveTab] = useState<string>(statusParam || "all");
 
-  // Update URL when tab changes
+  // Update URL when tab changes - with debouncing to prevent multiple updates
+  const navigateDebounced = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    if (statusParam !== activeTab && activeTab !== "all") {
-      navigate(`/active?status=${activeTab}&t=${Date.now()}`, { replace: true });
-    } else if (statusParam !== activeTab && activeTab === "all") {
-      navigate(`/active?t=${Date.now()}`, { replace: true });
+    if (navigateDebounced.current) {
+      clearTimeout(navigateDebounced.current);
     }
+    
+    navigateDebounced.current = setTimeout(() => {
+      if (statusParam !== activeTab && activeTab !== "all") {
+        navigate(`/active?status=${activeTab}`, { replace: true });
+      } else if (statusParam !== activeTab && activeTab === "all") {
+        navigate(`/active`, { replace: true });
+      }
+    }, 100);
+    
+    return () => {
+      if (navigateDebounced.current) {
+        clearTimeout(navigateDebounced.current);
+      }
+    };
   }, [activeTab, navigate, statusParam]);
 
   // Update active tab when URL changes
@@ -51,21 +66,24 @@ const ActiveRequests: React.FC = () => {
     }
   }, [statusParam]);
   
-  // Listen for request updates to refresh the component
+  // Listen for request updates with reduced frequency
   useEffect(() => {
-    const handleStorageChange = (event: StorageEvent | CustomEvent) => {
-      console.log("ActiveRequests: Storage or custom event detected", 
-        event instanceof StorageEvent ? event.key : "CustomEvent");
-      setRefreshTrigger(prev => prev + 1);
+    const handleStorageChange = () => {
+      refreshTriggerRef.current += 1;
+      // Only update the state occasionally to avoid too many re-renders
+      if (refreshTriggerRef.current % 3 === 0) {
+        setRefreshCount(prev => prev + 1);
+      }
     };
     
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
     
-    // Set up a periodic refresh to ensure UI stays updated
+    // Less frequent refresh interval
     const refreshInterval = setInterval(() => {
-      setRefreshTrigger(prev => prev + 1);
-    }, 3000);
+      refreshTriggerRef.current += 1;
+      setRefreshCount(prev => prev + 1);
+    }, 5000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -110,7 +128,7 @@ const ActiveRequests: React.FC = () => {
     }, 10000); // 10 seconds
   };
 
-  // Handle accepting a request with estimated time
+  // Handle accepting a request with estimated time - with optimized updates
   const handleAcceptRequest = useCallback((id: string, data: { estimatedTime: string }) => {
     console.log("ActiveRequests: Accepting request", id, data);
     
@@ -121,29 +139,23 @@ const ActiveRequests: React.FC = () => {
     
     // After accepting, navigate to active tab
     setActiveTab("active");
-    navigate(`/active?status=active&t=${Date.now()}`);
     
-    // Force a refresh of the component
-    setRefreshTrigger(prev => prev + 1);
-    
-    // Dispatch events to update all components
-    window.dispatchEvent(new Event('storage'));
-    window.dispatchEvent(new CustomEvent('requestUpdated'));
+    // Use replace to prevent history buildup
+    navigate(`/active?status=active&t=${Date.now()}`, { replace: true });
     
     // Show a toast notification
     toast({
       title: "Request Accepted",
       description: `You'll arrive in ${data.estimatedTime}.`,
     });
+    
+    // Update the refresh counter to trigger a re-render
+    refreshTriggerRef.current += 1;
+    setRefreshCount(prev => prev + 1);
+    
   }, [acceptRequest, navigate, toast]);
-  
-  // Force refresh when requests change
-  useEffect(() => {
-    // This effect runs when requests change (including when they're loaded from localStorage)
-    console.log("Requests updated in ActiveRequests component", requests);
-  }, [requests, refreshTrigger]);
-  
-  // Filter requests based on user role and ensure it's reactive
+
+  // Filter requests based on user role
   const filteredRequests = React.useMemo(() => {
     if (!isSupport) {
       // For general users, only show their own requests
@@ -151,7 +163,7 @@ const ActiveRequests: React.FC = () => {
     }
     // Support users see all requests without filtering by requestedBy
     return [...requests];
-  }, [requests, isSupport, currentUserId, refreshTrigger]);
+  }, [requests, isSupport, currentUserId, refreshCount]);
 
   // Only display tabs that the user has access to
   const availableTabs = isSupport 
@@ -176,19 +188,20 @@ const ActiveRequests: React.FC = () => {
           ))}
         </TabsList>
 
-        {availableTabs.map((tab) => (
-          <TabsContent key={`${tab}-${refreshTrigger}`} value={tab}>
-            <RequestsTabContent
-              requests={filteredRequests}
-              status={tab as RequestStatus | "all"}
-              formatDate={formatDate}
-              onClearRequest={handleClearRequest}
-              currentUserId={currentUserId}
-              onAcceptRequest={isSupport ? handleAcceptRequest : undefined}
-              onRequestUpdated={() => setRefreshTrigger(prev => prev + 1)}
-            />
-          </TabsContent>
-        ))}
+        <div key={`tabs-content-${refreshCount}`}>
+          {availableTabs.map((tab) => (
+            <TabsContent key={`${tab}-content-${refreshCount}`} value={tab}>
+              <RequestsTabContent
+                requests={filteredRequests}
+                status={tab as RequestStatus | "all"}
+                formatDate={formatDate}
+                onClearRequest={handleClearRequest}
+                currentUserId={currentUserId}
+                onAcceptRequest={isSupport ? handleAcceptRequest : undefined}
+              />
+            </TabsContent>
+          ))}
+        </div>
       </Tabs>
     </div>
   );

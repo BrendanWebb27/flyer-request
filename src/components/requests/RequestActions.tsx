@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { Request } from "@/types/request";
 import RequestDetailsDialog from "./RequestDetailsDialog";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 interface RequestActionsProps {
@@ -39,7 +38,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   onRequestUpdated
 }) => {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
   const { toast } = useToast();
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
@@ -58,28 +56,14 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         description: `You'll arrive in ${data.estimatedTime}.`,
       });
       
-      // Force multiple update events to ensure all components refresh
-      setTimeout(() => {
-        console.log("RequestActions: Triggering updates after accept");
-        
-        // Navigate to active tab and force refresh
-        navigate(`/active?status=active&t=${Date.now()}`);
-        
-        // Trigger storage events to update all components
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('requestUpdated'));
-        
-        // Also call the callback directly
-        if (onRequestUpdated) {
-          console.log("RequestActions: Calling onRequestUpdated callback");
-          onRequestUpdated();
-        }
-        
-        // Force a page reload as a last resort to ensure UI is updated
-        setTimeout(() => {
-          window.location.href = `/active?status=active&t=${Date.now()}`;
-        }, 300);
-      }, 100);
+      // Trigger storage events to update all components
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('requestUpdated'));
+      
+      // Also call the callback directly if available
+      if (onRequestUpdated) {
+        onRequestUpdated();
+      }
     }
   };
 

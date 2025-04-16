@@ -1,68 +1,63 @@
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { loadRequests } from "@/utils/requestPersistence";
 
 type SetRequestsFunction = React.Dispatch<React.SetStateAction<any[]>>;
 
 export const useRequestSync = (setRequests: SetRequestsFunction) => {
+  const lastUpdate = useRef(0);
+  const isMounted = useRef(true);
+  
   useEffect(() => {
-    const handleStorageChange = (event: StorageEvent | Event) => {
-      console.log("useRequestSync: Storage change detected", 
-        event instanceof StorageEvent ? event.key : "custom event");
+    // Set up mounted flag for cleanup
+    isMounted.current = true;
+    
+    // Use a debounced update function to prevent multiple rapid updates
+    const updateRequests = (forceUpdate = false) => {
+      const now = Date.now();
+      // Only update if sufficient time has passed (debounce) or if forced
+      if (forceUpdate || now - lastUpdate.current > 300) {
+        if (isMounted.current) {
+          const savedRequests = loadRequests();
+          setRequests(savedRequests);
+          lastUpdate.current = now;
+          console.log("useRequestSync: Updated requests", savedRequests);
+        }
+      }
+    };
+
+    const handleStorageChange = (event: StorageEvent | CustomEvent) => {
+      const isStorageEvent = event instanceof StorageEvent;
+      console.log("useRequestSync: Event detected", 
+        isStorageEvent ? event.key : "custom event");
       
-      // Always try to load the latest data from localStorage
-      const savedRequests = loadRequests();
-      setRequests(savedRequests);
-      
-      // Only for StorageEvent, check if it's specifically our key
-      if (event instanceof StorageEvent) {
+      if (isStorageEvent) {
+        // For storage events, only update if it's our specific keys
         if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate') {
-          try {
-            const parsedRequests = event.key === 'requestsUpdate' && event.newValue
-              ? JSON.parse(event.newValue)
-              : loadRequests(); // Fallback to loading if key is different
-            
-            setRequests(parsedRequests);
-            console.log("useRequestSync: Updated requests from storage event", parsedRequests);
-            
-            // Force metrics to update with small delay to ensure state consistency
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('metricsUpdate'));
-            }, 50);
-          } catch (err) {
-            console.error("Error parsing requests from storage:", err);
-            
-            // Try loading directly as fallback
-            const directRequests = loadRequests();
-            setRequests(directRequests);
-          }
+          updateRequests(true);
         }
       } else {
-        // For custom events, ensure metrics update
-        window.dispatchEvent(new CustomEvent('metricsUpdate'));
+        // For custom events, update with a small delay to prevent racing
+        setTimeout(() => updateRequests(true), 50);
       }
     };
     
-    // Set up event listeners with priority handling
+    // Set up event listeners
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
-    window.addEventListener('metricsUpdate', () => {
-      const refreshedRequests = loadRequests();
-      setRequests(refreshedRequests);
-    });
+    window.addEventListener('metricsUpdate', () => updateRequests(true));
     
     // Initial load
-    const initialRequests = loadRequests();
-    setRequests(initialRequests);
-    console.log("useRequestSync: Initial requests loaded", initialRequests);
+    updateRequests(true);
     
-    // Set up periodic refresh to ensure data is always current
+    // Use a less frequent refresh interval
     const refreshInterval = setInterval(() => {
-      const refreshedRequests = loadRequests();
-      setRequests(refreshedRequests);
-    }, 2000); // Check every 2 seconds
+      updateRequests();
+    }, 5000); // Check every 5 seconds instead of 2
     
+    // Cleanup function
     return () => {
+      isMounted.current = false;
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('requestUpdated', handleStorageChange);
       window.removeEventListener('metricsUpdate', handleStorageChange);
