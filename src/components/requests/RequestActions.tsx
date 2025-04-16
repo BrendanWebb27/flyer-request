@@ -24,7 +24,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   onComplete,
   onRequestUpdated
 }) => {
-  const [open, setOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const { toast } = useToast();
   const { isSupport } = useProfileAccess();
   
@@ -39,7 +39,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       
       try {
         // First close the dialog to avoid UI glitches
-        setOpen(false);
+        setDetailsOpen(false);
         
         // Call the accept function immediately
         onAccept(id, data);
@@ -73,7 +73,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       
       try {
         // First close the dialog to avoid UI glitches
-        setOpen(false);
+        setDetailsOpen(false);
         
         // Call the complete function
         onComplete(id, note);
@@ -126,15 +126,15 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         <CompleteRequestButton 
           onClick={(e) => {
             e.stopPropagation();
-            setOpen(true);
+            setDetailsOpen(true);
           }}
         />
       )}
       
       <RequestDetailsButton 
         request={request}
-        open={open}
-        setOpen={setOpen}
+        open={detailsOpen}
+        setOpen={setDetailsOpen}
         handleAccept={isSupport ? handleAccept : undefined}
         handleComplete={isSupport ? handleComplete : undefined}
       />

@@ -27,6 +27,17 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
 }) => {
   const dialogActionRef = useRef<HTMLButtonElement>(null);
   
+  // Enhanced handler to properly manage dialog clicks
+  const handleButtonClick = (e: React.MouseEvent) => {
+    // Prevent all default behavior and propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Set dialog state to open
+    setOpen(true);
+  };
+  
+  // Handler for clicks inside the dialog to prevent propagation
   const handleDialogClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -38,11 +49,7 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
           size="sm" 
           className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
           ref={dialogActionRef}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setOpen(true);
-          }}
+          onClick={handleButtonClick}
         >
           <Eye size={16} className="mr-1" />
           View Details
