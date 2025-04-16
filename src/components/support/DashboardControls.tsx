@@ -26,17 +26,18 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
   const navigate = useNavigate();
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
       <h2 className="text-2xl font-bold">Support Dashboard</h2>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
         <Button 
           variant="outline"
           size="sm"
+          width="auto"
           onClick={forceSyncRequests}
-          className="flex items-center gap-1"
+          className="whitespace-nowrap flex-shrink-0"
         >
-          <RefreshCcw size={14} />
+          <RefreshCcw size={14} className="mr-2" />
           Sync
         </Button>
         
@@ -44,12 +45,13 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           <Button
             variant="default"
             size="sm"
+            width="auto"
             onClick={() => {
               navigate("/support?status=pending");
               resetNotificationCount();
               forceSyncRequests();
             }}
-            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700"
+            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 whitespace-nowrap flex-shrink-0"
           >
             <Bell size={14} className="animate-pulse" />
             <Badge variant="secondary" className="bg-white text-amber-700">
@@ -63,9 +65,9 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           setActiveMode(v as "requests" | "users");
           forceSyncRequests();
         }}>
-          <TabsList>
-            <TabsTrigger value="requests">Support Requests</TabsTrigger>
-            <TabsTrigger value="users">User Verification</TabsTrigger>
+          <TabsList className="flex-shrink-0">
+            <TabsTrigger value="requests" className="min-w-24">Support Requests</TabsTrigger>
+            <TabsTrigger value="users" className="min-w-24">User Verification</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>

@@ -77,7 +77,8 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         <Button 
           variant={buttonVariant}
           size={buttonSize}
-          className={buttonClass}
+          width="auto"
+          className={`whitespace-nowrap ${buttonClass}`}
           onClick={handleButtonClick}
         >
           {buttonIcon && <span className="mr-1">{buttonIcon}</span>}

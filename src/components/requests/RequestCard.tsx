@@ -50,7 +50,7 @@ const RequestCard: React.FC<RequestCardProps> = ({
           formatDate={formatDate}
         />
       </CardContent>
-      <CardFooter className="border-t pt-4">
+      <CardFooter className="border-t pt-4 flex justify-end w-full">
         <RequestActions 
           requestId={request.id}
           onClear={onClearRequest}

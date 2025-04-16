@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -71,8 +72,9 @@ const RequestRow: React.FC<RequestRowProps> = ({
         action: (
           <Button 
             variant="outline" 
-            size="sm" 
-            className="border-green-500 text-green-600 hover:bg-green-50"
+            size="sm"
+            width="auto"
+            className="border-green-500 text-green-600 hover:bg-green-50 whitespace-nowrap"
             onClick={() => {
               if (undoClearRequest) {
                 undoClearRequest(request.id, requestIndex);
@@ -99,11 +101,18 @@ const RequestRow: React.FC<RequestRowProps> = ({
       <TableCell>{request.estimatedArrival || 'Not specified'}</TableCell>
       <TableCell>{getStatusBadge(request.status)}</TableCell>
       <TableCell>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-nowrap justify-end">
           {request.status === "pending" && (
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm">Accept</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  width="auto"
+                  className="whitespace-nowrap"
+                >
+                  Accept
+                </Button>
               </SheetTrigger>
               <SheetContent>
                 <SheetHeader>
@@ -124,8 +133,9 @@ const RequestRow: React.FC<RequestRowProps> = ({
               <SheetTrigger asChild>
                 <Button 
                   variant="outline" 
-                  size="sm" 
-                  className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200"
+                  size="sm"
+                  width="auto"
+                  className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200 whitespace-nowrap"
                   onClick={() => setActiveRequest(request.id)}
                 >
                   Complete
@@ -151,7 +161,8 @@ const RequestRow: React.FC<RequestRowProps> = ({
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="text-red-500 border-red-200 hover:bg-red-50"
+                  width="auto"
+                  className="text-red-500 border-red-200 hover:bg-red-50 whitespace-nowrap"
                 >
                   <Trash2 size={16} className="mr-1" />
                   Clear
@@ -175,7 +186,12 @@ const RequestRow: React.FC<RequestRowProps> = ({
             </AlertDialog>
           )}
           
-          <Button variant="ghost" size="sm">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            width="auto" 
+            className="whitespace-nowrap"
+          >
             Details
           </Button>
         </div>

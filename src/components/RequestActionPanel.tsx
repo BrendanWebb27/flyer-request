@@ -80,7 +80,7 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
             <SelectTrigger id="assignedTo">
               <SelectValue placeholder="Select support personnel" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {supportProfiles.length > 0 ? (
                 supportProfiles.map((profile, index) => (
                   <SelectItem key={`support-${index}`} value={profile.name || `Support Staff ${index + 1}`}>
@@ -106,7 +106,7 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
             <SelectTrigger id="estimatedTime">
               <SelectValue placeholder="Select estimated time" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {timeOptions.map((time) => (
                 <SelectItem key={time} value={time}>
                   {time}
@@ -118,7 +118,8 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
         
         <Button 
           onClick={handleAccept}
-          className="w-full bg-flyerPurple-600 hover:bg-flyerPurple-700"
+          width="full"
+          className="bg-flyerPurple-600 hover:bg-flyerPurple-700 mt-2"
         >
           <Check size={16} className="mr-2" />
           Accept Request

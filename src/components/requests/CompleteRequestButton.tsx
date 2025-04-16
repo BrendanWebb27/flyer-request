@@ -17,7 +17,8 @@ const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({ onClick }
   return (
     <Button 
       size="sm" 
-      className="bg-green-600 hover:bg-green-700"
+      width="auto"
+      className="bg-green-600 hover:bg-green-700 whitespace-nowrap"
       onClick={handleClick}
     >
       <Check size={16} className="mr-1" />

@@ -116,7 +116,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 
   return (
     <div 
-      className="flex gap-2 self-end md:self-center" 
+      className="flex gap-2 self-end md:self-center justify-end w-full flex-nowrap"
       onClick={stopPropagation}
     >
       {/* Clear button */}
