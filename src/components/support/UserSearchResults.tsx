@@ -1,18 +1,9 @@
-
 import React from "react";
 import { UserCheck, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-export interface UserProfile {
-  email: string;
-  manNumber?: string;
-  organization?: string;
-  isVerified: boolean;
-  verificationCode?: string;
-  username?: string;
-}
+import { UserProfile } from "@/types/userSearch";
 
 interface UserSearchResultsProps {
   results: UserProfile[];

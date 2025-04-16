@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UserSearchResults from "@/components/support/UserSearchResults";
 import UserSuggestions from "@/components/support/UserSuggestions";
 import { useUserSearch } from "@/hooks/useUserSearch";
-import type { UserProfile } from "@/hooks/useUserSearch";
+import { UserProfile } from "@/types/userSearch";
 
 interface UserLookupProps {
   onUserSelect?: (user: UserProfile) => void;
