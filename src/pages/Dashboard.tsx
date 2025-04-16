@@ -2,25 +2,34 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock, CheckCircle2, MapPin, AlertCircle } from "lucide-react";
+import { ArrowRight, Clock, CheckCircle2, MapPin, AlertCircle, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
+import { loadRequests } from "@/utils/requestPersistence";
 
 const Dashboard: React.FC = () => {
   const { requests, metrics } = useSupportRequests();
   const { getUserProfile } = useProfileAccess();
   
-  const profile = getUserProfile();
-  const currentUserId = profile?.id || "user123";
+  // Get current user email for request filtering
+  const currentUserEmail = localStorage.getItem("supportUserEmail") || "user@example.com";
+  console.log("Dashboard: Current user email:", currentUserEmail);
   
   // Filter requests to only show the current user's requests
-  const userRequests = requests.filter(req => req.requestedBy === currentUserId);
+  const userRequests = requests.filter(req => {
+    console.log(`Dashboard: Checking request ${req.id} - requestedBy: ${req.requestedBy}, current: ${currentUserEmail}`);
+    return req.requestedBy === currentUserEmail;
+  });
+  
+  console.log(`Dashboard: Found ${userRequests.length} requests for current user`);
   
   // Calculate request statistics
   const activeCount = userRequests.filter(req => req.status === "active").length;
   const completedCount = userRequests.filter(req => req.status === "completed").length;
   const pendingCount = userRequests.filter(req => req.status === "pending").length;
+  
+  console.log(`Dashboard: Stats - active: ${activeCount}, completed: ${completedCount}, pending: ${pendingCount}`);
   
   // Get recent requests (limited to 3)
   const recentRequests = [...userRequests]
@@ -50,16 +59,40 @@ const Dashboard: React.FC = () => {
       link: "/active?status=pending"
     },
   ];
+  
+  // Function to force refresh requests
+  const handleRefresh = () => {
+    console.log("Dashboard: Manual refresh triggered");
+    const freshRequests = loadRequests();
+    console.log(`Dashboard: Refreshed with ${freshRequests.length} requests`);
+    window.dispatchEvent(new CustomEvent('requestsForceSync', {
+      detail: {
+        timestamp: new Date().toISOString(),
+        forceSync: true
+      }
+    }));
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <Link to="/request">
-          <Button className="bg-flyerPurple-600 hover:bg-flyerPurple-700">
-            New Request
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={handleRefresh}
+            title="Refresh requests"
+            className="mr-2"
+          >
+            <RefreshCw size={16} className="mr-2" />
+            Refresh
           </Button>
-        </Link>
+          <Link to="/request">
+            <Button className="bg-flyerPurple-600 hover:bg-flyerPurple-700">
+              New Request
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -83,9 +116,15 @@ const Dashboard: React.FC = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Requests</CardTitle>
-          <CardDescription>View your most recent flyer requests</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Recent Requests</CardTitle>
+            <CardDescription>View your most recent flyer requests</CardDescription>
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleRefresh}>
+            <RefreshCw size={16} className="mr-2" />
+            Refresh
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -122,9 +161,15 @@ const Dashboard: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">No requests found</p>
-                <Link to="/request" className="mt-2 inline-flex items-center text-sm text-flyerPurple-600 hover:underline">
-                  Create your first request <ArrowRight className="h-4 w-4 ml-1" />
-                </Link>
+                <div className="flex flex-col items-center gap-2 mt-2">
+                  <Button variant="outline" size="sm" onClick={handleRefresh}>
+                    <RefreshCw size={16} className="mr-2" />
+                    Refresh Requests
+                  </Button>
+                  <Link to="/request" className="mt-2 inline-flex items-center text-sm text-flyerPurple-600 hover:underline">
+                    Create your first request <ArrowRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </div>
               </div>
             )}
             {recentRequests.length > 0 && (

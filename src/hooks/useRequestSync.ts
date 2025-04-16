@@ -9,14 +9,19 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
   const isMounted = useRef(true);
   const updateInProgress = useRef(false);
   const updateInterval = useRef<number | null>(null);
+  const forceSyncTimeout = useRef<number | null>(null);
   
   useEffect(() => {
     // Set up mounted flag for cleanup
     isMounted.current = true;
     
+    // Log initial sync for debugging
+    console.log("useRequestSync: Setting up request synchronization");
+    
     // Use a debounced update function to prevent multiple rapid updates
     const updateRequests = (forceUpdate = false) => {
       if (updateInProgress.current) {
+        console.log("useRequestSync: Update already in progress, skipping");
         return; // Prevent concurrent updates
       }
       
@@ -27,9 +32,16 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
           try {
             updateInProgress.current = true;
             const savedRequests = loadRequests();
+            console.log(`useRequestSync: Updating with ${savedRequests.length} requests`);
+            
+            // Check if email is set in local storage
+            const userEmail = localStorage.getItem("supportUserEmail");
+            console.log(`useRequestSync: Current user email - ${userEmail || "not set"}`);
+            
             setRequests(savedRequests);
             lastUpdate.current = now;
-            console.log("useRequestSync: Updated requests", savedRequests.length);
+          } catch (error) {
+            console.error("useRequestSync: Error updating requests", error);
           } finally {
             updateInProgress.current = false;
           }
@@ -67,8 +79,16 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       updateRequests(true);
       
       // Refresh again after a sequence of small delays for race conditions
-      setTimeout(() => updateRequests(true), 300);
-      setTimeout(() => updateRequests(true), 1000);
+      if (forceSyncTimeout.current !== null) {
+        clearTimeout(forceSyncTimeout.current);
+      }
+      
+      forceSyncTimeout.current = window.setTimeout(() => {
+        updateRequests(true);
+        forceSyncTimeout.current = window.setTimeout(() => {
+          updateRequests(true);
+        }, 1000);
+      }, 300);
     };
     
     // Set up event listeners with more types of events
@@ -85,7 +105,7 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
     // Set up a more frequent refresh interval
     updateInterval.current = window.setInterval(() => {
       updateRequests(true); // Force update on interval
-    }, 2000); // Check every 2 seconds (more frequent than before)
+    }, 1500); // Check every 1.5 seconds (more frequent than before)
     
     // Cleanup function
     return () => {
@@ -97,6 +117,10 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       
       if (updateInterval.current !== null) {
         clearInterval(updateInterval.current);
+      }
+      
+      if (forceSyncTimeout.current !== null) {
+        clearTimeout(forceSyncTimeout.current);
       }
     };
   }, [setRequests]);

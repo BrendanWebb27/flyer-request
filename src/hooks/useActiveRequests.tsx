@@ -11,8 +11,11 @@ export const useActiveRequests = () => {
   const refreshTriggerRef = useRef(0);
   const [refreshCount, setRefreshCount] = useState(0);
   
-  const { isSupport } = useProfileAccess();
-  const currentUserId = "user123";
+  const { isSupport, getUserProfile } = useProfileAccess();
+  
+  // Get current user email for request filtering
+  const currentUserEmail = localStorage.getItem("supportUserEmail") || "user@example.com";
+  console.log("Current user email for filtering requests:", currentUserEmail);
   
   // Initialize the request actions
   const { 
@@ -57,18 +60,27 @@ export const useActiveRequests = () => {
     setRefreshCount(prev => prev + 1);
   }, []);
 
-  // Filter requests for current user if not support
+  // Filter requests based on user role and ownership
   const filteredRequests = requests.filter(req => {
-    if (!isSupport) {
-      return req.requestedBy === currentUserId;
+    console.log(`Checking request ${req.id}: requested by ${req.requestedBy}, current user: ${currentUserEmail}`);
+    
+    if (isSupport) {
+      // Support staff can see all requests
+      return true;
+    } else {
+      // Regular users only see their own requests
+      const isOwner = req.requestedBy === currentUserEmail;
+      console.log(`Is user owner of request ${req.id}? ${isOwner}`);
+      return isOwner;
     }
-    return true;
   });
+  
+  console.log(`Found ${filteredRequests.length} requests for user ${currentUserEmail}`);
 
   // Define available tabs based on user role
   const availableTabs = isSupport 
     ? ["all", "pending", "active", "completed"] 
-    : ["all", "pending", "active"];
+    : ["all", "pending", "active", "completed"];
 
   return {
     activeTab,
@@ -82,7 +94,7 @@ export const useActiveRequests = () => {
     handleRequestUpdated,
     updateUrlWithActiveTab,
     formatDate,
-    currentUserId,
+    currentUserId: currentUserEmail,
     isSupport,
     requests
   };

@@ -37,6 +37,10 @@ export const notifyAllTabsAboutNewRequest = () => {
 export const submitFlyerRequest = async (data: RequestFormData): Promise<void> => {
   console.log("Submitting request:", data);
   
+  // Get the current user's email from localStorage
+  const userEmail = localStorage.getItem("supportUserEmail") || "user@example.com";
+  console.log("Current user submitting request:", userEmail);
+  
   // Generate a unique ID for the request
   const requestId = `REQ${Date.now().toString().slice(-6)}`;
   
@@ -47,11 +51,13 @@ export const submitFlyerRequest = async (data: RequestFormData): Promise<void> =
     details: data.details,
     createdAt: new Date().toISOString(),
     status: "pending",
-    requestedBy: localStorage.getItem("supportUserEmail") || "user@example.com",
+    requestedBy: userEmail, // Use email as identifier for proper matching
     notes: [],
     assetType: data.assetType || "standard",
     secondUser: data.secondUser
   };
+  
+  console.log("Created new request with owner:", newRequest.requestedBy);
   
   // Load existing requests
   const currentRequests = loadRequests();
