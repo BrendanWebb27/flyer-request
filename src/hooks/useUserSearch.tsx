@@ -22,6 +22,7 @@ const mockUsers = [
   { username: "67890 Sarah Davis", email: "sarah.davis@us.af.mil", manNumber: "AF67890", organization: "36th Fighter Generation Squadron" },
   { username: "78901 David Miller", email: "david.miller@us.af.mil", manNumber: "AF78901", organization: "36 FGS" },
   { username: "89012 Jennifer Taylor", email: "jennifer.taylor@us.af.mil", manNumber: "AF89012", organization: "36 FGS" },
+  { username: "04074 SSgt Webb", email: "brendan.webb@us.af.mil", manNumber: "AF04074", organization: "36 FGS" },
 ];
 
 export function useUserSearch(setError: (error: string) => void) {
@@ -49,17 +50,34 @@ export function useUserSearch(setError: (error: string) => void) {
     
     // Simulate API call to search for users
     setTimeout(() => {
-      const trimmedQuery = query.trim();
+      const trimmedQuery = query.trim().toLowerCase();
       
       // Check if it's a username search with embedded man number (##### Name)
       const extractedManNumber = extractManNumber(trimmedQuery);
       
-      if (extractedManNumber) {
+      // First check if the query matches or partially matches a username
+      const usernameMatch = mockUsers.find(user => 
+        user.username.toLowerCase() === trimmedQuery ||
+        user.username.toLowerCase().includes(trimmedQuery)
+      );
+      
+      if (usernameMatch) {
+        // Use the matched user's data
+        const mockResults: UserProfile[] = [{ 
+          email: usernameMatch.email,
+          organization: usernameMatch.organization || "36 FGS",
+          isVerified: verifiedEmails.includes(usernameMatch.email),
+          username: usernameMatch.username
+        }];
+        
+        setSearchResults(mockResults);
+      }
+      else if (extractedManNumber) {
         // Handle username search with man number
         const username = trimmedQuery;
         
         // Check if this username matches any in our mock database
-        const matchedUser = mockUsers.find(user => user.username.toLowerCase() === username.toLowerCase());
+        const matchedUser = mockUsers.find(user => user.username.toLowerCase().includes(extractedManNumber.toLowerCase()));
         
         if (matchedUser) {
           // Use the matched user's data
@@ -91,7 +109,7 @@ export function useUserSearch(setError: (error: string) => void) {
         const isAlreadyVerified = verifiedEmails.includes(trimmedQuery);
         
         // Try to find a username match for this email
-        const matchedUser = mockUsers.find(user => user.email.toLowerCase() === trimmedQuery.toLowerCase());
+        const matchedUser = mockUsers.find(user => user.email.toLowerCase() === trimmedQuery);
         
         const mockResults: UserProfile[] = isValidEmail 
           ? [
@@ -181,3 +199,4 @@ export function useUserSearch(setError: (error: string) => void) {
     handleSelectSuggestion
   };
 }
+
