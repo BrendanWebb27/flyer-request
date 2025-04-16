@@ -6,11 +6,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 interface RequestTabsProps {
   children: React.ReactNode;
   defaultValue?: string;
+  onTabChange?: () => void;
 }
 
 const RequestTabs: React.FC<RequestTabsProps> = ({ 
   children, 
-  defaultValue = "all" 
+  defaultValue = "all",
+  onTabChange 
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,6 +40,11 @@ const RequestTabs: React.FC<RequestTabsProps> = ({
       } else {
         navigate("/active", { replace: true });
       }
+    }
+    
+    // Notify parent about tab change
+    if (onTabChange) {
+      onTabChange();
     }
   };
 

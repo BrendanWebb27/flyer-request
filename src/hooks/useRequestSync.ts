@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { loadRequests } from "@/utils/requestPersistence";
+import { loadRequests, forceRequestSync } from "@/utils/requestPersistence";
 
 type SetRequestsFunction = React.Dispatch<React.SetStateAction<any[]>>;
 
@@ -8,6 +8,7 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
   const lastUpdate = useRef(0);
   const isMounted = useRef(true);
   const updateInProgress = useRef(false);
+  const updateInterval = useRef<number | null>(null);
   
   useEffect(() => {
     // Set up mounted flag for cleanup
@@ -42,34 +43,64 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       if (isStorageEvent) {
         // For storage events, only update if it's our specific keys
         if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate') {
+          console.log("Storage change detected:", event.key);
           updateRequests(true);
         }
       } else {
-        // For custom events, use a small delay
-        setTimeout(() => updateRequests(true), 100);
+        // For custom events, check if it's a force sync
+        const customEvent = event as CustomEvent;
+        const forceSync = customEvent.detail?.forceSync;
+        
+        // Use a small delay for normal updates, immediate for force syncs
+        if (forceSync) {
+          updateRequests(true);
+        } else {
+          setTimeout(() => updateRequests(true), 100);
+        }
       }
+    };
+    
+    // For force sync events (more aggressive refresh)
+    const handleForceSync = () => {
+      console.log("Force sync event received");
+      updateRequests(true);
+      
+      // Refresh again after a small delay in case of race conditions
+      setTimeout(() => updateRequests(true), 500);
     };
     
     // Set up event listeners
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
+    window.addEventListener('requestsForceSync', handleForceSync);
     window.addEventListener('metricsUpdate', handleStorageChange);
     
     // Initial load with a small delay to allow other components to initialize
     setTimeout(() => updateRequests(true), 50);
     
-    // Use a less frequent refresh interval
-    const refreshInterval = setInterval(() => {
-      updateRequests();
-    }, 5000); // Check every 5 seconds
+    // Set up a refresh interval (more frequent than before)
+    updateInterval.current = window.setInterval(() => {
+      updateRequests(true); // Force update on interval
+    }, 3000); // Check every 3 seconds (more frequent than before)
     
     // Cleanup function
     return () => {
       isMounted.current = false;
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('requestUpdated', handleStorageChange);
+      window.removeEventListener('requestsForceSync', handleForceSync);
       window.removeEventListener('metricsUpdate', handleStorageChange);
-      clearInterval(refreshInterval);
+      
+      if (updateInterval.current !== null) {
+        clearInterval(updateInterval.current);
+      }
     };
   }, [setRequests]);
+  
+  // Expose a function to force refresh
+  const forceRefresh = () => {
+    forceRequestSync();
+  };
+  
+  return { forceRefresh };
 };

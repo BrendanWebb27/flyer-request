@@ -1,29 +1,60 @@
+import { RequestFormData, Request } from "@/types/request";
+import { loadRequests, saveRequests } from "./requestPersistence";
 
-import { RequestFormData } from "@/types/request";
-import { toast } from "@/hooks/use-toast";
+// Function to ensure all tabs are notified of request submission
+export const notifyAllTabsAboutNewRequest = () => {
+  // Use a custom event to notify all tabs
+  window.dispatchEvent(new CustomEvent('requestsForceSync', {
+    detail: {
+      timestamp: new Date().toISOString(),
+      action: 'newRequest'
+    }
+  }));
+  
+  // Use localStorage to notify other tabs
+  const notificationKey = `request_notification_${Date.now()}`;
+  localStorage.setItem(notificationKey, Date.now().toString());
+  
+  // Clean up old notifications (to avoid localStorage bloat)
+  setTimeout(() => {
+    localStorage.removeItem(notificationKey);
+  }, 5000);
+};
 
-/**
- * Handles the submission of a flyer request
- * @param data The form data to submit
- * @returns A promise that resolves when the request is complete
- */
+// Modify the existing submitFlyerRequest function to include notification
 export const submitFlyerRequest = async (data: RequestFormData): Promise<void> => {
-  // Simulate API call - in a real app, this would be replaced with an actual API call
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  console.log("Submitting request:", data);
   
-  // For demonstration, we're just logging the data
-  console.log("Submitting flyer request:", data);
+  // Generate a unique ID for the request
+  const requestId = `REQ${Date.now().toString().slice(-6)}`;
   
-  // In a real application, you would make an API call here
-  // const response = await fetch('/api/flyer-request', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(data)
-  // });
+  // Create the request object
+  const newRequest: Request = {
+    id: requestId,
+    location: data.location,
+    details: data.details,
+    createdAt: new Date().toISOString(),
+    status: "pending",
+    requestedBy: localStorage.getItem("supportUserEmail") || "user@example.com",
+    notes: [],
+    assetType: data.assetType || "standard",
+    secondUser: data.secondUser
+  };
   
-  // if (!response.ok) {
-  //   throw new Error('Failed to submit request');
-  // }
+  // Load existing requests
+  const currentRequests = loadRequests();
   
-  // return response.json();
+  // Add the new request to the beginning of the array
+  const updatedRequests = [newRequest, ...currentRequests];
+  
+  // Save the updated requests
+  saveRequests(updatedRequests);
+  
+  // Notify all tabs/users about the new request
+  notifyAllTabsAboutNewRequest();
+  
+  console.log("Request submitted successfully:", newRequest);
+  
+  // Simulate network delay for a more realistic experience
+  return new Promise(resolve => setTimeout(resolve, 600));
 };
