@@ -121,15 +121,17 @@ export const useActiveRequests = () => {
       
       // Update the active tab to show active requests
       setActiveTab("active");
-      navigate(`/active?status=active`, { replace: true });
-      
-      // Force refresh to ensure UI updates
-      setRefreshCount(prev => prev + 1);
-      
-      // Dispatch event for any other components that need to know
-      window.dispatchEvent(new CustomEvent('requestStatusChanged', {
-        detail: { id, newStatus: 'active' }
-      }));
+      setTimeout(() => {
+        navigate(`/active?status=active`, { replace: true });
+        
+        // Force refresh to ensure UI updates
+        setRefreshCount(prev => prev + 1);
+        
+        // Dispatch event for any other components that need to know
+        window.dispatchEvent(new CustomEvent('requestStatusChanged', {
+          detail: { id, newStatus: 'active' }
+        }));
+      }, 300);
       
     } catch (error) {
       console.error("Error in handleAcceptRequest:", error);

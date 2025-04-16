@@ -41,9 +41,11 @@ export const acceptRequest = (
   saveRequests(updatedRequests);
   
   // Dispatch an event to notify other components about the status change
-  window.dispatchEvent(new CustomEvent('requestStatusChanged', {
-    detail: { id, newStatus: 'active', data }
-  }));
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('requestStatusChanged', {
+      detail: { id, newStatus: 'active', data }
+    }));
+  }, 100);
   
   return updatedRequests;
 };

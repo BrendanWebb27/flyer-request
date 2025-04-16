@@ -28,12 +28,16 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
   console.log("ActiveRequestsTabsContent rendering with refreshCount:", refreshCount);
   
   // Create a stable key for the TabsContent components
-  const tabContentKey = useMemo(() => `tabs-content-${refreshCount}`, [refreshCount]);
+  const tabContentKey = useMemo(() => `tabs-content-${refreshCount}-${Date.now()}`, [refreshCount]);
   
   return (
     <div key={tabContentKey}>
       {availableTabs.map((tab) => (
-        <TabsContent key={`${tab}-content-${refreshCount}`} value={tab}>
+        <TabsContent 
+          key={`${tab}-content-${refreshCount}-${Date.now()}`} 
+          value={tab}
+          forceMount={false}
+        >
           <RequestsTabContent
             requests={filteredRequests}
             status={tab as RequestStatus | "all"}

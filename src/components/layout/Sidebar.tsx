@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
@@ -17,7 +16,6 @@ import {
   FileText,
   Clock,
   UserCircle,
-  LogOut,
   Menu,
   HeadphonesIcon,
   CheckCircle2,
@@ -149,20 +147,7 @@ const Sidebar: React.FC = () => {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="p-4">
-          <button 
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-            onClick={() => {
-              // Clear access in localStorage and reload
-              localStorage.removeItem("supportAccessGranted");
-              localStorage.removeItem("organizationAccess");
-              window.location.href = "/";
-            }}
-          >
-            <LogOut size={20} />
-            <span>Sign Out</span>
-          </button>
-        </SidebarFooter>
+        {/* Removed SidebarFooter with sign out button */}
       </SidebarComponent>
     </>
   );

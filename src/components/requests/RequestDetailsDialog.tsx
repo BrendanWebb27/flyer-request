@@ -60,7 +60,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
         
         // Close dialog if needed
         if (onClose) {
-          onClose();
+          setTimeout(() => onClose(), 200);
         }
       } catch (error) {
         console.error("Error in RequestDetailsDialog:", error);
