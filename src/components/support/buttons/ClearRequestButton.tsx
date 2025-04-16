@@ -46,24 +46,45 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
     return null;
   }
 
-  const handleConfirmClear = () => {
+  const handleConfirmClear = (e: React.MouseEvent) => {
+    // Prevent event from propagating
+    e.stopPropagation();
+    
     handleClearRequest();
     setOpen(false);
   };
 
+  // Handle dialog open state explicitly
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Only allow closing when explicit close action or outside click
+      const target = document.activeElement as HTMLElement;
+      setOpen(false);
+    } else {
+      setOpen(true);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
           className={`whitespace-nowrap flex-shrink-0 ${buttonStyle}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
         >
           <Trash2 size={16} className="mr-1" />
           Clear
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        onClick={e => e.stopPropagation()}
+        onPointerDownOutside={e => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Clear this request?</DialogTitle>
           <DialogDescription>

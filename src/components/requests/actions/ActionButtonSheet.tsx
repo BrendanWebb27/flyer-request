@@ -39,8 +39,11 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
 
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen === false) {
+      // Only close when explicit close action is triggered
       const target = document.activeElement as HTMLElement;
-      const isCloseAction = target?.hasAttribute('data-sheet-close');
+      const isCloseAction = 
+        target?.hasAttribute('data-sheet-close') || 
+        target?.closest('[data-sheet-close="true"]');
       
       if (isCloseAction) {
         setOpen(false);
@@ -76,11 +79,12 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         onEscapeKeyDown={e => e.preventDefault()}
         onInteractOutside={e => e.preventDefault()}
         onCloseAutoFocus={e => e.preventDefault()}
+        data-prevent-close="true"
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4" onClick={e => e.stopPropagation()}>
+        <div className="mt-4" onClick={e => e.stopPropagation()} data-prevent-close="true">
           {children}
         </div>
       </SheetContent>
