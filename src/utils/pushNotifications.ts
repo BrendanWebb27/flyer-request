@@ -3,6 +3,16 @@
  * Utilities for managing push notifications
  */
 
+// Define types for push subscriptions - making all required properties explicitly required
+export interface PushSubscriptionJSON {
+  endpoint: string; // This is required
+  expirationTime: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
 // Store the subscription in local storage
 export const saveSubscription = (subscription: PushSubscriptionJSON): void => {
   if (!subscription) return;
@@ -52,7 +62,16 @@ export const subscribeToPush = async (): Promise<PushSubscriptionJSON | null> =>
       applicationServerKey: urlBase64ToUint8Array(process.env.VITE_VAPID_PUBLIC_KEY || '')
     });
     
-    const subscriptionJSON = subscription.toJSON();
+    // Convert browser's PushSubscription to our PushSubscriptionJSON type
+    const subscriptionJSON: PushSubscriptionJSON = {
+      endpoint: subscription.endpoint,
+      expirationTime: subscription.expirationTime,
+      keys: {
+        p256dh: subscription.toJSON().keys.p256dh,
+        auth: subscription.toJSON().keys.auth
+      }
+    };
+    
     saveSubscription(subscriptionJSON);
     
     // Register with Supabase
@@ -108,14 +127,4 @@ async function registerSubscriptionWithSupabase(subscription: PushSubscriptionJS
   } catch (error) {
     console.error('Error registering push subscription:', error);
   }
-}
-
-// Define types for push subscriptions
-export interface PushSubscriptionJSON {
-  endpoint: string;
-  expirationTime: number | null;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
 }
