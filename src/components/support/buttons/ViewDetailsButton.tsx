@@ -25,7 +25,7 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   
-  // Handle button click with propagation control
+  // Handle button click with improved propagation control
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -39,6 +39,14 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
       // Fallback to navigation if no request data
       navigate(`/request/${requestId}`);
     }
+
+    return false; // Ensure no propagation
+  };
+
+  // Ensure dialog content clicks don't propagate
+  const handleContentClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   return (
@@ -48,6 +56,8 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
         size="sm"
         className="whitespace-nowrap flex-shrink-0"
         onClick={handleClick}
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <Eye size={16} className="mr-1" />
         Details
@@ -55,10 +65,13 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
 
       {/* Only render dialog if we have request data */}
       {request && (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog 
+          open={open} 
+          onOpenChange={setOpen}
+        >
           <DialogContent 
             className="max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleContentClick}
           >
             <RequestDetailsDialog 
               request={request}

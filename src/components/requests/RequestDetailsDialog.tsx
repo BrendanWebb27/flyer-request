@@ -53,8 +53,11 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
     }
   };
 
-  // Accept request
-  const handleAccept = () => {
+  // Accept request - with stopPropagation
+  const handleAccept = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (onAccept && estimatedTime) {
       onAccept(request.id, { 
         assignedTo: "Current Support Staff", // Fixed default value
@@ -67,13 +70,19 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
   // Time options for support staff
   const timeOptions = ["5 minutes", "10 minutes", "15 minutes", "20 minutes", "30 minutes", "45 minutes", "1 hour"];
   
+  // Enhanced stop propagation
   const stopPropagation = (e: React.UIEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    return false;
   };
   
   return (
-    <div onClick={stopPropagation}>
+    <div 
+      onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerDown={stopPropagation}
+    >
       <DialogHeader>
         <DialogTitle>Request {request.id}</DialogTitle>
       </DialogHeader>
@@ -170,6 +179,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={3}
+                  onClick={stopPropagation}
                 />
               </div>
               

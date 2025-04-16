@@ -40,7 +40,7 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
     (isSupport && request.status === "completed") ||
     (!isSupport && (request.status === "pending" || request.status === "active"));
 
-  // Simple function to handle stopping event propagation
+  // Enhanced function to handle stopping event propagation
   const stopPropagation = (e: React.UIEvent) => {
     e.preventDefault();
     e.stopPropagation();
