@@ -28,12 +28,15 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
 }) => {
   const { isSupport } = useProfileAccess();
   
-  const showClearButton = !isSupport || 
-                          (isSupport && request.status === "completed");
+  // General users should always see Clear and Details buttons
+  // Support users should see different buttons based on request status
+  const showAcceptButton = isSupport && request.status === "pending";
+  const showCompleteButton = isSupport && request.status === "active";
+  const showClearButton = !isSupport || request.status === "completed";
 
   return (
     <div className="flex items-center gap-2 flex-nowrap justify-end">
-      {request.status === "pending" && (
+      {showAcceptButton && (
         <AcceptRequestButton 
           request={request}
           acceptRequest={acceptRequest}
@@ -41,7 +44,7 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
         />
       )}
       
-      {request.status === "active" && (
+      {showCompleteButton && (
         <CompleteRequestButton 
           request={request}
           completeRequest={completeRequest}
@@ -57,7 +60,11 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
         />
       )}
       
-      <ViewDetailsButton requestId={request.id} />
+      {/* View Details always available to all users */}
+      <ViewDetailsButton 
+        requestId={request.id} 
+        onClick={() => setActiveRequest(request.id)}
+      />
     </div>
   );
 };

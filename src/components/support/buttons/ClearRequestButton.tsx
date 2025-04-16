@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface ClearRequestButtonProps {
   requestId: string;
@@ -23,6 +24,13 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
   requestId,
   handleClearRequest
 }) => {
+  const { isSupport } = useProfileAccess();
+  
+  // Determine button style based on user role
+  const buttonStyle = isSupport 
+    ? "text-red-500 border-red-200 hover:bg-red-50" 
+    : "text-gray-500 border-gray-200 hover:bg-gray-50";
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -30,7 +38,7 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
           variant="outline" 
           size="sm"
           width="auto"
-          className="text-red-500 border-red-200 hover:bg-red-50 whitespace-nowrap"
+          className={`whitespace-nowrap flex-shrink-0 ${buttonStyle}`}
         >
           <Trash2 size={16} className="mr-1" />
           Clear
