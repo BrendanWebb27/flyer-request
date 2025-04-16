@@ -15,4 +15,6 @@ export interface UserProfile {
   username?: string; 
   isVerified?: boolean;
   verificationCode?: string;
+  workCenter?: string; // Added this property
 }
+
