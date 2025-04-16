@@ -54,10 +54,38 @@ export const getAllSupportProfiles = (): UserProfile[] => {
   // Add mock support staff if no profiles are available
   if (supportProfiles.length === 0 && !isCurrentUserSupport) {
     supportProfiles = [
-      { name: "John Doe", organization: "Support", workShift: "dayshift" },
-      { name: "Sarah Johnson", organization: "Support", workShift: "dayshift" },
-      { name: "Mike Wilson", organization: "Support", workShift: "nightshift" },
-      { name: "Emily Brown", organization: "Support", workShift: "nightshift" }
+      { 
+        name: "John Doe", 
+        organization: "Support", 
+        workShift: "dayshift",
+        manNumber: "S12345",
+        isFlyer: false,
+        flyerRole: "none"  
+      },
+      { 
+        name: "Sarah Johnson", 
+        organization: "Support", 
+        workShift: "dayshift",
+        manNumber: "S23456",
+        isFlyer: true,
+        flyerRole: "primary"
+      },
+      { 
+        name: "Mike Wilson", 
+        organization: "Support", 
+        workShift: "nightshift",
+        manNumber: "S34567",
+        isFlyer: true,
+        flyerRole: "alternate"
+      },
+      { 
+        name: "Emily Brown", 
+        organization: "Support", 
+        workShift: "nightshift",
+        manNumber: "S45678",
+        isFlyer: false,
+        flyerRole: "none"
+      }
     ];
     
     // Store mock profiles for future use

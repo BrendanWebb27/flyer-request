@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
 import { updateUserActivityTimestamp } from "@/utils/userDataExpiration";
+import { UserProfile } from "@/types/profile";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import ProfileForm from "@/components/profile/ProfileForm";
@@ -21,7 +23,7 @@ const Profile: React.FC = () => {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   
   // Load profile data from localStorage or use defaults
-  const [profile, setProfile] = useState(() => {
+  const [profile, setProfile] = useState<UserProfile>(() => {
     const savedProfile = getUserProfile();
     if (savedProfile) {
       return savedProfile;

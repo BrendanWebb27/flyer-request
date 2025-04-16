@@ -1,26 +1,14 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { UserProfile } from "@/types/profile";
 
 interface ProfileFormProps {
-  profile: {
-    manNumber: string;
-    organization: string;
-    workShift: string;
-    isFlyer: boolean;
-    flyerRole: string;
-    isSupport: boolean;
-  };
-  setProfile: React.Dispatch<React.SetStateAction<{
-    manNumber: string;
-    organization: string;
-    workShift: string;
-    isFlyer: boolean;
-    flyerRole: string;
-    isSupport: boolean;
-  }>>;
+  profile: UserProfile;
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
   isEditing: boolean;
   organizations: string[];
 }

@@ -3,20 +3,11 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { UserProfile } from "@/types/profile";
 
 interface FlyerStatusFormProps {
-  profile: {
-    isFlyer: boolean;
-    flyerRole: string;
-  };
-  setProfile: React.Dispatch<React.SetStateAction<{
-    manNumber: string;
-    organization: string;
-    workShift: string;
-    isFlyer: boolean;
-    flyerRole: string;
-    isSupport: boolean;
-  }>>;
+  profile: UserProfile;
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
   isEditing: boolean;
 }
 
