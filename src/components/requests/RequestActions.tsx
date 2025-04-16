@@ -15,7 +15,7 @@ interface RequestActionsProps {
   request?: Request;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
   onComplete?: (id: string, note: { text: string, author: string }) => void;
-  onRequestUpdated?: () => void;  // Callback to trigger parent updates
+  onRequestUpdated?: () => void;
 }
 
 export const RequestActions: React.FC<RequestActionsProps> = ({ 
@@ -32,19 +32,11 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
     if (onAccept) {
-      console.log("RequestActions: Accepting request with ID:", id);
-      
       try {
-        // First close the dialog to avoid UI glitches
         setDetailsOpen(false);
-        
-        // Call the accept function immediately
         onAccept(id, data);
-        
-        // Trigger event to update all components
         window.dispatchEvent(new Event('requestUpdated'));
         
-        // Also call the callback directly if available
         if (onRequestUpdated) {
           onRequestUpdated();
         }
@@ -66,19 +58,11 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 
   const handleComplete = (id: string, note: { text: string, author: string }) => {
     if (onComplete) {
-      console.log("RequestActions: Completing request with ID:", id);
-      
       try {
-        // First close the dialog to avoid UI glitches
         setDetailsOpen(false);
-        
-        // Call the complete function
         onComplete(id, note);
-        
-        // Trigger event to update all components
         window.dispatchEvent(new Event('requestUpdated'));
         
-        // Also call the callback directly if available
         if (onRequestUpdated) {
           onRequestUpdated();
         }
@@ -98,28 +82,20 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     }
   };
 
-  // Prevent event propagation
   const stopPropagation = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  // Check if the request is active to show complete button directly
   const isActive = request?.status === "active";
-  // Only show the complete button if user is support staff
   const canCompleteRequest = isSupport && isActive && onComplete;
-  
-  // Determine if we should show the clear button
-  // Now all users can clear requests, but for support users, only completed requests can be cleared
-  const showClearButton = !isSupport || 
-                          (isSupport && request?.status === "completed");
+  const showClearButton = !isSupport || (isSupport && request?.status === "completed");
 
   return (
     <div 
-      className="flex gap-2 self-end md:self-center justify-end w-full flex-nowrap"
+      className="flex gap-2 justify-end w-full flex-wrap sm:flex-nowrap"
       onClick={stopPropagation}
     >
-      {/* Clear button */}
       {showClearButton && (
         <ClearRequestAction 
           requestId={requestId} 
@@ -127,7 +103,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         />
       )}
       
-      {/* Complete button */}
       {canCompleteRequest && (
         <CompleteRequestAction 
           requestId={requestId} 
@@ -135,7 +110,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         />
       )}
       
-      {/* View details button */}
       {request && (
         <ViewDetailsAction 
           request={request} 
@@ -146,7 +120,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         />
       )}
       
-      {/* Hidden button for accept flow */}
       {isSupport && request?.status === "pending" && onAccept && (
         <AcceptRequestAction 
           requestId={requestId} 
@@ -154,7 +127,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         />
       )}
 
-      {/* Show the complete button directly in action area */}
       {canCompleteRequest && (
         <CompleteRequestButton 
           onClick={stopPropagation} 

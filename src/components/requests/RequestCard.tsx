@@ -31,7 +31,9 @@ const RequestCard: React.FC<RequestCardProps> = ({
           <CardTitle className="text-lg">Request {request.id}</CardTitle>
           <p className="text-sm text-gray-500">{request.location}</p>
         </div>
-        <RequestStatusBadge status={request.status} />
+        <div className="flex-shrink-0">
+          <RequestStatusBadge status={request.status} />
+        </div>
       </CardHeader>
       <CardContent className="flex-grow">
         <RequestMetadata 
@@ -50,7 +52,7 @@ const RequestCard: React.FC<RequestCardProps> = ({
           formatDate={formatDate}
         />
       </CardContent>
-      <CardFooter className="border-t pt-4 flex justify-end w-full">
+      <CardFooter className="border-t pt-4 w-full">
         <RequestActions 
           requestId={request.id}
           onClear={onClearRequest}

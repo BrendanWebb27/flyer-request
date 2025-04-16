@@ -28,20 +28,19 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
   onRequestUpdated,
   refreshCount
 }) => {
-  console.log("ActiveRequestsTabsContent rendering with refreshCount:", refreshCount);
-  
   // Create a stable key for the TabsContent components
-  const tabContentKey = useMemo(() => `tabs-content-${refreshCount}-${Date.now()}`, [refreshCount]);
+  const tabContentKey = useMemo(() => `tabs-content-${refreshCount}`, [refreshCount]);
   
   // Use our custom hook to check support access
   const { isSupport } = useProfileAccess();
   
   return (
-    <div key={tabContentKey}>
+    <div key={tabContentKey} className="w-full">
       {availableTabs.map((tab) => (
         <TabsContent 
-          key={`${tab}-content-${refreshCount}-${Date.now()}`} 
+          key={`${tab}-content-${refreshCount}`} 
           value={tab}
+          className="w-full"
         >
           <RequestsTabContent
             requests={filteredRequests}

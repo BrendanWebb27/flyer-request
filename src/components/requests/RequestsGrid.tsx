@@ -23,12 +23,10 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   // Handle request acceptance with proper notification
   const handleAcceptRequest = (id: string, data: { estimatedTime: string }) => {
     if (onAcceptRequest) {
-      console.log("RequestsGrid: Handling accept for request:", id);
       onAcceptRequest(id, data);
       
       // Notify parent components about the update
       if (onRequestUpdated) {
-        console.log("RequestsGrid: Notifying parent of update");
         setTimeout(() => {
           onRequestUpdated();
         }, 100);
@@ -39,26 +37,22 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   // Handle request completion with proper notification
   const handleCompleteRequest = (id: string, note: { text: string, author: string }) => {
     if (onCompleteRequest) {
-      console.log("RequestsGrid: Handling complete for request:", id);
       onCompleteRequest(id, note);
       
       // Notify parent components about the update
       if (onRequestUpdated) {
-        console.log("RequestsGrid: Notifying parent of update");
         setTimeout(() => {
           onRequestUpdated();
         }, 100);
       }
     }
   };
-
-  console.log("RequestsGrid rendering with", requests.length, "requests");
   
   // Create a stable key for each request that includes status to force re-render
   const requestsWithKeys = useMemo(() => {
     return requests.map(req => ({
       request: req,
-      key: `${req.id}-${req.status}-${Date.now()}`
+      key: `${req.id}-${req.status}`
     }));
   }, [requests]);
 

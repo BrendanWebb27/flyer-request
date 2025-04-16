@@ -54,10 +54,10 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
             className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 whitespace-nowrap flex-shrink-0"
           >
             <Bell size={14} className="animate-pulse" />
-            <Badge variant="secondary" className="bg-white text-amber-700">
+            <Badge variant="secondary" className="bg-white text-amber-700 flex-shrink-0">
               {newRequestCount}
             </Badge>
-            <span>New {newRequestCount === 1 ? 'Request' : 'Requests'}</span>
+            <span className="whitespace-nowrap">New {newRequestCount === 1 ? 'Request' : 'Requests'}</span>
           </Button>
         )}
         
@@ -66,8 +66,8 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
           forceSyncRequests();
         }}>
           <TabsList className="flex-shrink-0">
-            <TabsTrigger value="requests" className="min-w-24">Support Requests</TabsTrigger>
-            <TabsTrigger value="users" className="min-w-24">User Verification</TabsTrigger>
+            <TabsTrigger value="requests" className="min-w-24 whitespace-nowrap">Support Requests</TabsTrigger>
+            <TabsTrigger value="users" className="min-w-24 whitespace-nowrap">User Verification</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
