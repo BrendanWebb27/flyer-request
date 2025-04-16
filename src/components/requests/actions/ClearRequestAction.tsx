@@ -20,8 +20,7 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
   };
   
   const handleClearRequest = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    stopPropagation(e);
     
     onClear(requestId);
     
@@ -55,7 +54,11 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
             <SheetClose asChild data-sheet-close="true">
               <Button 
                 variant="destructive" 
-                onClick={handleClearRequest}
+                onClick={(e) => {
+                  handleClearRequest(e);
+                  // Explicitly add a small delay before closing to ensure action completes
+                  setTimeout(() => {}, 100);
+                }}
                 data-sheet-close="true"
               >
                 Clear Request

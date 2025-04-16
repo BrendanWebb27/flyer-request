@@ -45,35 +45,37 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
 
-  const preventCloseOnOutsideClick = (e: React.MouseEvent | React.PointerEvent) => {
+  const handleOpenChange = (newOpen: boolean) => {
+    console.log("Sheet onOpenChange called with:", newOpen);
+    // Only allow closing via explicit close button clicks
+    if (newOpen === false) {
+      // Check if the event was from a proper close button
+      const target = document.activeElement as HTMLElement;
+      const isCloseAction = target?.hasAttribute('data-sheet-close');
+      
+      if (isCloseAction) {
+        console.log("Closing sheet from close button");
+        setOpen(false);
+      } else {
+        console.log("Preventing automatic sheet close");
+        // Prevent automatic closing
+        return;
+      }
+    } else {
+      setOpen(true);
+    }
+  };
+
+  // Prevent propagation for all events inside the sheet
+  const stopPropagation = (e: React.MouseEvent | React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    return false;
   };
 
   return (
     <Sheet 
       open={open} 
-      onOpenChange={(newOpen) => {
-        console.log("Sheet onOpenChange called with:", newOpen);
-        // Only allow closing via explicit close button clicks
-        if (newOpen === false) {
-          // Check if the event was from a proper close button
-          const target = document.activeElement as HTMLElement;
-          const isCloseAction = target?.hasAttribute('data-sheet-close');
-          
-          if (isCloseAction) {
-            console.log("Closing sheet from close button");
-            setOpen(false);
-          } else {
-            console.log("Preventing automatic sheet close");
-            // Prevent automatic closing
-            return;
-          }
-        } else {
-          setOpen(true);
-        }
-      }}
+      onOpenChange={handleOpenChange}
       modal={true}
     >
       <SheetTrigger asChild>
@@ -89,30 +91,30 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       </SheetTrigger>
       <SheetContent 
         side="right"
-        onClick={(e) => e.stopPropagation()}
+        className="overflow-y-auto max-h-screen"
+        onClick={stopPropagation}
         onPointerDownOutside={(e) => {
           console.log("Pointer down outside event");
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          // Prevent escape key from closing the sheet automatically
+          console.log("Escape key pressed - preventing default closure");
           e.preventDefault();
         }}
         onInteractOutside={(e) => {
           console.log("Interact outside event");
           e.preventDefault();
         }}
-        onEscapeKeyDown={(e) => {
-          // Allow escape key to work, but only for explicit closing
-          console.log("Escape key pressed");
-          e.preventDefault();
-        }}
         onCloseAutoFocus={(e) => {
           // Prevent focus issues that can cause unintended closes
           e.preventDefault();
         }}
-        className="overflow-y-auto max-h-screen"
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4" onClick={preventCloseOnOutsideClick}>
+        <div className="mt-4" onClick={stopPropagation}>
           {children}
         </div>
       </SheetContent>
