@@ -114,6 +114,8 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 
   // Check if the request is active to show complete button directly
   const isActive = request?.status === "active";
+  // Only show the complete button if user is support staff
+  const canCompleteRequest = isSupport && isActive && onComplete;
 
   return (
     <div className="flex gap-2 self-end md:self-center">
@@ -144,7 +146,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         </AlertDialogContent>
       </AlertDialog>
       
-      {isActive && onComplete && (
+      {canCompleteRequest && (
         <Button 
           size="sm" 
           className="bg-green-600 hover:bg-green-700"
@@ -170,7 +172,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
             <RequestDetailsDialog 
               request={request} 
               onAccept={isSupport ? handleAccept : undefined}
-              onComplete={handleComplete}
+              onComplete={isSupport ? handleComplete : undefined}
               onClose={() => setOpen(false)}
             />
           ) : (

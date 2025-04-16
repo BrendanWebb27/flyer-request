@@ -100,7 +100,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
             <RequestDetailsNotes notes={request.notes} />
           )}
           
-          {/* Actions based on status */}
+          {/* Accept action - only for support staff */}
           {isPending && onAccept && (
             <div className="space-y-4 border-t pt-4 mt-4">
               <h4 className="font-medium">Accept Request</h4>
@@ -137,6 +137,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
             </div>
           )}
           
+          {/* Complete action - only for support staff */}
           {isActive && onComplete && (
             <div className="space-y-4 border-t pt-4 mt-4">
               <h4 className="font-medium">Complete Request</h4>
