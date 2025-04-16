@@ -25,7 +25,7 @@ export const saveRequests = (requests: Request[]): void => {
   localStorage.setItem('lastRequestUpdate', updateTime);
   
   // Log the save operation for debugging
-  console.log(`Saving ${requests.length} requests at ${updateTime}`, requests);
+  console.log(`Saving ${requests.length} requests at ${updateTime}`);
   
   // Dispatch multiple events to ensure all components are notified
   // 1. Custom event for internal components
@@ -34,17 +34,24 @@ export const saveRequests = (requests: Request[]): void => {
   }));
   
   // 2. Storage event for cross-tab communication
-  window.dispatchEvent(new StorageEvent('storage', {
-    key: 'requestsUpdate',
-    newValue: JSON.stringify(requests),
-    url: window.location.href,
-    storageArea: localStorage
-  }));
+  try {
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'requestsUpdate',
+      newValue: JSON.stringify(requests),
+      url: window.location.href,
+      storageArea: localStorage
+    }));
+  } catch (e) {
+    console.error("Error dispatching storage event:", e);
+  }
   
   // 3. General metrics update event
   window.dispatchEvent(new CustomEvent('metricsUpdate', { 
     detail: { timestamp: updateTime }
   }));
+  
+  // 4. Force sync trigger - this is a new addition to ensure sync happens
+  localStorage.setItem('requestSyncTrigger', Date.now().toString());
 };
 
 // Track which requests have had notifications sent
@@ -69,7 +76,24 @@ export const forceRequestSync = (): void => {
   window.dispatchEvent(new CustomEvent('requestUpdated', {
     detail: { timestamp: updateTime, forceSync: true }
   }));
+  
   window.dispatchEvent(new CustomEvent('requestsForceSync', {
     detail: { timestamp: updateTime }
   }));
+  
+  // Also refresh the sync trigger in localStorage
+  localStorage.setItem('requestSyncTrigger', Date.now().toString());
+  
+  // Force a storage event with the current requests data
+  try {
+    const currentRequestsData = localStorage.getItem('requestsUpdate');
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'requestsUpdate',
+      newValue: currentRequestsData,
+      url: window.location.href,
+      storageArea: localStorage
+    }));
+  } catch (e) {
+    console.error("Error dispatching storage event during force sync:", e);
+  }
 };

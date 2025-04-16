@@ -29,7 +29,7 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
             const savedRequests = loadRequests();
             setRequests(savedRequests);
             lastUpdate.current = now;
-            console.log("useRequestSync: Updated requests", savedRequests);
+            console.log("useRequestSync: Updated requests", savedRequests.length);
           } finally {
             updateInProgress.current = false;
           }
@@ -42,7 +42,8 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       
       if (isStorageEvent) {
         // For storage events, only update if it's our specific keys
-        if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate') {
+        if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate' || 
+            event.key === 'requestSyncTrigger' || event.key?.startsWith('request_notification_')) {
           console.log("Storage change detected:", event.key);
           updateRequests(true);
         }
@@ -65,23 +66,26 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       console.log("Force sync event received");
       updateRequests(true);
       
-      // Refresh again after a small delay in case of race conditions
-      setTimeout(() => updateRequests(true), 500);
+      // Refresh again after a sequence of small delays for race conditions
+      setTimeout(() => updateRequests(true), 300);
+      setTimeout(() => updateRequests(true), 1000);
     };
     
-    // Set up event listeners
+    // Set up event listeners with more types of events
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
     window.addEventListener('requestsForceSync', handleForceSync);
     window.addEventListener('metricsUpdate', handleStorageChange);
     
-    // Initial load with a small delay to allow other components to initialize
-    setTimeout(() => updateRequests(true), 50);
+    // Initial load with multiple attempts
+    updateRequests(true);
+    setTimeout(() => updateRequests(true), 200);
+    setTimeout(() => updateRequests(true), 500);
     
-    // Set up a refresh interval (more frequent than before)
+    // Set up a more frequent refresh interval
     updateInterval.current = window.setInterval(() => {
       updateRequests(true); // Force update on interval
-    }, 3000); // Check every 3 seconds (more frequent than before)
+    }, 2000); // Check every 2 seconds (more frequent than before)
     
     // Cleanup function
     return () => {
@@ -99,7 +103,12 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
   
   // Expose a function to force refresh
   const forceRefresh = () => {
+    console.log("Manual force refresh triggered");
     forceRequestSync();
+    
+    // Additional direct sync attempt
+    const savedRequests = loadRequests();
+    setRequests(savedRequests);
   };
   
   return { forceRefresh };

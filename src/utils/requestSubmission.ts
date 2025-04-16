@@ -1,3 +1,4 @@
+
 import { RequestFormData, Request } from "@/types/request";
 import { loadRequests, saveRequests } from "./requestPersistence";
 
@@ -19,6 +20,17 @@ export const notifyAllTabsAboutNewRequest = () => {
   setTimeout(() => {
     localStorage.removeItem(notificationKey);
   }, 5000);
+  
+  // Force an additional sync by modifying a sync trigger in localStorage
+  localStorage.setItem('requestSyncTrigger', Date.now().toString());
+  
+  // Force request refresh
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: 'requestsUpdate',
+    newValue: localStorage.getItem('requestsUpdate'),
+    url: window.location.href,
+    storageArea: localStorage
+  }));
 };
 
 // Modify the existing submitFlyerRequest function to include notification
@@ -54,7 +66,7 @@ export const submitFlyerRequest = async (data: RequestFormData): Promise<void> =
   notifyAllTabsAboutNewRequest();
   
   console.log("Request submitted successfully:", newRequest);
-  
-  // Simulate network delay for a more realistic experience
-  return new Promise(resolve => setTimeout(resolve, 600));
+
+  // Force a delay before resolving to ensure storage events are processed
+  return new Promise(resolve => setTimeout(resolve, 1000));
 };
