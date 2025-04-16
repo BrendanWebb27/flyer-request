@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
@@ -23,13 +23,16 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   onComplete
 }) => {
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   
-  // All users should have access to view details, so no permission check needed here
+  // Stop propagation for all events
+  const stopAllEvents = (e: React.UIEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
   
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+    stopAllEvents(e);
     
     if (onClick) {
       onClick();
@@ -46,13 +49,14 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Only close if it's an explicit close action
-      const target = document.activeElement as HTMLElement;
+      const activeElement = document.activeElement as HTMLElement;
       
-      // Check if clicked element is a dialog close action or outside the dialog
+      // Check if clicked element is a dialog close action
       const isDialogCloseAction = 
-        target?.closest('[data-dialog-close="true"]') || 
-        target?.getAttribute('role') === 'button' ||
-        !target?.closest('[role="dialog"]');
+        activeElement?.hasAttribute('data-dialog-close') || 
+        activeElement?.closest('[data-dialog-close="true"]') ||
+        activeElement?.getAttribute('role') === 'button' && 
+        !activeElement?.closest('[data-prevent-close="true"]');
         
       if (isDialogCloseAction) {
         setOpen(false);
@@ -80,16 +84,15 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
           <DialogContent 
             className="max-h-[80vh] overflow-y-auto"
             // Prevent dialog from closing when clicking inside it
-            onClick={e => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
+            onClick={stopAllEvents}
+            onMouseDown={stopAllEvents}
+            onPointerDown={stopAllEvents}
             onPointerDownOutside={e => {
               // Prevent closing when clicking inside elements with data-prevent-close attribute
-              if (e.target && (e.target as Element).closest('[data-prevent-close="true"]')) {
-                e.preventDefault();
-              }
+              e.preventDefault();
             }}
+            onEscapeKeyDown={e => e.preventDefault()}
+            onInteractOutside={e => e.preventDefault()}
             data-prevent-close="true"
           >
             <RequestDetailsDialog 

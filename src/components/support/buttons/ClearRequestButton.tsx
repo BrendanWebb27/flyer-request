@@ -46,11 +46,16 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
     return null;
   }
 
+  // Stop all events from propagating
+  const stopAllEvents = (e: React.UIEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   // Enhanced handling for confirm dialog actions
   const handleConfirmClear = (e: React.MouseEvent) => {
     // Prevent event from propagating and causing side effects
-    e.preventDefault();
-    e.stopPropagation();
+    stopAllEvents(e);
     
     handleClearRequest();
     setOpen(false);
@@ -60,17 +65,15 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Allow closing when the user explicitly closes the dialog
-      const target = document.activeElement as HTMLElement;
+      const activeElement = document.activeElement as HTMLElement;
       
-      // Check if it's a dialog close action or clicking outside
+      // Check if it's a dialog close action
       const isDialogCloseAction = 
-        target?.hasAttribute('data-dialog-close') || 
-        target?.closest('[data-dialog-close="true"]');
+        activeElement?.hasAttribute('data-dialog-close') || 
+        activeElement?.closest('[data-dialog-close="true"]');
         
-      if (isDialogCloseAction || !target?.closest('[role="dialog"]')) {
+      if (isDialogCloseAction) {
         setOpen(false);
-      } else {
-        return; // Prevent closing in other cases
       }
     } else {
       setOpen(true);
@@ -85,8 +88,7 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
           size="sm"
           className={`whitespace-nowrap flex-shrink-0 ${buttonStyle}`}
           onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            stopAllEvents(e);
             setOpen(true);
           }}
         >
@@ -95,8 +97,12 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
         </Button>
       </DialogTrigger>
       <DialogContent
-        onClick={e => e.stopPropagation()}
+        onClick={stopAllEvents}
+        onMouseDown={stopAllEvents}
+        onPointerDown={stopAllEvents}
         onPointerDownOutside={e => e.preventDefault()}
+        onEscapeKeyDown={e => e.preventDefault()}
+        onInteractOutside={e => e.preventDefault()}
         data-prevent-close="true"
       >
         <DialogHeader>
@@ -109,7 +115,7 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
           <Button 
             variant="outline" 
             onClick={(e) => {
-              e.stopPropagation();
+              stopAllEvents(e);
               setOpen(false);
             }}
             data-dialog-close="true"

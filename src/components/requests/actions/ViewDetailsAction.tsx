@@ -23,9 +23,10 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
   setDetailsOpen
 }) => {
   const { isSupport } = useProfileAccess();
+  const [isOpen, setIsOpen] = React.useState(false);
   
-  // Enhanced event handling to stop propagation
-  const stopPropagation = (e: React.MouseEvent) => {
+  // Enhanced event handling to stop propagation of all events
+  const stopAllEvents = (e: React.UIEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
@@ -36,12 +37,14 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         text: notes || "Request completed", 
         author: "Support Staff" 
       });
+      setIsOpen(false);
     }
   };
 
   const handleAcceptButtonClick = (e: React.MouseEvent) => {
-    stopPropagation(e);
+    stopAllEvents(e);
     if (setDetailsOpen) setDetailsOpen(true);
+    setIsOpen(false);
     
     // Add a short delay to ensure the first dialog is closed
     setTimeout(() => {
@@ -50,11 +53,27 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
       if (acceptButton) acceptButton.click();
     }, 100);
   };
+  
+  // Enhanced open state management
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Check if we're clicking on an explicit close action
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement?.hasAttribute('data-sheet-close') || 
+          activeElement?.closest('[data-sheet-close="true"]')) {
+        setIsOpen(false);
+      }
+    } else {
+      setIsOpen(true);
+    }
+  };
 
   return (
     <div 
-      onClick={stopPropagation} 
-      onMouseDown={stopPropagation}
+      onClick={stopAllEvents} 
+      onMouseDown={stopAllEvents}
+      onPointerDown={stopAllEvents}
+      className="relative"
       data-prevent-close="true"
     >
       <ActionButtonSheet
@@ -63,18 +82,22 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         buttonVariant="default"
         buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
         title="Request Details"
+        open={isOpen}
+        onOpenChange={handleOpenChange}
       >
         <div 
           className="full-sheet-content" 
-          onClick={stopPropagation} 
-          onMouseDown={stopPropagation}
+          onClick={stopAllEvents} 
+          onMouseDown={stopAllEvents}
+          onPointerDown={stopAllEvents}
           data-prevent-close="true"
         >
           {request ? (
             <div 
               className="space-y-4" 
-              onClick={stopPropagation} 
-              onMouseDown={stopPropagation}
+              onClick={stopAllEvents} 
+              onMouseDown={stopAllEvents}
+              onPointerDown={stopAllEvents}
               data-prevent-close="true"
             >
               <div className="grid grid-cols-2 gap-2">
@@ -147,7 +170,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                     <SheetClose asChild data-sheet-close="true">
                       <Button 
                         onClick={(e) => {
-                          stopPropagation(e);
+                          stopAllEvents(e);
                           const notes = prompt("Add completion notes (optional):");
                           if (notes !== null) { // Only if not cancelled
                             handleComplete(requestId, notes);

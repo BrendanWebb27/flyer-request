@@ -13,16 +13,18 @@ interface ClearRequestActionProps {
 
 const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onClear }) => {
   const { toast } = useToast();
+  const [isOpen, setIsOpen] = React.useState(false);
   
-  const stopPropagation = (e: React.MouseEvent) => {
+  const stopAllEvents = (e: React.UIEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
   
   const handleClearRequest = (e: React.MouseEvent) => {
-    stopPropagation(e);
+    stopAllEvents(e);
     
     onClear(requestId);
+    setIsOpen(false);
     
     // Add an undo option to the toast
     toast({
@@ -47,10 +49,26 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
     });
   };
 
+  // Enhanced open state management
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Check if we're clicking on an explicit close action
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement?.hasAttribute('data-sheet-close') || 
+          activeElement?.closest('[data-sheet-close="true"]')) {
+        setIsOpen(false);
+      }
+    } else {
+      setIsOpen(true);
+    }
+  };
+
   return (
     <div 
-      onClick={stopPropagation}
-      onMouseDown={stopPropagation}
+      onClick={stopAllEvents}
+      onMouseDown={stopAllEvents}
+      onPointerDown={stopAllEvents}
+      className="relative"
       data-prevent-close="true"
     >
       <ActionButtonSheet
@@ -59,11 +77,14 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
         buttonVariant="outline"
         buttonClass="text-red-500 border-red-200 hover:bg-red-50"
         title={`Clear Request ${requestId}`}
+        open={isOpen}
+        onOpenChange={handleOpenChange}
       >
         <div 
           className="p-4" 
-          onClick={stopPropagation}
-          onMouseDown={stopPropagation}
+          onClick={stopAllEvents}
+          onMouseDown={stopAllEvents}
+          onPointerDown={stopAllEvents}
           data-prevent-close="true"
         >
           <p className="mb-6">Are you sure you want to clear this request? This will remove it from your view.</p>
@@ -71,7 +92,7 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
             <SheetClose asChild>
               <Button 
                 variant="outline" 
-                onClick={stopPropagation}
+                onClick={stopAllEvents}
                 data-sheet-close="true"
               >
                 Cancel
