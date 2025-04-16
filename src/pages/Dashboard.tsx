@@ -4,37 +4,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, CheckCircle2, MapPin, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSupportRequests } from "@/hooks/useSupportRequests";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 const Dashboard: React.FC = () => {
-  // Mock data for the dashboard
+  const { requests, metrics } = useSupportRequests();
+  const { getUserProfile } = useProfileAccess();
+  
+  const profile = getUserProfile();
+  const currentUserId = profile?.id || "user123";
+  
+  // Filter requests to only show the current user's requests
+  const userRequests = requests.filter(req => req.requestedBy === currentUserId);
+  
+  // Calculate request statistics
+  const activeCount = userRequests.filter(req => req.status === "active").length;
+  const completedCount = userRequests.filter(req => req.status === "completed").length;
+  const pendingCount = userRequests.filter(req => req.status === "pending").length;
+  
+  // Get recent requests (limited to 3)
+  const recentRequests = [...userRequests]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
+
   const stats = [
     { 
       title: "Active Requests", 
-      value: "3", 
+      value: activeCount.toString(), 
       icon: Clock, 
       color: "bg-blue-500",
-      link: "/active"
+      link: "/active?status=active"
     },
     { 
       title: "Completed Requests", 
-      value: "12", 
+      value: completedCount.toString(), 
       icon: CheckCircle2, 
       color: "bg-green-500",
       link: "/active?status=completed"
     },
     { 
       title: "Pending Approval", 
-      value: "1", 
+      value: pendingCount.toString(), 
       icon: AlertCircle, 
       color: "bg-yellow-500",
       link: "/active?status=pending"
     },
-  ];
-
-  const recentRequests = [
-    { id: "REQ-1234", location: "Building A, Room 105", status: "Active", time: "10 mins ago" },
-    { id: "REQ-1233", location: "Building C, Room 201", status: "Completed", time: "2 hours ago" },
-    { id: "REQ-1232", location: "Building B, Cafeteria", status: "Completed", time: "Yesterday" },
   ];
 
   return (
@@ -75,35 +89,49 @@ const Dashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentRequests.map((request) => (
-              <Link key={request.id} to={`/active?id=${request.id}`}>
-                <div className="flex items-center justify-between p-4 rounded-lg border transition-all hover:shadow-sm hover:border-flyerPurple-300">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-muted">
-                      <MapPin className="h-4 w-4 text-flyerPurple-500" />
+            {recentRequests.length > 0 ? (
+              recentRequests.map((request) => (
+                <Link key={request.id} to={`/active?id=${request.id}`}>
+                  <div className="flex items-center justify-between p-4 rounded-lg border transition-all hover:shadow-sm hover:border-flyerPurple-300">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-muted">
+                        <MapPin className="h-4 w-4 text-flyerPurple-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{request.id}</p>
+                        <p className="text-sm text-muted-foreground">{request.location}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{request.id}</p>
-                      <p className="text-sm text-muted-foreground">{request.location}</p>
+                    <div className="flex flex-col items-end">
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className={`inline-flex h-2 w-2 rounded-full ${
+                            request.status === "active" ? "bg-green-500" : 
+                            request.status === "pending" ? "bg-yellow-500" : "bg-gray-400"
+                          }`}
+                        />
+                        <p className="text-sm">{request.status.charAt(0).toUpperCase() + request.status.slice(1)}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(request.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-2">
-                      <span 
-                        className={`inline-flex h-2 w-2 rounded-full ${
-                          request.status === "Active" ? "bg-green-500" : "bg-gray-400"
-                        }`}
-                      />
-                      <p className="text-sm">{request.status}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{request.time}</p>
-                  </div>
-                </div>
+                </Link>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No requests found</p>
+                <Link to="/request" className="mt-2 inline-flex items-center text-sm text-flyerPurple-600 hover:underline">
+                  Create your first request <ArrowRight className="h-4 w-4 ml-1" />
+                </Link>
+              </div>
+            )}
+            {recentRequests.length > 0 && (
+              <Link to="/active" className="flex items-center justify-center text-sm text-flyerPurple-600 hover:underline">
+                View all requests <ArrowRight className="h-4 w-4 ml-1" />
               </Link>
-            ))}
-            <Link to="/active" className="flex items-center justify-center text-sm text-flyerPurple-600 hover:underline">
-              View all requests <ArrowRight className="h-4 w-4 ml-1" />
-            </Link>
+            )}
           </div>
         </CardContent>
       </Card>
