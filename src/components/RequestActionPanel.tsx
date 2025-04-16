@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Check, Clock, Users } from "lucide-react";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface RequestActionPanelProps {
   requestId: string;
@@ -19,6 +20,7 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
   const { toast } = useToast();
   const [assignedTo, setAssignedTo] = React.useState("");
   const [estimatedTime, setEstimatedTime] = React.useState("");
+  const { getAllSupportProfiles } = useProfileAccess();
   
   const handleAccept = () => {
     if (!assignedTo || !estimatedTime) {
@@ -46,13 +48,8 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
     }, 100);
   };
   
-  // Mock data for available personnel
-  const availablePersonnel = [
-    { id: "1", name: "John Doe" },
-    { id: "2", name: "Sarah Johnson" },
-    { id: "3", name: "Mike Wilson" },
-    { id: "4", name: "Emily Brown" }
-  ];
+  // Get support staff profiles using the hook
+  const supportProfiles = getAllSupportProfiles();
   
   // Time options
   const timeOptions = [
@@ -81,14 +78,18 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
             onValueChange={setAssignedTo}
           >
             <SelectTrigger id="assignedTo">
-              <SelectValue placeholder="Select personnel" />
+              <SelectValue placeholder="Select support personnel" />
             </SelectTrigger>
             <SelectContent>
-              {availablePersonnel.map((person) => (
-                <SelectItem key={person.id} value={person.name}>
-                  {person.name}
-                </SelectItem>
-              ))}
+              {supportProfiles.length > 0 ? (
+                supportProfiles.map((profile, index) => (
+                  <SelectItem key={`support-${index}`} value={profile.name || `Support Staff ${index + 1}`}>
+                    {profile.name || `Support Staff ${index + 1}`}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="Current Support Staff">Current Support Staff</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>
