@@ -36,7 +36,6 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
         <TabsContent 
           key={`${tab}-content-${refreshCount}-${Date.now()}`} 
           value={tab}
-          forceMount={false}
         >
           <RequestsTabContent
             requests={filteredRequests}
