@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Request } from "@/types/request";
 import { useToast } from "@/hooks/use-toast";
-import { useProfileAccess } from "@/hooks/useProfileAccess";
 import { Undo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "./StatusBadge";
