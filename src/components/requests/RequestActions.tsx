@@ -6,7 +6,6 @@ import { useProfileAccess } from "@/hooks/useProfileAccess";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import RequestActionPanel from "@/components/RequestActionPanel";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Trash2, Eye } from "lucide-react";
 import CompleteRequestButton from "./CompleteRequestButton";
 
@@ -127,7 +126,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     >
       {/* Clear button with sheet/dialog */}
       {showClearButton && (
-        <Sheet>
+        <Sheet modal={true}>
           <SheetTrigger asChild>
             <Button 
               variant="outline" 
@@ -175,7 +174,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       
       {/* Complete button */}
       {canCompleteRequest && (
-        <Sheet>
+        <Sheet modal={true}>
           <SheetTrigger asChild>
             <Button 
               size="sm" 
@@ -231,7 +230,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       )}
       
       {/* View details button */}
-      <Sheet>
+      <Sheet modal={true}>
         <SheetTrigger asChild>
           <Button 
             size="sm" 
@@ -264,6 +263,9 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
                   
                   <div className="font-semibold">Created:</div>
                   <div>{new Date(request.createdAt).toLocaleString()}</div>
+                  
+                  <div className="font-semibold">Requested By:</div>
+                  <div>{request.requestedBy || "Unknown"}</div>
                   
                   {request.assignedTo && (
                     <>
@@ -356,7 +358,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       
       {/* Hidden button for accept flow */}
       {isSupport && request?.status === "pending" && onAccept && (
-        <Sheet>
+        <Sheet modal={true}>
           <SheetTrigger asChild>
             <Button
               id="acceptRequestButton"

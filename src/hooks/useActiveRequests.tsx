@@ -49,6 +49,7 @@ export const useActiveRequests = () => {
       }
     };
     
+    // Listen for request status change events
     window.addEventListener('requestStatusChanged', handleStatusChange);
     return () => window.removeEventListener('requestStatusChanged', handleStatusChange);
   }, [setActiveTab]);
@@ -61,22 +62,9 @@ export const useActiveRequests = () => {
   }, []);
 
   // Filter requests based on user role and ownership
-  const filteredRequests = requests.filter(req => {
-    console.log(`Checking request ${req.id}: requested by ${req.requestedBy}, current user: ${currentUserEmail}, isSupport: ${isSupport}`);
-    
-    // Support staff should see all requests
-    if (isSupport) {
-      console.log(`Support user sees request ${req.id}`);
-      return true;
-    } else {
-      // Regular users only see their own requests
-      const isOwner = req.requestedBy === currentUserEmail;
-      console.log(`Is user owner of request ${req.id}? ${isOwner}`);
-      return isOwner;
-    }
-  });
+  const filteredRequests = requests;  // Support users now see all requests by default
   
-  console.log(`Found ${filteredRequests.length} requests for user ${currentUserEmail} (isSupport: ${isSupport})`);
+  console.log(`Found ${filteredRequests.length} requests total (isSupport: ${isSupport})`);
 
   // Define available tabs based on user role
   const availableTabs = isSupport 

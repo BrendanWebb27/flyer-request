@@ -3,6 +3,7 @@ import React, { useEffect, useMemo } from "react";
 import { RequestStatus, Request } from "@/types/request";
 import RequestsGrid from "./RequestsGrid";
 import EmptyRequestsState from "./EmptyRequestsState";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface RequestsTabContentProps {
   requests: Request[];
@@ -25,20 +26,29 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   onCompleteRequest,
   onRequestUpdated
 }) => {
-  // Filter requests based on tab - using useMemo to prevent unnecessary recalculations
+  const { isSupport } = useProfileAccess();
+  
+  // Filter requests based on tab and user role - using useMemo to prevent unnecessary recalculations
   const filteredRequests = useMemo(() => {
     console.log(`RequestsTabContent: Filtering ${requests.length} requests for status: ${status}`);
     
-    // Log each request for debugging
-    requests.forEach(req => {
-      console.log(`Request ${req.id}: status=${req.status}, requestedBy=${req.requestedBy}, currentUser=${currentUserId}`);
-    });
+    // Filter by status first
+    let statusFilteredRequests = status === "all" 
+      ? [...requests]
+      : requests.filter(request => request.status === status);
     
-    if (status === "all") {
-      return [...requests];
+    // Then by user if not a support user
+    if (!isSupport) {
+      console.log(`Non-support user filtering: showing only requests for ${currentUserId}`);
+      statusFilteredRequests = statusFilteredRequests.filter(request => 
+        request.requestedBy === currentUserId
+      );
+    } else {
+      console.log("Support user: showing all requests");
     }
-    return requests.filter(request => request.status === status);
-  }, [requests, status, currentUserId]);
+    
+    return statusFilteredRequests;
+  }, [requests, status, currentUserId, isSupport]);
   
   // Log requests when component receives new data
   useEffect(() => {
