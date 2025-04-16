@@ -3,7 +3,9 @@
 export const validCodes: Record<string, string> = {
   "ORG001-FLYER": "Air Force HQ",
   "ORG002-FLYER": "Air Force Operations",
-  "ORG003-FLYER": "Air Force Support"
+  "ORG003-FLYER": "Air Force Support",
+  "ORG004-FLYER": "Air Force Intelligence",
+  "ORG005-FLYER": "Air Force Logistics"
 };
 
 // List of allowed email domains
