@@ -84,7 +84,13 @@ async function sendPushNotification(notification: {
     const subscription = getSubscription();
     if (!subscription) return;
     
-    await fetch('https://your-app-id.supabase.co/functions/v1/send-push', {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl) {
+      console.error('Supabase URL is missing');
+      return;
+    }
+    
+    await fetch(`${supabaseUrl}/functions/v1/send-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

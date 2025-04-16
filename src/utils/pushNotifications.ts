@@ -56,10 +56,18 @@ export const subscribeToPush = async (): Promise<PushSubscriptionJSON | null> =>
       return null;
     }
     
+    // Get VAPID key from environment
+    // You should set this in your Vite environment variables
+    const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+    if (!vapidPublicKey) {
+      console.error('VAPID public key is missing');
+      return null;
+    }
+    
     // Get the subscription
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(process.env.VITE_VAPID_PUBLIC_KEY || '')
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
     });
     
     // Convert browser's PushSubscription to our PushSubscriptionJSON type
@@ -103,8 +111,15 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 // Register subscription with Supabase
 async function registerSubscriptionWithSupabase(subscription: PushSubscriptionJSON): Promise<void> {
   try {
+    // Get your Supabase URL from environment variables
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl) {
+      console.error('Supabase URL is missing');
+      return;
+    }
+    
     // Call the Supabase Edge Function to register the subscription
-    const response = await fetch('https://your-app-id.supabase.co/functions/v1/register-push', {
+    const response = await fetch(`${supabaseUrl}/functions/v1/register-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
