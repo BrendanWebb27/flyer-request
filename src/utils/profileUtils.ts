@@ -9,42 +9,71 @@ import { UserProfile } from "@/types/userSearch";
 export const checkForProfile = (username: string): {exists: boolean, profile?: any} => {
   console.log("Checking for profile with username:", username);
   
+  if (!username || username.trim() === '') {
+    console.log("Empty username provided");
+    return { exists: false };
+  }
+  
+  const trimmedUsername = username.trim().toLowerCase();
+  
   // First check the user profile directly
   const currentProfile = localStorage.getItem("userProfile");
   if (currentProfile) {
-    const parsedProfile = JSON.parse(currentProfile);
-    if (parsedProfile.manNumber === username || parsedProfile.name?.includes(username)) {
-      console.log("Found profile in userProfile:", parsedProfile);
-      return { exists: true, profile: parsedProfile };
+    try {
+      const parsedProfile = JSON.parse(currentProfile);
+      const profileManNumber = (parsedProfile.manNumber || '').toLowerCase();
+      const profileName = (parsedProfile.name || '').toLowerCase();
+      
+      if (profileManNumber === trimmedUsername || 
+          profileName.includes(trimmedUsername)) {
+        console.log("Found profile in userProfile:", parsedProfile);
+        return { exists: true, profile: parsedProfile };
+      }
+    } catch (e) {
+      console.error("Error parsing user profile:", e);
     }
   }
   
   // Then check all support profiles
   const supportProfiles = localStorage.getItem("supportProfiles");
   if (supportProfiles) {
-    const parsedProfiles = JSON.parse(supportProfiles);
-    const foundProfile = parsedProfiles.find(
-      (profile: any) => profile.manNumber === username || profile.name?.includes(username)
-    );
-    
-    if (foundProfile) {
-      console.log("Found profile in supportProfiles:", foundProfile);
-      return { exists: true, profile: foundProfile };
+    try {
+      const parsedProfiles = JSON.parse(supportProfiles);
+      const foundProfile = parsedProfiles.find(
+        (profile: any) => {
+          const profileManNumber = (profile.manNumber || '').toLowerCase();
+          const profileName = (profile.name || '').toLowerCase();
+          
+          return profileManNumber === trimmedUsername || 
+                 profileName.includes(trimmedUsername);
+        }
+      );
+      
+      if (foundProfile) {
+        console.log("Found profile in supportProfiles:", foundProfile);
+        return { exists: true, profile: foundProfile };
+      }
+    } catch (e) {
+      console.error("Error parsing support profiles:", e);
     }
   }
   
   // Check all stored user emails
   const verifiedEmails = localStorage.getItem("verifiedEmails");
   if (verifiedEmails) {
-    const emails = JSON.parse(verifiedEmails);
-    // If username is in the format of an email or a man number that's associated with an email
-    const relatedEmail = emails.find((email: string) => 
-      email.includes(username) || email.startsWith(`user${username}@`)
-    );
-    
-    if (relatedEmail) {
-      console.log("Found related email:", relatedEmail);
-      return { exists: true, profile: { email: relatedEmail } };
+    try {
+      const emails = JSON.parse(verifiedEmails);
+      // If username is in the format of an email or a man number that's associated with an email
+      const relatedEmail = emails.find((email: string) => 
+        email.includes(trimmedUsername) || email.startsWith(`user${trimmedUsername}@`)
+      );
+      
+      if (relatedEmail) {
+        console.log("Found related email:", relatedEmail);
+        return { exists: true, profile: { email: relatedEmail } };
+      }
+    } catch (e) {
+      console.error("Error parsing verified emails:", e);
     }
   }
   
@@ -55,11 +84,15 @@ export const checkForProfile = (username: string): {exists: boolean, profile?: a
       const parsedCache = JSON.parse(searchCache);
       for (const key in parsedCache) {
         const results = parsedCache[key];
-        const found = results.find((user: UserProfile) => 
-          user.manNumber === username || 
-          user.username?.includes(username) ||
-          (user.email && user.email.includes(username))
-        );
+        const found = results.find((user: UserProfile) => {
+          const userManNumber = (user.manNumber || '').toLowerCase();
+          const userName = (user.username || '').toLowerCase();
+          const userEmail = (user.email || '').toLowerCase();
+          
+          return userManNumber === trimmedUsername || 
+                 userName.includes(trimmedUsername) ||
+                 userEmail.includes(trimmedUsername);
+        });
         
         if (found) {
           console.log("Found user in search cache:", found);
@@ -104,6 +137,11 @@ export const logAllProfiles = () => {
       console.error("Error parsing search cache:", e);
     }
   }
+  
+  // Log support access status
+  console.log("Support Access Granted:", localStorage.getItem("supportAccessGranted"));
+  console.log("Email Verified:", localStorage.getItem("emailVerified"));
+  console.log("Support User Email:", localStorage.getItem("supportUserEmail"));
   
   console.log("=== END DEBUGGING PROFILES ===");
 };

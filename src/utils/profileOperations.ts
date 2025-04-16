@@ -61,7 +61,7 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         manNumber: "S12345",
         isFlyer: false,
         flyerRole: "none",
-        isSupport: true // Added the isSupport property
+        isSupport: true
       },
       { 
         name: "Sarah Johnson", 
@@ -70,7 +70,7 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         manNumber: "S23456",
         isFlyer: true,
         flyerRole: "primary",
-        isSupport: true // Added the isSupport property
+        isSupport: true
       },
       { 
         name: "Mike Wilson", 
@@ -79,7 +79,7 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         manNumber: "S34567",
         isFlyer: true,
         flyerRole: "alternate",
-        isSupport: true // Added the isSupport property
+        isSupport: true
       },
       { 
         name: "Emily Brown", 
@@ -88,7 +88,7 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         manNumber: "S45678",
         isFlyer: false,
         flyerRole: "none",
-        isSupport: true // Added the isSupport property
+        isSupport: true
       }
     ];
     
@@ -108,7 +108,8 @@ export const getAllSupportProfiles = (): UserProfile[] => {
     if (!exists) {
       supportProfiles.unshift({
         ...currentProfile,
-        name: currentUserName
+        name: currentUserName,
+        isSupport: true // Ensure isSupport is set for current user
       });
     }
   }
@@ -118,31 +119,68 @@ export const getAllSupportProfiles = (): UserProfile[] => {
 
 // Find a profile by username (or manNumber)
 export const findProfileByUsername = (username: string): UserProfile | null => {
+  if (!username || username.trim() === '') {
+    console.log("Empty username provided to findProfileByUsername");
+    return null;
+  }
+  
+  const trimmedUsername = username.trim().toLowerCase();
+  console.log(`Finding profile for username: "${trimmedUsername}"`);
+  
   // First check in the current user's profile
   const currentProfile = getUserProfile();
-  if (currentProfile && currentProfile.manNumber === username) {
-    return currentProfile;
+  if (currentProfile) {
+    const currentManNumber = (currentProfile.manNumber || '').toLowerCase();
+    const currentName = (currentProfile.name || '').toLowerCase();
+    
+    if (currentManNumber === trimmedUsername || 
+        currentName.includes(trimmedUsername)) {
+      console.log("Found matching profile in current user profile");
+      return currentProfile;
+    }
   }
   
   // Then check in all support profiles
   const supportProfiles = getAllSupportProfiles();
-  const foundProfile = supportProfiles.find(
-    profile => profile.manNumber === username || profile.name?.includes(username)
-  );
+  console.log(`Checking ${supportProfiles.length} support profiles for username match`);
+  
+  const foundProfile = supportProfiles.find(profile => {
+    const profileManNumber = (profile.manNumber || '').toLowerCase();
+    const profileName = (profile.name || '').toLowerCase();
+    
+    return profileManNumber === trimmedUsername || 
+           profileName.includes(trimmedUsername);
+  });
+  
+  if (foundProfile) {
+    console.log("Found matching profile in support profiles");
+    return foundProfile;
+  }
   
   // Also check in localStorage for any other profiles
   try {
     const allProfiles = localStorage.getItem("allUserProfiles");
     if (allProfiles) {
       const parsedProfiles = JSON.parse(allProfiles) as UserProfile[];
-      const profile = parsedProfiles.find(
-        p => p.manNumber === username || p.name?.includes(username)
-      );
-      if (profile) return profile;
+      console.log(`Checking ${parsedProfiles.length} stored profiles for username match`);
+      
+      const profile = parsedProfiles.find(p => {
+        const pManNumber = (p.manNumber || '').toLowerCase();
+        const pName = (p.name || '').toLowerCase();
+        
+        return pManNumber === trimmedUsername || 
+               pName.includes(trimmedUsername);
+      });
+      
+      if (profile) {
+        console.log("Found matching profile in stored profiles");
+        return profile;
+      }
     }
   } catch (e) {
     console.error("Error parsing stored profiles:", e);
   }
   
-  return foundProfile || null;
+  console.log("No matching profile found for username:", username);
+  return null;
 };

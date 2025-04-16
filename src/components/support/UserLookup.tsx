@@ -8,6 +8,7 @@ import UserSearchResults from "@/components/support/UserSearchResults";
 import UserSuggestions from "@/components/support/UserSuggestions";
 import { useUserSearch } from "@/hooks/useUserSearch";
 import { UserProfile } from "@/types/userSearch";
+import { logAllProfiles } from "@/utils/profileUtils";
 
 interface UserLookupProps {
   onUserSelect?: (user: UserProfile) => void;
@@ -25,6 +26,11 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
     performSearch,
     handleSelectSuggestion
   } = useUserSearch(setError);
+  
+  // Debug profiles on mount - can be removed in production
+  useEffect(() => {
+    logAllProfiles();
+  }, []);
   
   // Filter suggestions based on search query
   useEffect(() => {

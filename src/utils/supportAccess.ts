@@ -17,6 +17,16 @@ export const getSupportAccess = (): boolean => {
   const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
   console.log("getSupportAccess result:", hasAccess);
   
+  // Check profile for support organization as backup
+  if (!hasAccess) {
+    const profile = getUserProfile();
+    if (profile && profile.organization === "Support") {
+      console.log("Found support access from profile organization");
+      setSupportAccess(true);
+      return true;
+    }
+  }
+  
   // Update activity timestamp if the user has access
   if (hasAccess) {
     updateUserActivityTimestamp();
@@ -33,41 +43,92 @@ export const setSupportAccess = (hasAccess: boolean): void => {
   // Update activity timestamp when setting access
   if (hasAccess) {
     updateUserActivityTimestamp();
+    // Make sure verifiedEmails includes the current user's email
+    try {
+      const userEmail = localStorage.getItem("supportUserEmail");
+      if (userEmail) {
+        const verifiedEmails = JSON.parse(localStorage.getItem("verifiedEmails") || "[]");
+        if (!verifiedEmails.includes(userEmail)) {
+          verifiedEmails.push(userEmail);
+          localStorage.setItem("verifiedEmails", JSON.stringify(verifiedEmails));
+          localStorage.setItem("emailVerified", "true");
+        }
+      }
+    } catch (e) {
+      console.error("Error updating verified emails:", e);
+    }
   }
   
   // Dispatch storage event to notify other components
-  window.dispatchEvent(new Event("storage"));
+  try {
+    window.dispatchEvent(new Event("storage"));
+  } catch (e) {
+    console.error("Error dispatching storage event:", e);
+  }
 };
 
 // Helper to check if user is verified
 export const isUserVerified = (): boolean => {
-  return localStorage.getItem("emailVerified") === "true";
+  const verified = localStorage.getItem("emailVerified") === "true";
+  console.log("User verified status:", verified);
+  return verified;
 };
 
 // Update support access based on profile
 export const updateSupportAccessFromProfile = (profile: UserProfile): void => {
   // Update support access based on organization
   const hasAccess = isSupportOrganization(profile.organization);
-  setSupportAccess(hasAccess);
+  
+  if (profile.isSupport !== hasAccess) {
+    // Update the profile's isSupport property to match the organization
+    const updatedProfile = {
+      ...profile,
+      isSupport: hasAccess
+    };
+    
+    // Save the updated profile
+    saveUserProfile(updatedProfile);
+  } else {
+    // Only update the access status
+    setSupportAccess(hasAccess);
+  }
   
   // If profile is for support staff, update the support profiles list
   if (hasAccess) {
-    const supportProfiles = JSON.parse(localStorage.getItem("supportProfiles") || "[]");
-    
-    // Check if profile already exists in support profiles
-    const existingIndex = supportProfiles.findIndex(
-      (p: UserProfile) => p.manNumber === profile.manNumber
-    );
-    
-    if (existingIndex >= 0) {
-      // Update existing profile
-      supportProfiles[existingIndex] = {...profile};
-    } else {
-      // Add profile to support staff list
-      supportProfiles.unshift({...profile});
+    let supportProfiles: UserProfile[] = [];
+    try {
+      const storedProfiles = localStorage.getItem("supportProfiles");
+      if (storedProfiles) {
+        supportProfiles = JSON.parse(storedProfiles);
+      }
+      
+      // Check if profile already exists in support profiles
+      const existingIndex = supportProfiles.findIndex(
+        (p: UserProfile) => p.manNumber === profile.manNumber
+      );
+      
+      if (existingIndex >= 0) {
+        // Update existing profile
+        supportProfiles[existingIndex] = {...profile, isSupport: true};
+      } else {
+        // Add profile to support staff list
+        supportProfiles.unshift({...profile, isSupport: true});
+      }
+      
+      // Save updated support profiles
+      localStorage.setItem("supportProfiles", JSON.stringify(supportProfiles));
+      
+      // Also update email in verified emails for support staff
+      const userEmail = localStorage.getItem("supportUserEmail");
+      if (userEmail) {
+        const verifiedEmails = JSON.parse(localStorage.getItem("verifiedEmails") || "[]");
+        if (!verifiedEmails.includes(userEmail)) {
+          verifiedEmails.push(userEmail);
+          localStorage.setItem("verifiedEmails", JSON.stringify(verifiedEmails));
+        }
+      }
+    } catch (e) {
+      console.error("Error updating support profiles:", e);
     }
-    
-    // Save updated support profiles
-    localStorage.setItem("supportProfiles", JSON.stringify(supportProfiles));
   }
 };
