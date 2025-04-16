@@ -23,13 +23,28 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
   requestId,
   handleClearRequest
 }) => {
-  const { isSupport } = useProfileAccess();
+  const { isSupport, getUserProfile } = useProfileAccess();
   const [open, setOpen] = React.useState(false);
+  
+  // Get user profile to check work center
+  const userProfile = getUserProfile();
+  const userWorkCenter = userProfile?.workCenter || '';
+  
+  // Define general work centers that should have clear access
+  const generalWorkCenters = ["AVI", "ENG", "WPN", "APG", "E&E"];
+  
+  // Check if user has clear permission based on work center
+  const hasClearPermission = generalWorkCenters.includes(userWorkCenter) && !isSupport;
   
   // Determine button style based on user role
   const buttonStyle = isSupport 
     ? "text-red-500 border-red-200 hover:bg-red-50" 
     : "text-gray-500 border-gray-200 hover:bg-gray-50";
+
+  // If user doesn't have permission, don't render the button
+  if (!hasClearPermission && isSupport) {
+    return null;
+  }
 
   const handleConfirmClear = () => {
     handleClearRequest();
@@ -42,7 +57,6 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
         <Button 
           variant="outline" 
           size="sm"
-          width="auto"
           className={`whitespace-nowrap flex-shrink-0 ${buttonStyle}`}
         >
           <Trash2 size={16} className="mr-1" />

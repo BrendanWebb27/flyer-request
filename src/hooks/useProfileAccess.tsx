@@ -63,6 +63,13 @@ export function useProfileAccess() {
     }
   }, []);
 
+  // Check if user belongs to a general work center
+  const isGeneralWorkCenter = (userProfile?: UserProfile) => {
+    if (!userProfile) return false;
+    const generalWorkCenters = ["AVI", "ENG", "WPN", "APG", "E&E"];
+    return generalWorkCenters.includes(userProfile.workCenter || '');
+  };
+
   // Custom save function that also updates support status
   const saveUserProfileWithAccessUpdate = (profile: UserProfile) => {
     saveUserProfile(profile);
@@ -81,6 +88,7 @@ export function useProfileAccess() {
     getUserProfile,
     saveUserProfile: saveUserProfileWithAccessUpdate,
     getAllSupportProfiles,
-    findProfileByUsername
+    findProfileByUsername,
+    isGeneralWorkCenter
   };
 }

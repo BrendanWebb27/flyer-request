@@ -3,11 +3,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Request } from "@/types/request";
 import RequestDetailsDialog from "@/components/requests/RequestDetailsDialog";
@@ -30,6 +25,8 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   
+  // All users should have access to view details, so no permission check needed here
+  
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -49,7 +46,6 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
       <Button 
         variant="ghost" 
         size="sm"
-        width="auto" 
         className="whitespace-nowrap flex-shrink-0"
         onClick={handleClick}
       >
