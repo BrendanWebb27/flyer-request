@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,10 +13,11 @@ interface UserLookupProps {
 }
 
 const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
-  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const { 
+    searchQuery,
+    setSearchQuery,
     suggestions, 
     searchResults, 
     isSearching, 
@@ -86,7 +86,7 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
                 className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
               >
                 <Search className="h-4 w-4 mr-1" />
-                Search
+                {isSearching ? "Searching..." : "Search"}
               </Button>
             </div>
             
