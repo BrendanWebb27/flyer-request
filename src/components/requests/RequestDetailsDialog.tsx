@@ -1,302 +1,171 @@
 
 import React, { useState } from "react";
-import { Request } from "@/types/request";
-import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Clock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; 
-import { Check, MessageSquare } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import RequestStatusBadge from "./RequestStatusBadge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Request } from "@/types/request";
 import RequestDetailsItem from "./RequestDetailsItem";
 import RequestDetailsNotes from "./RequestDetailsNotes";
 
 interface RequestDetailsDialogProps {
   request: Request;
+  onClose: () => void;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
   onComplete?: (id: string, note: { text: string, author: string }) => void;
-  onClose?: () => void;
 }
-
-const formSchema = z.object({
-  estimatedTime: z.string().min(1, "Estimated time is required"),
-});
-
-const completeFormSchema = z.object({
-  completionNote: z.string().min(1, "Completion note is required"),
-});
 
 const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ 
   request, 
+  onClose, 
   onAccept,
-  onComplete,
-  onClose
+  onComplete 
 }) => {
-  const [showTimeInput, setShowTimeInput] = useState(false);
-  const [showCompletionForm, setShowCompletionForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const [estimatedTime, setEstimatedTime] = useState("");
+  const [note, setNote] = useState("");
   
-  // Form for accepting requests
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      estimatedTime: "",
-    },
-  });
-
-  // Form for completing requests
-  const completeForm = useForm<z.infer<typeof completeFormSchema>>({
-    resolver: zodResolver(completeFormSchema),
-    defaultValues: {
-      completionNote: "",
-    },
-  });
-
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("RequestDetailsDialog: Form submitted with values:", values);
-    
-    if (onAccept) {
-      setIsSubmitting(true);
-      
-      try {
-        // Convert input to format: "X minutes"
-        const formattedTime = `${values.estimatedTime} minutes`;
-        console.log("RequestDetailsDialog: Calling onAccept with:", request.id, { estimatedTime: formattedTime });
-        
-        // Call the accept function
-        onAccept(request.id, { estimatedTime: formattedTime });
-        
-        // Reset form state
-        form.reset();
-        setShowTimeInput(false);
-        
-        // Close dialog if needed
-        if (onClose) {
-          setTimeout(() => onClose(), 200);
-        }
-      } catch (error) {
-        console.error("Error in RequestDetailsDialog:", error);
-        toast({
-          title: "Error",
-          description: "Failed to accept request. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-  };
-
-  const handleCompleteSubmit = (values: z.infer<typeof completeFormSchema>) => {
-    console.log("RequestDetailsDialog: Complete form submitted with values:", values);
-    
-    if (onComplete) {
-      setIsSubmitting(true);
-      
-      try {
-        onComplete(request.id, { 
-          text: values.completionNote,
-          author: "Support Staff" // In a real app, get from current user
-        });
-        
-        // Reset form state
-        completeForm.reset();
-        setShowCompletionForm(false);
-        
-        // Close dialog if needed
-        if (onClose) {
-          setTimeout(() => onClose(), 200);
-        }
-      } catch (error) {
-        console.error("Error in RequestDetailsDialog:", error);
-        toast({
-          title: "Error",
-          description: "Failed to complete request. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-  };
-
-  // Check request status - use this to determine which buttons to show
+  // Determine status to show acceptance or completion options
   const isPending = request.status === "pending";
   const isActive = request.status === "active";
-  const isToolTurnover = request.assetType === "tool-turnover";
+  
+  // Create completion note
+  const handleComplete = () => {
+    if (onComplete && note) {
+      onComplete(request.id, {
+        text: note,
+        author: "Support Staff"  // This would be replaced with the actual user
+      });
+      onClose();
+    }
+  };
 
+  // Accept request
+  const handleAccept = () => {
+    if (onAccept && estimatedTime) {
+      onAccept(request.id, { estimatedTime });
+      onClose();
+    }
+  };
+
+  // Time options for support staff
+  const timeOptions = ["5 minutes", "10 minutes", "15 minutes", "20 minutes", "30 minutes", "45 minutes", "1 hour"];
+  
   return (
     <>
       <DialogHeader>
-        <div className="flex items-center justify-between">
-          <DialogTitle>Request {request.id}</DialogTitle>
-          <RequestStatusBadge status={request.status} />
-        </div>
-        <DialogDescription>
-          Created on {new Date(request.createdAt).toLocaleString()}
-        </DialogDescription>
+        <DialogTitle>Request {request.id}</DialogTitle>
       </DialogHeader>
-      
-      <div className="py-4 space-y-4">
-        <RequestDetailsItem label="Location">
-          {request.location}
-        </RequestDetailsItem>
-        
-        <RequestDetailsItem label="Asset Type">
-          {request.assetType}
-        </RequestDetailsItem>
-        
-        {isToolTurnover && request.secondUser && (
-          <RequestDetailsItem label="Receiving User">
-            {request.secondUser}
-          </RequestDetailsItem>
-        )}
-        
-        <RequestDetailsItem label="Details">
-          {request.details}
-        </RequestDetailsItem>
-        
-        <RequestDetailsItem label="Requested By">
-          {request.requestedBy}
-        </RequestDetailsItem>
-        
-        {request.assignedTo && (
-          <RequestDetailsItem label="Assigned To">
-            {request.assignedTo}
-          </RequestDetailsItem>
-        )}
-        
-        {request.estimatedArrival && (
-          <RequestDetailsItem label="Estimated Arrival">
-            {request.estimatedArrival}
-          </RequestDetailsItem>
-        )}
-        
-        {request.completedAt && (
-          <RequestDetailsItem label="Completed At">
-            {new Date(request.completedAt).toLocaleString()}
-          </RequestDetailsItem>
-        )}
-        
-        <RequestDetailsNotes notes={request.notes} />
-      </div>
-      
-      {/* Accept request button for pending requests */}
-      {isPending && !showTimeInput && (
-        <DialogFooter>
-          <Button 
-            onClick={() => setShowTimeInput(true)}
-            className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
-          >
-            <Check size={16} className="mr-2" />
-            Accept Request
-          </Button>
-        </DialogFooter>
-      )}
-      
-      {/* Complete request button for active requests */}
-      {isActive && !showCompletionForm && (
-        <DialogFooter>
-          <Button 
-            onClick={() => setShowCompletionForm(true)}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <Check size={16} className="mr-2" />
-            Complete Request
-          </Button>
-        </DialogFooter>
-      )}
-      
-      {/* Form for accepting requests */}
-      {showTimeInput && (
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="estimatedTime"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>How many minutes until you arrive?</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="Enter minutes" 
-                      {...field} 
-                      min="1"
-                      autoFocus
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+      <div className="py-4">
+        <div className="space-y-4">
+          <RequestDetailsItem 
+            label="Location"
+            value={request.location}
+          />
+          <RequestDetailsItem 
+            label="Asset Type"
+            value={request.assetType}
+          />
+          {request.secondUser && (
+            <RequestDetailsItem 
+              label="Receiving User"
+              value={request.secondUser}
             />
-            <DialogFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowTimeInput(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Accepting..." : "Confirm"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      )}
-      
-      {/* Form for completing requests */}
-      {showCompletionForm && (
-        <Form {...completeForm}>
-          <form onSubmit={completeForm.handleSubmit(handleCompleteSubmit)} className="space-y-4">
-            <FormField
-              control={completeForm.control}
-              name="completionNote"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <MessageSquare size={16} className="text-flyerPurple-500" />
-                    Completion Note
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="What was done to complete this request?" 
-                      {...field} 
-                      rows={4}
-                      autoFocus
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
+          )}
+          <RequestDetailsItem 
+            label="Details"
+            value={request.details}
+            multiline
+          />
+          <RequestDetailsItem 
+            label="Requested By"
+            value={request.requestedBy}
+          />
+          {request.assignedTo && (
+            <RequestDetailsItem 
+              label="Assigned To"
+              value={request.assignedTo}
             />
-            <DialogFooter className="gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowCompletionForm(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
+          )}
+          {request.estimatedArrival && (
+            <RequestDetailsItem 
+              label="Estimated Arrival"
+              value={request.estimatedArrival}
+            />
+          )}
+          
+          {/* Notes section */}
+          {request.notes && request.notes.length > 0 && (
+            <RequestDetailsNotes notes={request.notes} />
+          )}
+          
+          {/* Actions based on status */}
+          {isPending && onAccept && (
+            <div className="space-y-4 border-t pt-4 mt-4">
+              <h4 className="font-medium">Accept Request</h4>
+              <div className="space-y-2">
+                <Label htmlFor="estimatedTime" className="flex items-center gap-2">
+                  <Clock size={16} className="text-flyerPurple-500" />
+                  Estimated Time of Arrival
+                </Label>
+                <Select
+                  value={estimatedTime}
+                  onValueChange={setEstimatedTime}
+                >
+                  <SelectTrigger id="estimatedTime">
+                    <SelectValue placeholder="Select estimated time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timeOptions.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700"
+                onClick={handleAccept}
+                className="w-full bg-flyerPurple-600 hover:bg-flyerPurple-700"
+                disabled={!estimatedTime}
               >
-                {isSubmitting ? "Completing..." : "Mark as Complete"}
+                <Check size={16} className="mr-2" />
+                Accept Request
               </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      )}
+            </div>
+          )}
+          
+          {isActive && onComplete && (
+            <div className="space-y-4 border-t pt-4 mt-4">
+              <h4 className="font-medium">Complete Request</h4>
+              <div className="space-y-2">
+                <Label htmlFor="completionNote">Completion Note</Label>
+                <Textarea
+                  id="completionNote"
+                  placeholder="Add details about the completion..."
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              
+              <Button 
+                onClick={handleComplete}
+                className="w-full bg-green-600 hover:bg-green-700"
+                disabled={!note}
+              >
+                <Check size={16} className="mr-2" />
+                Mark as Completed
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>Close</Button>
+      </DialogFooter>
     </>
   );
 };

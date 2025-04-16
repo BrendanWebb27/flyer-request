@@ -21,6 +21,7 @@ import {
 import { Request } from "@/types/request";
 import RequestDetailsDialog from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface RequestActionsProps {
   requestId: string;
@@ -41,6 +42,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const { isSupport } = useProfileAccess();
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
     if (onAccept) {
@@ -167,7 +169,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
           {request ? (
             <RequestDetailsDialog 
               request={request} 
-              onAccept={handleAccept}
+              onAccept={isSupport ? handleAccept : undefined}
               onComplete={handleComplete}
               onClose={() => setOpen(false)}
             />

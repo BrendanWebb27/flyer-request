@@ -1,68 +1,79 @@
 
-import { Request, RequestStatus } from "@/types/request";
+import { Request } from "@/types/request";
 
-export const initialRequests: Request[] = [
+// Mock data for development and testing
+export const mockRequests: Request[] = [
   {
-    id: "REQ-1234",
-    location: "Building A, Room 105",
-    details: "Need assistance with carrying boxes to the mail room",
-    createdAt: "2025-04-15T09:30:00Z",
+    id: "REQ-001",
+    location: "A2L",
+    details: "Need assistance with equipment calibration.",
+    createdAt: "2023-04-15T09:30:00Z",
     status: "active",
-    assignedTo: "John Doe",
+    assignedTo: "John Smith",
     estimatedArrival: "10 minutes",
     requestedBy: "user123",
-    notes: []
+    notes: [],
+    assetType: "equipment"
   },
   {
-    id: "REQ-1235",
-    location: "Building B, Conference Room 3",
-    details: "Help required with setting up projector for presentation",
-    createdAt: "2025-04-15T10:15:00Z",
+    id: "REQ-002",
+    location: "B17R",
+    details: "Require support for safety inspection.",
+    createdAt: "2023-04-15T10:15:00Z",
     status: "active",
-    assignedTo: "Sarah Johnson",
-    estimatedArrival: "5 minutes",
-    requestedBy: "user123",
-    notes: []
+    assignedTo: "Jane Doe",
+    estimatedArrival: "15 minutes",
+    requestedBy: "user456",
+    notes: [],
+    assetType: "safety"
   },
   {
-    id: "REQ-1236",
-    location: "Building C, Cafeteria",
-    details: "Need assistance with food delivery for event",
-    createdAt: "2025-04-15T08:45:00Z",
+    id: "REQ-003",
+    location: "C23L",
+    details: "Material assistance needed for assembly.",
+    createdAt: "2023-04-15T11:00:00Z",
+    status: "pending",
+    requestedBy: "user789",
+    notes: [],
+    assetType: "material"
+  },
+  {
+    id: "REQ-004",
+    location: "D5R",
+    details: "Quality check required for production line.",
+    createdAt: "2023-04-15T11:30:00Z",
     status: "pending",
     requestedBy: "user123",
-    notes: []
+    notes: [],
+    assetType: "quality"
   },
   {
-    id: "REQ-1237",
-    location: "Building A, Room 302",
-    details: "Assist with moving furniture for event setup",
-    createdAt: "2025-04-15T11:20:00Z",
+    id: "REQ-005",
+    location: "E12L",
+    details: "Tool turnover needed between shifts.",
+    createdAt: "2023-04-15T12:00:00Z",
     status: "pending",
     requestedBy: "user456",
-    notes: []
+    notes: [],
+    assetType: "tool-turnover",
+    secondUser: "user789"
   },
   {
-    id: "REQ-1238",
-    location: "Building D, Lobby",
-    details: "Delivery of package from mailroom",
-    createdAt: "2025-04-15T09:15:00Z",
-    status: "pending",
-    requestedBy: "user123",
-    notes: []
-  },
-  {
-    id: "REQ-1239",
-    location: "Building A, Room 201",
-    details: "Technical assistance with projector",
-    createdAt: "2025-04-15T13:45:00Z",
+    id: "REQ-006",
+    location: "F8R",
+    details: "Completed safety inspection and documentation.",
+    createdAt: "2023-04-14T14:30:00Z",
     status: "completed",
-    assignedTo: "Mike Wilson",
-    requestedBy: "user123",
-    notes: [{
-      text: "Fixed HDMI connection issue",
-      timestamp: "2025-04-15T14:15:00Z",
-      author: "Mike Wilson"
-    }]
+    assignedTo: "John Smith",
+    requestedBy: "user789",
+    completedAt: "2023-04-14T15:45:00Z",
+    notes: [
+      {
+        text: "Completed safety inspection. All systems operational.",
+        timestamp: "2023-04-14T15:45:00Z",
+        author: "John Smith"
+      }
+    ],
+    assetType: "safety"
   }
 ];
