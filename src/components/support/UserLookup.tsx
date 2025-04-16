@@ -1,12 +1,13 @@
 
-import React, { useState, useEffect } from "react";
-import { Search, UserCheck, AlertCircle } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Search, UserCheck, AlertCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { isValidDomain, isValidCode } from "@/utils/organizationVerification";
+import { isValidDomain, isValidCode, getAllOrganizations } from "@/utils/organizationVerification";
 import { Badge } from "@/components/ui/badge";
 import { getVerifiedEmails, getEmailOrganization } from "@/utils/userDataExpiration";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface UserLookupProps {
   onUserSelect?: (user: UserProfile) => void;
@@ -21,17 +22,46 @@ interface UserProfile {
   username?: string;
 }
 
+// Mock user database for autocomplete
+const mockUsers = [
+  { username: "12345 John Smith", email: "john.smith@us.af.mil", manNumber: "AF12345", organization: "36 FGS" },
+  { username: "23456 Jane Doe", email: "jane.doe@us.af.mil", manNumber: "AF23456", organization: "36 FGS" },
+  { username: "34567 Robert Johnson", email: "robert.johnson@us.af.mil", manNumber: "AF34567", organization: "36th Fighter Generation Squadron" },
+  { username: "45678 Lisa Brown", email: "lisa.brown@us.af.mil", manNumber: "AF45678", organization: "36 FGS" },
+  { username: "56789 Michael Wilson", email: "michael.wilson@us.af.mil", manNumber: "AF56789", organization: "36 FGS" },
+  { username: "67890 Sarah Davis", email: "sarah.davis@us.af.mil", manNumber: "AF67890", organization: "36th Fighter Generation Squadron" },
+  { username: "78901 David Miller", email: "david.miller@us.af.mil", manNumber: "AF78901", organization: "36 FGS" },
+  { username: "89012 Jennifer Taylor", email: "jennifer.taylor@us.af.mil", manNumber: "AF89012", organization: "36 FGS" },
+];
+
 const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
+  const [suggestions, setSuggestions] = useState<Array<{username: string, email: string}>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState("");
   const [verifiedEmails, setVerifiedEmails] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   
   // Load verified emails on component mount
   useEffect(() => {
     setVerifiedEmails(getVerifiedEmails());
   }, []);
+  
+  // Filter suggestions based on search query
+  useEffect(() => {
+    if (searchQuery.trim().length > 1) {
+      const filtered = mockUsers.filter(user => 
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery]);
   
   // Extract man number from username (format: "##### Name")
   const extractManNumber = (query: string): string | null => {
@@ -43,6 +73,7 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
   const handleSearch = () => {
     setIsSearching(true);
     setError("");
+    setShowSuggestions(false);
     
     // Simulate API call to search for users
     setTimeout(() => {
@@ -54,37 +85,52 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
       if (extractedManNumber) {
         // Handle username search with man number
         const username = trimmedQuery;
-        const manNumber = "AF" + extractedManNumber;
+        const manNumber = extractedManNumber;
         
-        // Check if this man number is associated with a verified email
-        const associatedEmail = findVerifiedEmailByManNumber(manNumber);
+        // Check if this username matches any in our mock database
+        const matchedUser = mockUsers.find(user => user.username.toLowerCase() === username.toLowerCase());
         
-        const mockResults: UserProfile[] = [{ 
-          email: associatedEmail || `user${extractedManNumber}@us.af.mil`,
-          manNumber: manNumber,
-          organization: associatedEmail ? getEmailOrganization(associatedEmail) || "Air Force HQ" : "Air Force HQ",
-          isVerified: !!associatedEmail,
-          verificationCode: "ORG001-FLYER",
-          username: username
-        }];
-        
-        setSearchResults(mockResults);
+        if (matchedUser) {
+          // Use the matched user's data
+          const mockResults: UserProfile[] = [{ 
+            email: matchedUser.email,
+            organization: matchedUser.organization || "36 FGS",
+            isVerified: verifiedEmails.includes(matchedUser.email),
+            username: matchedUser.username
+          }];
+          
+          setSearchResults(mockResults);
+        } else {
+          // Create a result with the extracted data
+          const associatedEmail = `user${extractedManNumber}@us.af.mil`;
+          
+          const mockResults: UserProfile[] = [{ 
+            email: associatedEmail,
+            organization: "36 FGS",
+            isVerified: verifiedEmails.includes(associatedEmail),
+            username: username
+          }];
+          
+          setSearchResults(mockResults);
+        }
       }
       // Check if it's an email search
       else if (trimmedQuery.includes('@')) {
         const isValidEmail = isValidDomain(trimmedQuery);
         const isAlreadyVerified = verifiedEmails.includes(trimmedQuery);
         
+        // Try to find a username match for this email
+        const matchedUser = mockUsers.find(user => user.email.toLowerCase() === trimmedQuery.toLowerCase());
+        
         const mockResults: UserProfile[] = isValidEmail 
           ? [
               { 
                 email: trimmedQuery, 
-                manNumber: "AF" + Math.floor(10000 + Math.random() * 90000),
                 organization: isAlreadyVerified 
-                  ? getEmailOrganization(trimmedQuery) || "Air Force Operations"
-                  : "Air Force Operations",
+                  ? getEmailOrganization(trimmedQuery) || "36 FGS"
+                  : "36 FGS",
                 isVerified: isAlreadyVerified || Math.random() > 0.3, // Verified if in our records, otherwise 70% chance
-                verificationCode: "ORG002-FLYER"
+                username: matchedUser?.username || undefined
               }
             ]
           : [];
@@ -94,55 +140,58 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
         }
         setSearchResults(mockResults);
       } 
-      // Check if it's a search by man number
-      else if (trimmedQuery.startsWith("AF") || /^\d+$/.test(trimmedQuery)) {
-        const manNumber = trimmedQuery.startsWith("AF") ? trimmedQuery : "AF" + trimmedQuery;
+      // Check if it's a search by man number without AF prefix
+      else if (/^\d+$/.test(trimmedQuery)) {
+        const manNumber = trimmedQuery;
         
-        // Check if this man number is associated with a verified email
-        const associatedEmail = findVerifiedEmailByManNumber(manNumber);
+        // Try to find a username match for this man number
+        const matchedUser = mockUsers.find(user => 
+          user.manNumber === `AF${manNumber}` || 
+          user.username.startsWith(manNumber)
+        );
         
-        const mockResults: UserProfile[] = [
-          { 
-            email: associatedEmail || `user${manNumber.replace("AF", "")}@us.af.mil`,
-            manNumber: manNumber,
-            organization: associatedEmail ? getEmailOrganization(associatedEmail) || "Air Force HQ" : "Air Force HQ",
-            isVerified: !!associatedEmail || Math.random() > 0.2, // Verified if we have an email, otherwise 80% chance
-            verificationCode: "ORG001-FLYER"
-          }
-        ];
-        
-        setSearchResults(mockResults);
+        if (matchedUser) {
+          const mockResults: UserProfile[] = [
+            { 
+              email: matchedUser.email,
+              organization: matchedUser.organization || "36 FGS",
+              isVerified: verifiedEmails.includes(matchedUser.email),
+              username: matchedUser.username
+            }
+          ];
+          setSearchResults(mockResults);
+        } else {
+          setError("No user found with that man number");
+          setSearchResults([]);
+        }
       } else {
         setError("Please enter a valid email, man number, or username (##### Name)");
         setSearchResults([]);
       }
       
       setIsSearching(false);
-    }, 800);
-  };
-  
-  // Function to find a verified email associated with a man number
-  // In a real app, this would query a database
-  const findVerifiedEmailByManNumber = (manNumber: string): string | null => {
-    // This is mock functionality - in a real app we'd check a database
-    // For now, we'll just use a deterministic approach based on the man number
-    
-    // Simulate that some man numbers have verified emails
-    const manNumberDigits = manNumber.replace("AF", "");
-    const lastDigit = parseInt(manNumberDigits.slice(-1));
-    
-    if (lastDigit % 3 === 0 && verifiedEmails.length > 0) {
-      // For demonstration purposes, return a verified email if available
-      return verifiedEmails[lastDigit % verifiedEmails.length];
-    }
-    
-    return null;
+    }, 500);
   };
   
   // Function to verify a user's organization code
   const verifyUserOrganization = (user: UserProfile): boolean => {
     if (!user.verificationCode) return false;
     return isValidCode(user.verificationCode);
+  };
+  
+  // Select a suggestion
+  const handleSelectSuggestion = (suggestion: {username: string, email: string}) => {
+    setSearchQuery(suggestion.username);
+    setShowSuggestions(false);
+  };
+  
+  // Clear search field
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setError("");
+    setSuggestions([]);
+    setShowSuggestions(false);
   };
   
   return (
@@ -152,24 +201,53 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Input
-                type="text"
-                placeholder="Search by email, man number, or username (##### Name)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
+          <div className="relative">
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <Input
+                  type="text"
+                  placeholder="Search by username (##### Name), email, or man number"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  onFocus={() => setShowSuggestions(suggestions.length > 0)}
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={clearSearch}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <Button 
+                onClick={handleSearch} 
+                disabled={isSearching || !searchQuery}
+                className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
+              >
+                <Search className="h-4 w-4 mr-1" />
+                Search
+              </Button>
             </div>
-            <Button 
-              onClick={handleSearch} 
-              disabled={isSearching || !searchQuery}
-              className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
-            >
-              <Search className="h-4 w-4 mr-1" />
-              Search
-            </Button>
+            
+            {/* Suggestions dropdown */}
+            {showSuggestions && (
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-auto bg-white border border-gray-200 rounded-md shadow-lg">
+                <ScrollArea className="h-full max-h-60">
+                  {suggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => handleSelectSuggestion(suggestion)}
+                    >
+                      <div className="font-medium">{suggestion.username}</div>
+                      <div className="text-sm text-gray-500">{suggestion.email}</div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+            )}
           </div>
           
           {error && (
@@ -198,12 +276,6 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
                         {user.username && (
                           <div className="text-sm text-muted-foreground">
                             <strong>Username:</strong> {user.username}
-                          </div>
-                        )}
-                        
-                        {user.manNumber && (
-                          <div className="text-sm text-muted-foreground">
-                            <strong>Man Number:</strong> {user.manNumber}
                           </div>
                         )}
                         

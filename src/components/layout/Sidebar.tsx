@@ -121,8 +121,8 @@ const Sidebar: React.FC = () => {
     <>
       <div className="fixed top-4 left-4 z-50 md:hidden">
         <SidebarTrigger>
-          <button className="p-2 rounded-md bg-flyerPurple-500 text-white hover:bg-flyerPurple-600 transition-colors">
-            <Menu size={20} />
+          <button className="p-2 rounded-md bg-flyerPurple-600 text-white hover:bg-flyerPurple-700 transition-colors shadow-lg">
+            <Menu size={24} />
           </button>
         </SidebarTrigger>
       </div>

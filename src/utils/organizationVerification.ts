@@ -1,6 +1,7 @@
+
 // Valid organization codes mapped to their organization names
 export const validCodes: Record<string, string> = {
-  "ORG001-FLYER": "Air Force HQ",
+  "ORG001-FLYER": "36 FGS",
   "ORG002-FLYER": "Air Force Operations",
   "ORG003-FLYER": "Air Force Support",
   "ORG004-FLYER": "Air Force Intelligence",

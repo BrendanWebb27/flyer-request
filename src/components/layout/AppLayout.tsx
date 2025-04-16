@@ -9,7 +9,7 @@ const AppLayout: React.FC = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <Sidebar />
-        <main className="flex-1 p-6 pt-16 md:pt-6 md:p-8 overflow-auto">
+        <main className="flex-1 p-6 pt-20 md:pt-6 md:p-8 overflow-auto">
           <Outlet />
         </main>
       </div>
