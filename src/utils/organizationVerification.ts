@@ -1,11 +1,11 @@
-
 // Valid organization codes mapped to their organization names
 export const validCodes: Record<string, string> = {
   "ORG001-FLYER": "Air Force HQ",
   "ORG002-FLYER": "Air Force Operations",
   "ORG003-FLYER": "Air Force Support",
   "ORG004-FLYER": "Air Force Intelligence",
-  "ORG005-FLYER": "Air Force Logistics"
+  "ORG005-FLYER": "Air Force Logistics",
+  "ORG036-FLYER": "Unspecified Organization"
 };
 
 // List of allowed email domains
