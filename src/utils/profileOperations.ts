@@ -60,7 +60,8 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         workShift: "dayshift",
         manNumber: "S12345",
         isFlyer: false,
-        flyerRole: "none"  
+        flyerRole: "none",
+        isSupport: true // Added the isSupport property
       },
       { 
         name: "Sarah Johnson", 
@@ -68,7 +69,8 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         workShift: "dayshift",
         manNumber: "S23456",
         isFlyer: true,
-        flyerRole: "primary"
+        flyerRole: "primary",
+        isSupport: true // Added the isSupport property
       },
       { 
         name: "Mike Wilson", 
@@ -76,7 +78,8 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         workShift: "nightshift",
         manNumber: "S34567",
         isFlyer: true,
-        flyerRole: "alternate"
+        flyerRole: "alternate",
+        isSupport: true // Added the isSupport property
       },
       { 
         name: "Emily Brown", 
@@ -84,7 +87,8 @@ export const getAllSupportProfiles = (): UserProfile[] => {
         workShift: "nightshift",
         manNumber: "S45678",
         isFlyer: false,
-        flyerRole: "none"
+        flyerRole: "none",
+        isSupport: true // Added the isSupport property
       }
     ];
     
