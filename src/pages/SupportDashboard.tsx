@@ -5,6 +5,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RequestStatus } from "@/types/request";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Component imports
 import OrganizationAccessControl from "@/components/OrganizationAccessControl";
@@ -12,6 +13,7 @@ import DashboardHeader from "@/components/support/DashboardHeader";
 import DashboardMetrics from "@/components/support/DashboardMetrics";
 import RequestTabs from "@/components/support/RequestTabs";
 import RequestsTable from "@/components/support/RequestsTable";
+import UserLookup from "@/components/support/UserLookup";
 
 const SupportDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -29,6 +31,9 @@ const SupportDashboard: React.FC = () => {
   
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Mode switching between requests and user lookup
+  const [activeMode, setActiveMode] = useState<"requests" | "users">("requests");
   
   // Extract status from URL query params
   const urlParams = new URLSearchParams(location.search);
@@ -83,24 +88,37 @@ const SupportDashboard: React.FC = () => {
         completedCount={metrics.completedToday}
       />
       
-      <h2 className="text-2xl font-bold">Support Requests</h2>
-
-      <RequestTabs defaultValue={activeTab}>
-        {["all", "pending", "active", "completed"].map((tab) => (
-          <TabsContent key={tab} value={tab}>
-            <RequestsTable
-              requests={requests}
-              activeTab={tab}
-              formatDate={formatDate}
-              acceptRequest={acceptRequest}
-              completeRequest={completeRequest}
-              addNote={addNote}
-              clearRequest={clearRequest}
-              undoClearRequest={undoClearRequest}
-            />
-          </TabsContent>
-        ))}
-      </RequestTabs>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Support Dashboard</h2>
+        
+        <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as "requests" | "users")}>
+          <TabsList>
+            <TabsTrigger value="requests">Support Requests</TabsTrigger>
+            <TabsTrigger value="users">User Verification</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+      
+      {activeMode === "users" ? (
+        <UserLookup />
+      ) : (
+        <RequestTabs defaultValue={activeTab}>
+          {["all", "pending", "active", "completed"].map((tab) => (
+            <TabsContent key={tab} value={tab}>
+              <RequestsTable
+                requests={requests}
+                activeTab={tab}
+                formatDate={formatDate}
+                acceptRequest={acceptRequest}
+                completeRequest={completeRequest}
+                addNote={addNote}
+                clearRequest={clearRequest}
+                undoClearRequest={undoClearRequest}
+              />
+            </TabsContent>
+          ))}
+        </RequestTabs>
+      )}
     </div>
   );
 };

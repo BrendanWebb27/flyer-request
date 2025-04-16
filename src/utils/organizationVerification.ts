@@ -39,3 +39,14 @@ export const isValidCode = (code: string): boolean => {
 export const getOrganizationFromCode = (code: string): string | undefined => {
   return validCodes[code];
 };
+
+/**
+ * Gets all valid organizations for support reference
+ * @returns Array of organization objects with code and name
+ */
+export const getAllOrganizations = () => {
+  return Object.entries(validCodes).map(([code, name]) => ({
+    code,
+    name
+  }));
+};
