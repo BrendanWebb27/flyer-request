@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Home,
@@ -28,6 +29,7 @@ type UserRole = "support" | "general";
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const { isSupport } = useProfileAccess();
+  const { openMobile, setOpenMobile } = useSidebar();
   
   // State to manage the user role
   const [userRole, setUserRole] = useState<UserRole>("general");
@@ -61,18 +63,25 @@ const Sidebar: React.FC = () => {
     return location.pathname === route && location.search === "";
   };
 
+  // Handle menu item click - close the mobile sidebar when an item is clicked
+  const handleItemClick = () => {
+    if (openMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   const navItems = [
     {
       icon: Home,
       label: "Dashboard",
       route: "/dashboard",
-      roles: ["general"], // Changed from ["general", "support"] to ["general"] only
+      roles: ["general"],
     },
     {
       icon: FileText,
       label: "New Request",
       route: "/request",
-      roles: ["general"], // Remove support role to hide this for support users
+      roles: ["general"],
     },
     {
       icon: Clock,
@@ -139,6 +148,7 @@ const Sidebar: React.FC = () => {
                         ? "bg-white/20 text-white font-medium"
                         : "text-white/80 hover:bg-white/10 hover:text-white"
                     )}
+                    onClick={handleItemClick}
                   >
                     <item.icon size={20} />
                     <span>{item.label}</span>
