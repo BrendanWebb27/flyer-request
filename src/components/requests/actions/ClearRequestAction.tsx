@@ -12,13 +12,11 @@ interface ClearRequestActionProps {
 
 const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onClear }) => {
   const handleClearRequest = (e: React.MouseEvent) => {
-    // Stop propagation to prevent the sheet from closing
     e.preventDefault();
     e.stopPropagation();
     onClear(requestId);
   };
 
-  // Define a handler to stop propagation
   const stopPropagation = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -37,7 +35,10 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
           <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
           <div className="flex justify-end gap-2 mt-6">
             <SheetClose asChild>
-              <Button variant="outline" onClick={stopPropagation}>
+              <Button 
+                variant="outline" 
+                onClick={stopPropagation}
+              >
                 Cancel
               </Button>
             </SheetClose>

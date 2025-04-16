@@ -28,7 +28,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
 }) => {
   const { isSupport } = useProfileAccess();
   
-  // Filter requests based on tab and user role - using useMemo to prevent unnecessary recalculations
+  // Filter requests based on tab and user role
   const filteredRequests = useMemo(() => {
     console.log(`RequestsTabContent: Filtering ${requests.length} requests for status: ${status}`);
     
@@ -37,7 +37,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
       ? [...requests]
       : requests.filter(request => request.status === status);
     
-    // Then by user if not a support user
+    // For non-support users, only show their own requests
     if (!isSupport) {
       console.log(`Non-support user filtering: showing only requests for ${currentUserId}`);
       statusFilteredRequests = statusFilteredRequests.filter(request => 
@@ -50,11 +50,13 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
     return statusFilteredRequests;
   }, [requests, status, currentUserId, isSupport]);
   
-  // Log requests when component receives new data
   useEffect(() => {
     console.log(`RequestsTabContent: Received ${requests.length} requests in total`);
     console.log(`RequestsTabContent: Filtered to ${filteredRequests.length} requests for status: ${status}`);
-  }, [filteredRequests, status, requests.length]);
+    if (isSupport) {
+      console.log("Support user confirmed: Should see all requests");
+    }
+  }, [filteredRequests, status, requests.length, isSupport]);
 
   // Generate a unique key for the grid to force re-render
   const requestsKey = useMemo(() => {

@@ -61,8 +61,8 @@ export const useActiveRequests = () => {
     setRefreshCount(prev => prev + 1);
   }, []);
 
-  // Filter requests based on user role and ownership
-  const filteredRequests = requests;  // Support users now see all requests by default
+  // No filtering applied here for support users - they see all requests by default
+  const filteredRequests = requests;
   
   console.log(`Found ${filteredRequests.length} requests total (isSupport: ${isSupport})`);
 
