@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Bell } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardControlsProps {
   activeMode: "requests" | "users";
@@ -41,17 +42,20 @@ const DashboardControls: React.FC<DashboardControlsProps> = ({
         
         {newRequestCount > 0 && activeTab !== "pending" && (
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
             onClick={() => {
               navigate("/support?status=pending");
               resetNotificationCount();
               forceSyncRequests();
             }}
-            className="flex items-center gap-1 bg-amber-50 border-amber-200 text-amber-700"
+            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700"
           >
-            <Bell size={14} />
-            {newRequestCount} New {newRequestCount === 1 ? 'Request' : 'Requests'}
+            <Bell size={14} className="animate-pulse" />
+            <Badge variant="secondary" className="bg-white text-amber-700">
+              {newRequestCount}
+            </Badge>
+            <span>New {newRequestCount === 1 ? 'Request' : 'Requests'}</span>
           </Button>
         )}
         

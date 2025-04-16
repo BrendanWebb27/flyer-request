@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 interface RequestTabsProps {
   children: React.ReactNode;
   defaultValue?: string;
-  onTabChange?: (value: string) => void; // Updated to accept a value parameter
+  onTabChange?: (value: string) => void;
 }
 
 const RequestTabs: React.FC<RequestTabsProps> = ({ 
@@ -55,13 +55,21 @@ const RequestTabs: React.FC<RequestTabsProps> = ({
     if (currentStatus && ["pending", "active", "completed", "all"].includes(currentStatus)) {
       if (currentStatus !== activeTab) {
         setActiveTab(currentStatus);
+        // Also notify parent when URL changes the tab
+        if (onTabChange) {
+          onTabChange(currentStatus);
+        }
       }
     } else if (!currentStatus) {
       if (activeTab !== "all") {
         setActiveTab("all");
+        // Also notify parent
+        if (onTabChange) {
+          onTabChange("all");
+        }
       }
     }
-  }, [location.search, urlParams]);
+  }, [location.search, urlParams, onTabChange, activeTab]);
 
   // Listen for status change events
   useEffect(() => {
@@ -70,13 +78,16 @@ const RequestTabs: React.FC<RequestTabsProps> = ({
       if (customEvent.detail && customEvent.detail.newStatus === 'active') {
         if (location.pathname === "/active") {
           setActiveTab('active');
+          if (onTabChange) {
+            onTabChange('active');
+          }
         }
       }
     };
     
     window.addEventListener('requestStatusChanged', handleStatusChange);
     return () => window.removeEventListener('requestStatusChanged', handleStatusChange);
-  }, [location.pathname]);
+  }, [location.pathname, onTabChange]);
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">

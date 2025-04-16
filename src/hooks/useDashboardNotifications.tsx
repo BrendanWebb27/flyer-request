@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+import { Bell } from "lucide-react";
 
 /**
  * Custom hook to handle notifications for the support dashboard
@@ -12,6 +13,7 @@ export const useDashboardNotifications = (
 ) => {
   const [newRequestCount, setNewRequestCount] = useState(0);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Handle new request notifications
   useEffect(() => {
@@ -20,19 +22,19 @@ export const useDashboardNotifications = (
       if (customEvent.detail && customEvent.detail.request) {
         const request = customEvent.detail.request;
         
-        // Show notification using Sonner toast for a more visible notification
-        toast.success(`New Request: ${request.id}`, {
+        // Show notification using shadcn/ui toast
+        toast({
+          title: `New Request: ${request.id}`,
           description: `From: ${request.requestedBy} - Location: ${request.location}`,
-          duration: 5000,
-          action: {
-            label: "View",
-            onClick: () => {
-              // Navigate to pending tab
+          action: (
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => {
               navigate("/support?status=pending");
-              // Force refresh
               forceSyncRequests();
-            }
-          }
+            }}>
+              <Bell className="h-4 w-4" />
+              <span>View</span>
+            </div>
+          ),
         });
         
         // Play sound for notification (optional)
@@ -73,7 +75,7 @@ export const useDashboardNotifications = (
       window.removeEventListener('supportNewRequest', handleNewRequest);
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [forceSyncRequests, navigate]);
+  }, [forceSyncRequests, navigate, toast]);
 
   // Reset notification counter
   const resetNotificationCount = useCallback(() => {
