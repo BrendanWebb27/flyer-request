@@ -1,3 +1,4 @@
+
 // Service Worker to handle push notifications
 
 // Cache name for the app shell
@@ -37,10 +38,35 @@ self.addEventListener('push', (event) => {
       icon: '/favicon.ico',
       badge: '/favicon.ico',
       vibrate: [100, 50, 100],
+      tag: data.requestId || 'general',  // Group notifications by request ID
+      renotify: true,  // Force notification even if same tag
       data: {
-        url: data.url || '/'
-      }
+        url: data.url || '/',
+        requestId: data.requestId
+      },
+      actions: []
     };
+    
+    // Add actions based on notification type
+    if (data.title.includes('New Request')) {
+      options.actions = [
+        {
+          action: 'view',
+          title: 'View'
+        },
+        {
+          action: 'accept',
+          title: 'Accept'
+        }
+      ];
+    } else if (data.title.includes('Request Accepted')) {
+      options.actions = [
+        {
+          action: 'view',
+          title: 'View'
+        }
+      ];
+    }
 
     // Show the notification
     event.waitUntil(
@@ -53,13 +79,21 @@ self.addEventListener('push', (event) => {
 
 // Listen for notification clicks
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked');
+  console.log('Notification clicked', event);
   
   // Close the notification
   event.notification.close();
 
-  // Get the notification data
-  const url = event.notification.data?.url || '/';
+  // Handle action clicks
+  const action = event.action;
+  const notification = event.notification;
+  const requestId = notification.data?.requestId;
+  let url = notification.data?.url || '/';
+  
+  // Modify URL based on the action
+  if (action === 'accept' && requestId) {
+    url = `/support?status=pending&requestId=${requestId}&action=accept`;
+  }
 
   // Open or focus the app to the specific page
   event.waitUntil(

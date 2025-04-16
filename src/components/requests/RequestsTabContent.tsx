@@ -1,9 +1,10 @@
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { RequestStatus, Request } from "@/types/request";
 import RequestsGrid from "./RequestsGrid";
 import EmptyRequestsState from "./EmptyRequestsState";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
+import { toast } from "sonner";
 
 interface RequestsTabContentProps {
   requests: Request[];
@@ -27,6 +28,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   onRequestUpdated
 }) => {
   const { isSupport } = useProfileAccess();
+  const [prevRequestCount, setPrevRequestCount] = useState<number>(0);
   
   // Filter requests based on tab and user role
   const filteredRequests = useMemo(() => {
@@ -49,6 +51,25 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
     
     return statusFilteredRequests;
   }, [requests, status, currentUserId, isSupport]);
+  
+  // Check for new requests in the pending tab (for support users)
+  useEffect(() => {
+    if (isSupport && status === "pending") {
+      // If this is not the initial render and we have more requests than before
+      if (prevRequestCount > 0 && filteredRequests.length > prevRequestCount) {
+        const newCount = filteredRequests.length - prevRequestCount;
+        
+        // Show notification using Sonner toast
+        toast.success(`${newCount} new ${newCount === 1 ? 'request' : 'requests'} available`, {
+          description: "New support requests have been added",
+          duration: 3000
+        });
+      }
+      
+      // Update the previous count
+      setPrevRequestCount(filteredRequests.length);
+    }
+  }, [filteredRequests.length, isSupport, status, prevRequestCount]);
   
   useEffect(() => {
     console.log(`RequestsTabContent: Received ${requests.length} requests in total`);

@@ -3,18 +3,31 @@ import { RequestFormData, Request } from "@/types/request";
 import { loadRequests, saveRequests } from "./requestPersistence";
 
 // Function to ensure all tabs are notified of request submission
-export const notifyAllTabsAboutNewRequest = () => {
+export const notifyAllTabsAboutNewRequest = (newRequest: Request) => {
   // Use a custom event to notify all tabs
   window.dispatchEvent(new CustomEvent('requestsForceSync', {
     detail: {
       timestamp: new Date().toISOString(),
-      action: 'newRequest'
+      action: 'newRequest',
+      request: newRequest
+    }
+  }));
+  
+  // Dispatch a specific event for support users to see
+  window.dispatchEvent(new CustomEvent('supportNewRequest', {
+    detail: {
+      request: newRequest,
+      timestamp: new Date().toISOString()
     }
   }));
   
   // Use localStorage to notify other tabs
   const notificationKey = `request_notification_${Date.now()}`;
-  localStorage.setItem(notificationKey, Date.now().toString());
+  localStorage.setItem(notificationKey, JSON.stringify({
+    type: 'new_request',
+    requestId: newRequest.id,
+    timestamp: Date.now()
+  }));
   
   // Clean up old notifications (to avoid localStorage bloat)
   setTimeout(() => {
@@ -69,7 +82,7 @@ export const submitFlyerRequest = async (data: RequestFormData): Promise<void> =
   saveRequests(updatedRequests);
   
   // Notify all tabs/users about the new request
-  notifyAllTabsAboutNewRequest();
+  notifyAllTabsAboutNewRequest(newRequest);
   
   console.log("Request submitted successfully:", newRequest);
 

@@ -20,12 +20,14 @@ import UserLookup from "@/components/support/UserLookup";
 
 // Add Button and RefreshCcw imports
 import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, Bell } from "lucide-react";
+import { toast } from "sonner";
 
 const SupportDashboard: React.FC = () => {
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
   const [hasAccess, setHasAccess] = useState(false);
   const [syncTimer, setSyncTimer] = useState(0); // Timer state to trigger updates
+  const [newRequestCount, setNewRequestCount] = useState(0);
   
   const { 
     requests, 
@@ -55,6 +57,72 @@ const SupportDashboard: React.FC = () => {
     forceRequestSync();
     setSyncTimer(prev => prev + 1);
   }, []);
+  
+  // Handle new request notifications
+  useEffect(() => {
+    const handleNewRequest = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail && customEvent.detail.request) {
+        const request = customEvent.detail.request;
+        
+        // Show notification using Sonner toast for a more visible notification
+        toast.success(`New Request: ${request.id}`, {
+          description: `From: ${request.requestedBy} - Location: ${request.location}`,
+          duration: 5000,
+          action: {
+            label: "View",
+            onClick: () => {
+              // Navigate to pending tab
+              navigate("/support?status=pending");
+              // Select pending tab if not already selected
+              if (activeTab !== "pending") {
+                setActiveTab("pending");
+              }
+              // Force refresh
+              forceSyncRequests();
+            }
+          }
+        });
+        
+        // Play sound for notification (optional)
+        try {
+          const audio = new Audio('/notification.mp3');
+          audio.play().catch(e => console.log('Audio play prevented by browser policy'));
+        } catch (e) {
+          console.log('Audio notification not supported');
+        }
+        
+        // Increment new request counter
+        setNewRequestCount(prev => prev + 1);
+      }
+    };
+    
+    // Listen for new request events
+    window.addEventListener('supportNewRequest', handleNewRequest);
+    
+    // Listen for storage events that might indicate new requests
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key && event.key.startsWith('request_notification_')) {
+        try {
+          const data = JSON.parse(event.newValue || '{}');
+          if (data.type === 'new_request') {
+            // Force a refresh when a new request comes in
+            forceSyncRequests();
+            setNewRequestCount(prev => prev + 1);
+          }
+        } catch (e) {
+          console.error('Error parsing notification data', e);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('supportNewRequest', handleNewRequest);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [forceSyncRequests, navigate, activeTab]);
   
   // Set up periodic sync
   useEffect(() => {
@@ -117,7 +185,12 @@ const SupportDashboard: React.FC = () => {
   };
   
   // Handler for when a new tab is selected
-  const handleTabChange = () => {
+  const handleTabChange = (value: string) => {
+    // Reset notification counter when viewing pending requests
+    if (value === "pending") {
+      setNewRequestCount(0);
+    }
+    
     // Force sync when changing tabs
     forceSyncRequests();
   };
@@ -148,6 +221,22 @@ const SupportDashboard: React.FC = () => {
             <RefreshCcw size={14} />
             Sync
           </Button>
+          
+          {newRequestCount > 0 && activeTab !== "pending" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigate("/support?status=pending");
+                setNewRequestCount(0);
+                forceSyncRequests();
+              }}
+              className="flex items-center gap-1 bg-amber-50 border-amber-200 text-amber-700"
+            >
+              <Bell size={14} />
+              {newRequestCount} New {newRequestCount === 1 ? 'Request' : 'Requests'}
+            </Button>
+          )}
           
           <Tabs value={activeMode} onValueChange={(v) => {
             setActiveMode(v as "requests" | "users");

@@ -1,9 +1,8 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AppLayout from "./components/layout/AppLayout";
 import Index from "./pages/Index";
@@ -68,7 +67,7 @@ const VerifiedRoute = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
-const App = () => {
+function App() {
   // Use the hook to track support status changes
   const { isSupport, getSupportAccess } = useProfileAccess();
   const [hasAccess, setHasAccess] = useState(false);
@@ -114,47 +113,48 @@ const App = () => {
   }, [isSupport, getSupportAccess]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={
-                <UserRoute>
-                  <VerifiedRoute>
-                    <Dashboard />
-                  </VerifiedRoute>
-                </UserRoute>
-              } />
-              <Route path="/request" element={
+    <>
+      {/* Main application with routes */}
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route element={<AppLayout />}>
+            <Route path="/dashboard" element={
+              <UserRoute>
                 <VerifiedRoute>
-                  <RequestForm />
+                  <Dashboard />
                 </VerifiedRoute>
-              } />
-              <Route path="/active" element={
-                <VerifiedRoute>
-                  <ActiveRequests />
-                </VerifiedRoute>
-              } />
-              <Route path="/profile" element={<Profile />} />
-              <Route 
-                path="/support" 
-                element={
-                  <SupportRoute>
-                    <SupportDashboard />
-                  </SupportRoute>
-                } 
-              />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+              </UserRoute>
+            } />
+            <Route path="/request" element={
+              <VerifiedRoute>
+                <RequestForm />
+              </VerifiedRoute>
+            } />
+            <Route path="/active" element={
+              <VerifiedRoute>
+                <ActiveRequests />
+              </VerifiedRoute>
+            } />
+            <Route path="/profile" element={<Profile />} />
+            <Route 
+              path="/support" 
+              element={
+                <SupportRoute>
+                  <SupportDashboard />
+                </SupportRoute>
+              } 
+            />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+      
+      {/* Toast notifications - both Shadcn and Sonner */}
+      <ShadcnToaster />
+      <SonnerToaster position="top-right" closeButton />
+    </>
   );
-};
+}
 
 export default App;
