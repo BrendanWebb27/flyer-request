@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import ActionButtonSheet from "./ActionButtonSheet";
@@ -11,18 +11,15 @@ interface ClearRequestActionProps {
 }
 
 const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onClear }) => {
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
   
   const handleClearRequest = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onClear(requestId);
-    setSheetOpen(false);
-  };
-
-  const stopPropagation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   return (
@@ -33,15 +30,11 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
         buttonVariant="outline"
         buttonClass="text-red-500 border-red-200 hover:bg-red-50"
         title={`Clear Request ${requestId}`}
-        onButtonClick={(e) => {
-          stopPropagation(e);
-          setSheetOpen(true);
-        }}
       >
         <div onClick={stopPropagation}>
           <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
           <div className="flex justify-end gap-2 mt-6">
-            <SheetClose asChild>
+            <SheetClose asChild data-sheet-close="true">
               <Button 
                 variant="outline" 
                 onClick={stopPropagation}
@@ -49,12 +42,14 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
                 Cancel
               </Button>
             </SheetClose>
-            <Button 
-              variant="destructive" 
-              onClick={handleClearRequest}
-            >
-              Clear Request
-            </Button>
+            <SheetClose asChild data-sheet-close="true">
+              <Button 
+                variant="destructive" 
+                onClick={handleClearRequest}
+              >
+                Clear Request
+              </Button>
+            </SheetClose>
           </div>
         </div>
       </ActionButtonSheet>

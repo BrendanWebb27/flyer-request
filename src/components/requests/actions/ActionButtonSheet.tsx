@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -26,10 +26,18 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   
+  // This useEffect helps debug the open state changes
+  useEffect(() => {
+    console.log("ActionButtonSheet open state changed to:", open);
+  }, [open]);
+
   const handleButtonClick = (e: React.MouseEvent) => {
     // Stop propagation to prevent parent elements from receiving the click
     e.preventDefault();
     e.stopPropagation();
+    
+    // Set open to true when the button is clicked
+    setOpen(true);
     
     // If there's an additional click handler, call it
     if (onButtonClick) {
@@ -37,15 +45,9 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
 
-  // Improved sheet opening/closing handling
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-    console.log("Sheet open state changed to:", newOpen);
-  };
-
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild onClick={(e) => e.stopPropagation()}>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button 
           variant={buttonVariant}
           size={buttonSize}
@@ -59,6 +61,13 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       <SheetContent 
         side="right"
         onClick={(e) => e.stopPropagation()}
+        onInteractOutside={(e) => {
+          // Only prevent default if it's not a button click meant to close the sheet
+          const target = e.target as HTMLElement;
+          if (!target.closest('[data-sheet-close="true"]')) {
+            e.preventDefault();
+          }
+        }}
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>

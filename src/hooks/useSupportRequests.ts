@@ -32,6 +32,7 @@ export const useSupportRequests = () => {
   const [requests, setRequests] = useState<Request[]>(() => {
     // Initialize with mock requests if localStorage is empty
     const savedRequests = loadRequests();
+    console.log("Initial loading of requests:", savedRequests.length);
     if (savedRequests.length === 0) {
       console.log("No requests found in localStorage, initializing with mock data");
       saveRequests(initialRequests);
@@ -90,13 +91,18 @@ export const useSupportRequests = () => {
   };
 
   const clearRequest = (id: string) => {
+    console.log("Clearing request:", id);
     const requestToClear = requests.find(r => r.id === id);
     if (requestToClear) {
-      setClearedRequests([...clearedRequests, requestToClear]);
+      setClearedRequests(prev => [...prev, requestToClear]);
       
       const updatedRequests = requests.filter(r => r.id !== id);
       setRequests(updatedRequests);
       saveRequests(updatedRequests);
+      
+      console.log("Request cleared successfully");
+    } else {
+      console.log("Request not found for clearing");
     }
   };
 
@@ -113,7 +119,7 @@ export const useSupportRequests = () => {
       
       setRequests(newRequests);
       saveRequests(newRequests);
-      setClearedRequests(clearedRequests.filter(r => r.id !== id));
+      setClearedRequests(prev => prev.filter(r => r.id !== id));
     }
   };
 
