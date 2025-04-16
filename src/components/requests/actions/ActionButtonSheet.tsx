@@ -45,10 +45,35 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
 
+  const preventCloseOnOutsideClick = (e: React.MouseEvent | React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
+
   return (
     <Sheet 
       open={open} 
-      onOpenChange={setOpen}
+      onOpenChange={(newOpen) => {
+        console.log("Sheet onOpenChange called with:", newOpen);
+        // Only allow closing via explicit close button clicks
+        if (newOpen === false) {
+          // Check if the event was from a proper close button
+          const target = document.activeElement as HTMLElement;
+          const isCloseAction = target?.hasAttribute('data-sheet-close');
+          
+          if (isCloseAction) {
+            console.log("Closing sheet from close button");
+            setOpen(false);
+          } else {
+            console.log("Preventing automatic sheet close");
+            // Prevent automatic closing
+            return;
+          }
+        } else {
+          setOpen(true);
+        }
+      }}
       modal={true}
     >
       <SheetTrigger asChild>
@@ -66,25 +91,28 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         side="right"
         onClick={(e) => e.stopPropagation()}
         onPointerDownOutside={(e) => {
-          // Prevent closing when clicking outside if it's not a button meant to close
-          const target = e.target as HTMLElement;
-          if (!target.closest('[data-sheet-close="true"]')) {
-            e.preventDefault();
-          }
+          console.log("Pointer down outside event");
+          e.preventDefault();
         }}
         onInteractOutside={(e) => {
-          // Prevent closing when interacting outside if it's not a button meant to close
-          const target = e.target as HTMLElement;
-          if (!target.closest('[data-sheet-close="true"]')) {
-            e.preventDefault();
-          }
+          console.log("Interact outside event");
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          // Allow escape key to work, but only for explicit closing
+          console.log("Escape key pressed");
+          e.preventDefault();
+        }}
+        onCloseAutoFocus={(e) => {
+          // Prevent focus issues that can cause unintended closes
+          e.preventDefault();
         }}
         className="overflow-y-auto max-h-screen"
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4">
+        <div className="mt-4" onClick={preventCloseOnOutsideClick}>
           {children}
         </div>
       </SheetContent>

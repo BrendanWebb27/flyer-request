@@ -60,7 +60,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
         title="Request Details"
       >
-        <div onClick={stopPropagation} onMouseDown={stopPropagation}>
+        <div className="full-sheet-content" onClick={stopPropagation} onMouseDown={stopPropagation}>
           {request ? (
             <div className="space-y-4" onClick={stopPropagation} onMouseDown={stopPropagation}>
               <div className="grid grid-cols-2 gap-2">
@@ -120,7 +120,10 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                 <div className="flex justify-end gap-2 mt-6">
                   {request.status === "pending" && onAccept && (
                     <SheetClose asChild data-sheet-close="true">
-                      <Button onClick={handleAcceptButtonClick}>
+                      <Button 
+                        onClick={handleAcceptButtonClick}
+                        data-sheet-close="true"
+                      >
                         Accept Request
                       </Button>
                     </SheetClose>
@@ -136,6 +139,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                             handleComplete(requestId, notes);
                           }
                         }}
+                        data-sheet-close="true"
                       >
                         Complete Request
                       </Button>
