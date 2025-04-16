@@ -48,7 +48,7 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
   };
 
   return (
-    <div onClick={stopPropagation} onMouseDown={stopPropagation}>
+    <div onClick={stopPropagation}>
       <ActionButtonSheet
         buttonText="Clear"
         buttonIcon={<Trash2 size={16} />}
@@ -56,10 +56,10 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
         buttonClass="text-red-500 border-red-200 hover:bg-red-50"
         title={`Clear Request ${requestId}`}
       >
-        <div className="full-sheet-content" onClick={stopPropagation} onMouseDown={stopPropagation}>
-          <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
-          <div className="flex justify-end gap-2 mt-6">
-            <SheetClose asChild data-sheet-close="true">
+        <div className="p-4" onClick={stopPropagation}>
+          <p className="mb-6">Are you sure you want to clear this request? This will remove it from your view.</p>
+          <div className="flex justify-end gap-3 mt-6">
+            <SheetClose asChild>
               <Button 
                 variant="outline" 
                 onClick={stopPropagation}
@@ -68,13 +68,11 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
                 Cancel
               </Button>
             </SheetClose>
-            <SheetClose asChild data-sheet-close="true">
+            <SheetClose asChild>
               <Button 
                 variant="destructive" 
                 onClick={(e) => {
                   handleClearRequest(e);
-                  // Explicitly add a small delay before closing to ensure action completes
-                  setTimeout(() => {}, 100);
                 }}
                 data-sheet-close="true"
               >

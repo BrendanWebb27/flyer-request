@@ -45,11 +45,12 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
 
+  // Modified to be more robust for handling sheet open/close
   const handleOpenChange = (newOpen: boolean) => {
     console.log("Sheet onOpenChange called with:", newOpen);
-    // Only allow closing via explicit close button clicks
+    
     if (newOpen === false) {
-      // Check if the event was from a proper close button
+      // Check if the event was from a proper close button with data-sheet-close attribute
       const target = document.activeElement as HTMLElement;
       const isCloseAction = target?.hasAttribute('data-sheet-close');
       
@@ -64,12 +65,6 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     } else {
       setOpen(true);
     }
-  };
-
-  // Prevent propagation for all events inside the sheet
-  const stopPropagation = (e: React.MouseEvent | React.PointerEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   return (
@@ -92,21 +87,21 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       <SheetContent 
         side="right"
         className="overflow-y-auto max-h-screen"
-        onClick={stopPropagation}
-        onPointerDownOutside={(e) => {
-          console.log("Pointer down outside event");
+        onClick={e => e.stopPropagation()}
+        onPointerDownOutside={e => {
+          console.log("Pointer down outside event - prevented");
           e.preventDefault();
         }}
-        onEscapeKeyDown={(e) => {
+        onEscapeKeyDown={e => {
           // Prevent escape key from closing the sheet automatically
           console.log("Escape key pressed - preventing default closure");
           e.preventDefault();
         }}
-        onInteractOutside={(e) => {
-          console.log("Interact outside event");
+        onInteractOutside={e => {
+          console.log("Interact outside event - prevented");
           e.preventDefault();
         }}
-        onCloseAutoFocus={(e) => {
+        onCloseAutoFocus={e => {
           // Prevent focus issues that can cause unintended closes
           e.preventDefault();
         }}
@@ -114,7 +109,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4" onClick={stopPropagation}>
+        <div className="mt-4" onClick={e => e.stopPropagation()}>
           {children}
         </div>
       </SheetContent>

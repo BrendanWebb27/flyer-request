@@ -15,14 +15,25 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({
   onSave,
   isSupport = false 
 }) => {
+  const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    e.preventDefault();
+    action();
+  };
+
   return (
     <>
       {isEditing ? (
         <>
-          <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+          <Button 
+            variant="outline" 
+            onClick={(e) => handleButtonClick(e, () => setIsEditing(false))}
+          >
+            Cancel
+          </Button>
           <Button 
             className="bg-flyerPurple-600 hover:bg-flyerPurple-700" 
-            onClick={onSave}
+            onClick={(e) => handleButtonClick(e, onSave)}
           >
             Save Changes
           </Button>
@@ -30,7 +41,7 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({
       ) : (
         <Button 
           className="bg-flyerPurple-600 hover:bg-flyerPurple-700" 
-          onClick={() => setIsEditing(true)}
+          onClick={(e) => handleButtonClick(e, () => setIsEditing(true))}
         >
           Edit Profile
         </Button>
