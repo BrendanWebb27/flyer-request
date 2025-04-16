@@ -34,7 +34,7 @@ const Profile: React.FC = () => {
       workShift: "dayshift",
       isFlyer: true,
       flyerRole: "primary",
-      isSupport: false // Default to false
+      isSupport: false
     };
   });
 
@@ -43,7 +43,15 @@ const Profile: React.FC = () => {
     // Check localStorage for email verification status
     const emailVerified = localStorage.getItem("emailVerified") === "true";
     setIsEmailVerified(emailVerified);
-  }, []);
+    
+    // Log critical information for debugging
+    console.log("Profile loaded with:", {
+      organization: profile.organization,
+      isSupport: profile.isSupport,
+      emailVerified: emailVerified
+    });
+    
+  }, [profile.organization]);
 
   // Update the activity timestamp when the profile page is loaded
   useEffect(() => {
@@ -65,6 +73,7 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const isUserSupport = isSupportOrganization(profile.organization);
     if (profile.isSupport !== isUserSupport) {
+      console.log("Updating isSupport based on organization:", profile.organization, "isSupport:", isUserSupport);
       setProfile(prev => ({
         ...prev,
         isSupport: isUserSupport
@@ -80,6 +89,15 @@ const Profile: React.FC = () => {
   }, [profile, saveUserProfile]);
 
   const handleSaveProfile = () => {
+    // Check if organization is support organization and update isSupport flag
+    const isUserSupport = isSupportOrganization(profile.organization);
+    if (profile.isSupport !== isUserSupport) {
+      setProfile(prev => ({
+        ...prev,
+        isSupport: isUserSupport
+      }));
+    }
+    
     // Simulate API call
     setTimeout(() => {
       setIsEditing(false);
@@ -90,6 +108,15 @@ const Profile: React.FC = () => {
         title: "Profile Updated",
         description: "Your profile information has been saved successfully."
       });
+      
+      // Force update of support access
+      if (profile.organization === "Support" || profile.isSupport) {
+        localStorage.setItem("supportAccessGranted", "true");
+        toast({
+          title: "Support Access Granted",
+          description: "You now have support staff access."
+        });
+      }
     }, 500);
   };
 
@@ -149,14 +176,12 @@ const Profile: React.FC = () => {
             organizations={organizations}
           />
           
-          {/* Only show Flyer Status for support members */}
-          {profile.isSupport && (
-            <FlyerStatusForm 
-              profile={profile}
-              setProfile={setProfile}
-              isEditing={isEditing}
-            />
-          )}
+          {/* Show Flyer Status for everyone */}
+          <FlyerStatusForm 
+            profile={profile}
+            setProfile={setProfile}
+            isEditing={isEditing}
+          />
           
           {/* Email verification status indicator */}
           <div className="pt-2">

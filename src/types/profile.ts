@@ -5,11 +5,11 @@
 
 export interface UserProfile {
   name?: string;
-  manNumber: string; // Required to match usage in Profile.tsx
+  manNumber: string;
   organization: string;
-  workShift: string; // Required to match usage in Profile.tsx
-  isFlyer: boolean; // Required to match usage in Profile.tsx
-  flyerRole: string; // Required to match usage in Profile.tsx
+  workShift: string;
+  isFlyer: boolean;
+  flyerRole: string;
   isSupport: boolean; // Required for support functionality
-  email?: string; // Added to align with userSearch.ts
+  email?: string;
 }

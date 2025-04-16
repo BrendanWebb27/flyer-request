@@ -11,7 +11,7 @@ export interface UserProfile {
   workShift?: string;
   isFlyer?: boolean;
   flyerRole?: string;
-  isSupport: boolean; // Changed from optional to required to match profile.ts
+  isSupport: boolean; // Required for support functionality
 }
 
 export interface UserSuggestion {

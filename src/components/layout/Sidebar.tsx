@@ -28,7 +28,7 @@ type UserRole = "support" | "general";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-  const { isSupport } = useProfileAccess();
+  const { isSupport, getSupportAccess } = useProfileAccess();
   const { openMobile, setOpenMobile } = useSidebar();
   
   // State to manage the user role
@@ -36,8 +36,11 @@ const Sidebar: React.FC = () => {
   
   // Update role when support status changes
   useEffect(() => {
-    setUserRole(isSupport ? "support" : "general");
-  }, [isSupport]);
+    const hasSupport = getSupportAccess();
+    console.log("Sidebar checking support status:", hasSupport);
+    
+    setUserRole(hasSupport ? "support" : "general");
+  }, [isSupport, getSupportAccess]);
 
   // Fixed isActiveRoute function that properly checks for exact route matches
   const isActiveRoute = (route: string) => {
@@ -69,6 +72,25 @@ const Sidebar: React.FC = () => {
       setOpenMobile(false);
     }
   };
+
+  // Check current role on component mount
+  useEffect(() => {
+    const hasSupport = getSupportAccess();
+    console.log("Sidebar initial support check:", hasSupport);
+    
+    // Force update of role based on localStorage
+    setUserRole(hasSupport ? "support" : "general");
+    
+    // Listen for storage events that might indicate support status changes
+    const handleStorageChange = () => {
+      const newSupportStatus = getSupportAccess();
+      console.log("Storage changed, new support status:", newSupportStatus);
+      setUserRole(newSupportStatus ? "support" : "general");
+    };
+    
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [getSupportAccess]);
 
   const navItems = [
     {

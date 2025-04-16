@@ -20,8 +20,8 @@ export const getSupportAccess = (): boolean => {
   // Check profile for support organization as backup
   if (!hasAccess) {
     const profile = getUserProfile();
-    if (profile && profile.organization === "Support") {
-      console.log("Found support access from profile organization");
+    if (profile && (profile.organization === "Support" || profile.isSupport)) {
+      console.log("Found support access from profile organization or isSupport flag");
       setSupportAccess(true);
       return true;
     }
@@ -77,7 +77,8 @@ export const isUserVerified = (): boolean => {
 // Update support access based on profile
 export const updateSupportAccessFromProfile = (profile: UserProfile): void => {
   // Update support access based on organization
-  const hasAccess = isSupportOrganization(profile.organization);
+  const hasAccess = profile.isSupport || isSupportOrganization(profile.organization);
+  console.log("Updating support access from profile:", profile.organization, "hasAccess:", hasAccess);
   
   if (profile.isSupport !== hasAccess) {
     // Update the profile's isSupport property to match the organization
