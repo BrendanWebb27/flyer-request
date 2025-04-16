@@ -26,26 +26,23 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
   setActiveRequest,
   handleClearRequest
 }) => {
-  const { isSupport, getUserProfile } = useProfileAccess();
+  const { isSupport, getUserProfile, isGeneralWorkCenter } = useProfileAccess();
   
-  // Get user profile to check work center
+  // Get user profile to check permissions
   const userProfile = getUserProfile();
-  const userWorkCenter = userProfile?.workCenter || '';
-  
-  // Define general work centers that should have clear access
-  const generalWorkCenters = ["AVI", "ENG", "WPN", "APG", "E&E"];
-  const hasGeneralAccess = generalWorkCenters.includes(userWorkCenter);
   
   // Support users should see different buttons based on request status
   const showAcceptButton = isSupport && request.status === "pending";
   const showCompleteButton = isSupport && request.status === "active";
   
-  // General users with appropriate work centers should see Clear button on pending and active requests
-  // Support users should NOT see the clear button on pending and active requests
-  const showClearButton = 
-    (hasGeneralAccess && (request.status === "pending" || request.status === "active")) || 
-    (!hasGeneralAccess && !isSupport) ||
-    request.status === "completed";
+  // Show clear button logic:
+  // 1. If user is support, only show for completed requests
+  // 2. If user is not support but has a general work center, show for pending and active
+  // 3. If user is neither support nor has general work center, always show
+  const showClearButton = (isSupport && request.status === "completed") ||
+                          (!isSupport && isGeneralWorkCenter(userProfile) && 
+                           (request.status === "pending" || request.status === "active")) ||
+                          (!isSupport && !isGeneralWorkCenter(userProfile));
 
   return (
     <div className="flex items-center gap-2 flex-nowrap justify-end">

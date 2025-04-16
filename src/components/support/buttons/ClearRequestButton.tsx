@@ -23,28 +23,21 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
   requestId,
   handleClearRequest
 }) => {
-  const { isSupport, getUserProfile } = useProfileAccess();
+  const { isSupport, getUserProfile, isGeneralWorkCenter } = useProfileAccess();
   const [open, setOpen] = React.useState(false);
   
-  // Get user profile to check work center
+  // Get user profile to check permissions
   const userProfile = getUserProfile();
-  const userWorkCenter = userProfile?.workCenter || '';
   
-  // Define general work centers that should have clear access
-  const generalWorkCenters = ["AVI", "ENG", "WPN", "APG", "E&E"];
-  
-  // Check if user has clear permission based on work center
-  const hasClearPermission = generalWorkCenters.includes(userWorkCenter) && !isSupport;
+  // Determine if the user should see this button
+  // 1. Support users can ONLY clear completed requests - this would be checked in the parent component
+  // 2. General work center users can clear pending/active (would be checked in parent)
+  // 3. Other regular users can always clear any request (would be checked in parent)
   
   // Determine button style based on user role
   const buttonStyle = isSupport 
     ? "text-red-500 border-red-200 hover:bg-red-50" 
     : "text-gray-500 border-gray-200 hover:bg-gray-50";
-
-  // If user doesn't have permission, don't render the button
-  if (!hasClearPermission && isSupport) {
-    return null;
-  }
 
   // Stop all events from propagating
   const stopAllEvents = (e: React.UIEvent) => {

@@ -64,7 +64,7 @@ export function useProfileAccess() {
   }, []);
 
   // Check if user belongs to a general work center
-  const isGeneralWorkCenter = (userProfile?: UserProfile) => {
+  const isGeneralWorkCenter = (userProfile?: UserProfile | null) => {
     if (!userProfile) return false;
     const generalWorkCenters = ["AVI", "ENG", "WPN", "APG", "E&E"];
     return generalWorkCenters.includes(userProfile.workCenter || '');

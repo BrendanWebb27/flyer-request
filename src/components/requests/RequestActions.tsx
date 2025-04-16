@@ -28,7 +28,9 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 }) => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const { toast } = useToast();
-  const { isSupport } = useProfileAccess();
+  const { isSupport, getUserProfile, isGeneralWorkCenter } = useProfileAccess();
+  
+  const userProfile = getUserProfile();
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
     if (onAccept) {
@@ -88,8 +90,18 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   };
 
   const isActive = request?.status === "active";
+  const isPending = request?.status === "pending";
+  const isCompleted = request?.status === "completed";
   const canCompleteRequest = isSupport && isActive && onComplete;
-  const showClearButton = !isSupport || (isSupport && request?.status === "completed");
+  
+  // Updated rule for showing clear button:
+  // 1. Support users can only clear completed requests
+  // 2. General work center users can clear pending and active
+  // 3. Regular users can always clear
+  const showClearButton = 
+    (isSupport && isCompleted) || 
+    (!isSupport && isGeneralWorkCenter(userProfile) && (isPending || isActive)) ||
+    (!isSupport && !isGeneralWorkCenter(userProfile));
 
   return (
     <div 

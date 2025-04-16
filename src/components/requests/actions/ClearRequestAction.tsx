@@ -5,15 +5,44 @@ import { Trash2, Undo } from "lucide-react";
 import ActionButtonSheet from "./ActionButtonSheet";
 import { SheetClose } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface ClearRequestActionProps {
   requestId: string;
   onClear: (id: string) => void;
+  requestStatus?: string;
 }
 
-const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onClear }) => {
+const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ 
+  requestId, 
+  onClear,
+  requestStatus = "unknown" 
+}) => {
   const { toast } = useToast();
+  const { isSupport, getUserProfile, isGeneralWorkCenter } = useProfileAccess();
   const [isOpen, setIsOpen] = React.useState(false);
+  
+  // Get user profile to verify permissions
+  const userProfile = getUserProfile();
+  
+  // Check if user should see the clear button based on role and request status
+  const shouldShowClearButton = () => {
+    if (isSupport) {
+      // Support users can only clear completed requests
+      return requestStatus === "completed";
+    } else if (isGeneralWorkCenter(userProfile)) {
+      // General work center users can clear pending and active requests
+      return requestStatus === "pending" || requestStatus === "active";
+    } else {
+      // Regular users can clear any request
+      return true;
+    }
+  };
+  
+  // If the user shouldn't see this button, don't render it
+  if (!shouldShowClearButton()) {
+    return null;
+  }
   
   const stopAllEvents = (e: React.UIEvent) => {
     e.preventDefault();
