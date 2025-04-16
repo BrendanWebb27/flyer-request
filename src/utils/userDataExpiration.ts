@@ -46,9 +46,31 @@ export const clearExpiredUserData = (): boolean => {
     localStorage.removeItem('userProfile');
     localStorage.removeItem('lastUserActivity');
     
+    // Don't remove verified emails list to maintain device-independent verification
+    // localStorage.removeItem('verifiedEmails');
+    // localStorage.removeItem('emailOrganizationMap');
+    
     console.log('User data cleared due to inactivity');
     return true;
   }
   
   return false;
+};
+
+/**
+ * Gets the list of verified emails
+ * @returns array of verified email addresses
+ */
+export const getVerifiedEmails = (): string[] => {
+  return JSON.parse(localStorage.getItem('verifiedEmails') || '[]');
+};
+
+/**
+ * Gets the organization associated with a verified email
+ * @param email The email address to look up
+ * @returns organization name or undefined if not found
+ */
+export const getEmailOrganization = (email: string): string | undefined => {
+  const emailOrganizationMap = JSON.parse(localStorage.getItem('emailOrganizationMap') || '{}');
+  return emailOrganizationMap[email];
 };

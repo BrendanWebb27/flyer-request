@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Shield } from "lucide-react";
@@ -25,6 +25,40 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [step, setStep] = useState<"email" | "code">("email");
+
+  // Check if email is already in verified emails list
+  useEffect(() => {
+    const checkVerifiedEmails = () => {
+      const verifiedEmails = JSON.parse(localStorage.getItem('verifiedEmails') || '[]');
+      
+      // If the entered email exists in verified emails list, auto-verify
+      if (email && verifiedEmails.includes(email)) {
+        toast({
+          title: "Email Recognized",
+          description: "This email has already been verified before.",
+        });
+        
+        // Get previously assigned organization for this email
+        const emailOrganizationMap = JSON.parse(localStorage.getItem('emailOrganizationMap') || '{}');
+        const organization = emailOrganizationMap[email];
+        
+        if (organization) {
+          // Set activity timestamp and grant access
+          updateUserActivityTimestamp();
+          localStorage.setItem("organizationAccess", organization);
+          localStorage.setItem("supportAccessGranted", "true");
+          localStorage.setItem("supportUserEmail", email);
+          localStorage.setItem("emailVerified", "true");
+          onAccessGranted();
+        } else {
+          // If organization not found but email is verified, go to code step
+          setStep("code");
+        }
+      }
+    };
+    
+    checkVerifiedEmails();
+  }, [email, onAccessGranted, toast]);
 
   const checkEmailDomain = () => {
     setIsLoading(true);
@@ -60,6 +94,18 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
         // Set the initial activity timestamp when a user is verified
         updateUserActivityTimestamp();
         
+        // Store email in verified emails list
+        const verifiedEmails = JSON.parse(localStorage.getItem('verifiedEmails') || '[]');
+        if (!verifiedEmails.includes(email)) {
+          verifiedEmails.push(email);
+          localStorage.setItem('verifiedEmails', JSON.stringify(verifiedEmails));
+          
+          // Map email to organization
+          const emailOrganizationMap = JSON.parse(localStorage.getItem('emailOrganizationMap') || '{}');
+          emailOrganizationMap[email] = organization;
+          localStorage.setItem('emailOrganizationMap', JSON.stringify(emailOrganizationMap));
+        }
+        
         toast({
           title: "Access Granted",
           description: `You now have support access for ${organization}`,
@@ -68,6 +114,7 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
         localStorage.setItem("organizationAccess", organization);
         localStorage.setItem("supportAccessGranted", "true");
         localStorage.setItem("supportUserEmail", email);
+        localStorage.setItem("emailVerified", "true");
         onAccessGranted();
       } else {
         setAttempts(prev => prev + 1);
