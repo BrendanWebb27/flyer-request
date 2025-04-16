@@ -11,6 +11,7 @@ import { isSupportOrganization, getUserProfile, saveUserProfile } from "./profil
 export const getSupportAccess = (): boolean => {
   // Check for expired data first
   if (clearExpiredUserData()) {
+    console.log("Support access check: User data expired");
     return false;
   }
   
@@ -62,8 +63,12 @@ export const setSupportAccess = (hasAccess: boolean): void => {
   // Dispatch storage event to notify other components
   try {
     window.dispatchEvent(new Event("storage"));
+    // Add an additional custom event for better cross-component communication
+    window.dispatchEvent(new CustomEvent("supportAccessChanged", { 
+      detail: { hasAccess } 
+    }));
   } catch (e) {
-    console.error("Error dispatching storage event:", e);
+    console.error("Error dispatching events:", e);
   }
 };
 
@@ -81,6 +86,7 @@ export const updateSupportAccessFromProfile = (profile: UserProfile): void => {
   console.log("Updating support access from profile:", profile.organization, "hasAccess:", hasAccess);
   
   if (profile.isSupport !== hasAccess) {
+    console.log("Profile isSupport flag doesn't match organization status, updating...");
     // Update the profile's isSupport property to match the organization
     const updatedProfile = {
       ...profile,
@@ -128,6 +134,9 @@ export const updateSupportAccessFromProfile = (profile: UserProfile): void => {
           localStorage.setItem("verifiedEmails", JSON.stringify(verifiedEmails));
         }
       }
+      
+      // Force verification for support staff
+      localStorage.setItem("emailVerified", "true");
     } catch (e) {
       console.error("Error updating support profiles:", e);
     }

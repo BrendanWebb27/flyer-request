@@ -10,6 +10,9 @@ export interface UserProfile {
   workShift: string;
   isFlyer: boolean;
   flyerRole: string;
-  isSupport: boolean; // Required for support functionality
+  isSupport: boolean;
   email?: string;
+  username?: string; 
+  isVerified?: boolean;
+  verificationCode?: string;
 }

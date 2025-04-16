@@ -37,11 +37,13 @@ const SupportRoute = ({ children }: { children: JSX.Element }) => {
 // Route guard component for regular users
 const UserRoute = ({ children }: { children: JSX.Element }) => {
   // Use our custom hook to check if user is support staff
-  const { isSupport } = useProfileAccess();
+  const { isSupport, getSupportAccess } = useProfileAccess();
+  const hasAccessCheck = getSupportAccess();
   
-  console.log("UserRoute check - isSupport:", isSupport);
+  console.log("UserRoute check - isSupport flag:", isSupport);
+  console.log("UserRoute check - hasAccess result:", hasAccessCheck);
   
-  if (isSupport) {
+  if (hasAccessCheck) {
     console.log("Support user detected, redirecting to support dashboard");
     return <Navigate to="/support" replace />;
   }
@@ -68,7 +70,8 @@ const VerifiedRoute = ({ children }: { children: JSX.Element }) => {
 
 const App = () => {
   // Use the hook to track support status changes
-  const { isSupport } = useProfileAccess();
+  const { isSupport, getSupportAccess } = useProfileAccess();
+  const [hasAccess, setHasAccess] = useState(false);
 
   // Check user verification status on app load
   useEffect(() => {
@@ -83,14 +86,32 @@ const App = () => {
         localStorage.setItem("emailVerified", "true");
       }
       
+      // Check for support access
+      const supportAccess = getSupportAccess();
+      setHasAccess(supportAccess);
+      
       // Debug support access
-      const supportAccess = localStorage.getItem("supportAccessGranted");
       console.log("App initialized - Support access:", supportAccess);
       console.log("isSupport from hook:", isSupport);
     };
     
     checkUserVerification();
-  }, [isSupport]);
+    
+    // Listen for support access changes
+    const handleSupportAccessChange = () => {
+      const newAccessStatus = getSupportAccess();
+      console.log("Support access changed event detected:", newAccessStatus);
+      setHasAccess(newAccessStatus);
+    };
+    
+    window.addEventListener('supportAccessChanged', handleSupportAccessChange);
+    window.addEventListener('storage', handleSupportAccessChange);
+    
+    return () => {
+      window.removeEventListener('supportAccessChanged', handleSupportAccessChange);
+      window.removeEventListener('storage', handleSupportAccessChange);
+    };
+  }, [isSupport, getSupportAccess]);
 
   return (
     <QueryClientProvider client={queryClient}>

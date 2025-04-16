@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Trash2, Eye, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -41,8 +41,15 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   onRequestUpdated
 }) => {
   const [open, setOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
   const { toast } = useToast();
   const { isSupport } = useProfileAccess();
+  const dialogActionRef = useRef<HTMLButtonElement>(null);
+  
+  // Prevent auto-closing of dialogs by stopping propagation
+  const handleDialogClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
     if (onAccept) {
@@ -112,6 +119,11 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     }
   };
 
+  const handleClearRequest = () => {
+    onClear(requestId);
+    setAlertOpen(false);
+  };
+
   // Check if the request is active to show complete button directly
   const isActive = request?.status === "active";
   // Only show the complete button if user is support staff
@@ -124,20 +136,23 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
                           (isSupport && request?.status === "completed");
 
   return (
-    <div className="flex gap-2 self-end md:self-center">
+    <div className="flex gap-2 self-end md:self-center" onClick={handleDialogClick}>
       {showClearButton && (
-        <AlertDialog>
+        <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
           <AlertDialogTrigger asChild>
             <Button 
               variant="outline" 
               size="sm"
               className="text-red-500 border-red-200 hover:bg-red-50"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
             >
               <Trash2 size={16} />
               Clear
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent onClick={handleDialogClick}>
             <AlertDialogHeader>
               <AlertDialogTitle>Clear this request?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -145,8 +160,11 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => onClear(requestId)}>
+              <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={(e) => {
+                e.stopPropagation();
+                handleClearRequest();
+              }}>
                 Clear Request
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -158,7 +176,10 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         <Button 
           size="sm" 
           className="bg-green-600 hover:bg-green-700"
-          onClick={() => setOpen(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
         >
           <Check size={16} className="mr-1" />
           Complete
@@ -170,6 +191,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
           <Button 
             size="sm" 
             className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
+            ref={dialogActionRef}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -180,7 +202,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
             View Details
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto" onClick={handleDialogClick}>
           {request ? (
             <RequestDetailsDialog 
               request={request} 
