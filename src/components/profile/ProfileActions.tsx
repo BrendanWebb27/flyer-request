@@ -22,7 +22,7 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({
   };
 
   return (
-    <>
+    <div className="flex gap-2 justify-end w-full">
       {isEditing ? (
         <>
           <Button 
@@ -46,7 +46,7 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({
           Edit Profile
         </Button>
       )}
-    </>
+    </div>
   );
 };
 
