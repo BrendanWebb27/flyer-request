@@ -60,13 +60,6 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
       <DialogContent 
         className="max-w-md max-h-[80vh] overflow-y-auto" 
         onClick={handleDialogClick}
-        onPointerDownOutside={(e) => {
-          // Prevent auto-closing when clicking outside
-          e.preventDefault();
-        }}
-        onEscapeKeyDown={(e) => {
-          // Allow ESC key to still close the dialog
-        }}
       >
         {request ? (
           <RequestDetailsDialog 

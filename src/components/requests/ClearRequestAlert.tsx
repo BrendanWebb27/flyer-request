@@ -57,13 +57,7 @@ const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
           Clear
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent 
-        onClick={handleDialogClick}
-        onPointerDownOutside={(e) => {
-          // Prevent clicking outside from auto-closing
-          e.preventDefault();
-        }}
-      >
+      <AlertDialogContent onClick={handleDialogClick}>
         <AlertDialogHeader>
           <AlertDialogTitle>Clear this request?</AlertDialogTitle>
           <AlertDialogDescription>
