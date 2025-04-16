@@ -36,25 +36,18 @@ const ActiveRequests: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>(statusParam || "all");
 
   // Update URL when tab changes - with debouncing to prevent multiple updates
-  const navigateDebounced = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    if (navigateDebounced.current) {
-      clearTimeout(navigateDebounced.current);
-    }
-    
-    navigateDebounced.current = setTimeout(() => {
+    const updateUrl = () => {
       if (statusParam !== activeTab && activeTab !== "all") {
         navigate(`/active?status=${activeTab}`, { replace: true });
       } else if (statusParam !== activeTab && activeTab === "all") {
         navigate(`/active`, { replace: true });
       }
-    }, 100);
-    
-    return () => {
-      if (navigateDebounced.current) {
-        clearTimeout(navigateDebounced.current);
-      }
     };
+    
+    // Add a small delay to batch URL changes
+    const timeoutId = setTimeout(updateUrl, 100);
+    return () => clearTimeout(timeoutId);
   }, [activeTab, navigate, statusParam]);
 
   // Update active tab when URL changes
@@ -66,29 +59,20 @@ const ActiveRequests: React.FC = () => {
     }
   }, [statusParam]);
   
-  // Listen for request updates with reduced frequency
+  // Listen for request updates
   useEffect(() => {
     const handleStorageChange = () => {
       refreshTriggerRef.current += 1;
-      // Only update the state occasionally to avoid too many re-renders
-      if (refreshTriggerRef.current % 3 === 0) {
-        setRefreshCount(prev => prev + 1);
-      }
+      // Update the state to trigger re-render
+      setRefreshCount(prev => prev + 1);
     };
     
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
     
-    // Less frequent refresh interval
-    const refreshInterval = setInterval(() => {
-      refreshTriggerRef.current += 1;
-      setRefreshCount(prev => prev + 1);
-    }, 5000);
-    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('requestUpdated', handleStorageChange);
-      clearInterval(refreshInterval);
     };
   }, []);
   
@@ -128,7 +112,7 @@ const ActiveRequests: React.FC = () => {
     }, 10000); // 10 seconds
   };
 
-  // Handle accepting a request with estimated time - with optimized updates
+  // Handle accepting a request with estimated time
   const handleAcceptRequest = useCallback((id: string, data: { estimatedTime: string }) => {
     console.log("ActiveRequests: Accepting request", id, data);
     
@@ -137,23 +121,30 @@ const ActiveRequests: React.FC = () => {
       estimatedTime: data.estimatedTime 
     });
     
-    // After accepting, navigate to active tab
-    setActiveTab("active");
-    
-    // Use replace to prevent history buildup
-    navigate(`/active?status=active&t=${Date.now()}`, { replace: true });
-    
-    // Show a toast notification
+    // Show a toast notification first
     toast({
       title: "Request Accepted",
       description: `You'll arrive in ${data.estimatedTime}.`,
     });
     
-    // Update the refresh counter to trigger a re-render
-    refreshTriggerRef.current += 1;
-    setRefreshCount(prev => prev + 1);
+    // After accepting, navigate to active tab with a small delay to prevent UI glitches
+    setTimeout(() => {
+      setActiveTab("active");
+      navigate(`/active?status=active`, { replace: true });
+      
+      // Update the refresh counter to trigger a re-render
+      refreshTriggerRef.current += 1;
+      setRefreshCount(prev => prev + 1);
+    }, 200);
     
   }, [acceptRequest, navigate, toast]);
+
+  // Force refresh when explicitly requested
+  const handleRequestUpdated = useCallback(() => {
+    console.log("ActiveRequests: Request update detected");
+    refreshTriggerRef.current += 1;
+    setRefreshCount(prev => prev + 1);
+  }, []);
 
   // Filter requests based on user role
   const filteredRequests = React.useMemo(() => {
@@ -198,6 +189,7 @@ const ActiveRequests: React.FC = () => {
                 onClearRequest={handleClearRequest}
                 currentUserId={currentUserId}
                 onAcceptRequest={isSupport ? handleAcceptRequest : undefined}
+                onRequestUpdated={handleRequestUpdated}
               />
             </TabsContent>
           ))}

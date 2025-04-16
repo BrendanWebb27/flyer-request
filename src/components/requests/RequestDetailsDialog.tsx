@@ -30,6 +30,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
   onClose
 }) => {
   const [showTimeInput, setShowTimeInput] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,19 +44,28 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
     console.log("Form submitted with values:", values);
     
     if (onAccept) {
-      // Convert input to format: "X minutes"
-      const formattedTime = `${values.estimatedTime} minutes`;
-      console.log("Calling onAccept with:", request.id, { estimatedTime: formattedTime });
+      setIsSubmitting(true);
       
-      onAccept(request.id, { estimatedTime: formattedTime });
-      
-      // Reset form state and close input
-      form.reset();
-      setShowTimeInput(false);
-      
-      // Force close the dialog 
-      if (onClose) {
-        onClose();
+      try {
+        // Convert input to format: "X minutes"
+        const formattedTime = `${values.estimatedTime} minutes`;
+        console.log("Calling onAccept with:", request.id, { estimatedTime: formattedTime });
+        
+        // Call the accept function
+        onAccept(request.id, { estimatedTime: formattedTime });
+        
+        // Reset form state
+        form.reset();
+        setShowTimeInput(false);
+      } catch (error) {
+        console.error("Error in RequestDetailsDialog:", error);
+        toast({
+          title: "Error",
+          description: "Failed to accept request. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -137,6 +147,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
                       {...field} 
                       min="1"
                       autoFocus
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                 </FormItem>
@@ -147,10 +158,13 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
                 type="button"
                 variant="outline"
                 onClick={() => setShowTimeInput(false)}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit">Confirm</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Accepting..." : "Confirm"}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -44,25 +44,33 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     if (onAccept) {
       console.log("RequestActions: Accepting request with ID:", id);
       
-      // Call the accept function
-      onAccept(id, data);
-      
-      // Close dialog immediately
-      setOpen(false);
-      
-      // Show toast to confirm action
-      toast({
-        title: "Request Accepted",
-        description: `You'll arrive in ${data.estimatedTime}.`,
-      });
-      
-      // Trigger storage events to update all components
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new CustomEvent('requestUpdated'));
-      
-      // Also call the callback directly if available
-      if (onRequestUpdated) {
-        onRequestUpdated();
+      try {
+        // Call the accept function
+        onAccept(id, data);
+        
+        // Show toast to confirm action
+        toast({
+          title: "Request Accepted",
+          description: `You'll arrive in ${data.estimatedTime}.`,
+        });
+        
+        // Trigger storage events to update all components
+        window.dispatchEvent(new Event('requestUpdated'));
+        
+        // Also call the callback directly if available
+        if (onRequestUpdated) {
+          onRequestUpdated();
+        }
+      } catch (error) {
+        console.error("Error accepting request:", error);
+        toast({
+          title: "Error",
+          description: "Failed to accept request. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        // Close dialog with a slight delay to prevent UI glitches
+        setTimeout(() => setOpen(false), 100);
       }
     }
   };

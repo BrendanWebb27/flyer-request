@@ -20,7 +20,8 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   formatDate,
   onClearRequest,
   currentUserId,
-  onAcceptRequest
+  onAcceptRequest,
+  onRequestUpdated
 }) => {
   // Filter requests based on tab - using useMemo to prevent unnecessary recalculations
   const filteredRequests = useMemo(() => {
@@ -34,6 +35,19 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   useEffect(() => {
     console.log("RequestsTabContent: Received requests for status:", status);
   }, [requests, status]);
+  
+  // Handle request acceptance with proper notification
+  const handleAcceptRequest = (id: string, data: { estimatedTime: string }) => {
+    if (onAcceptRequest) {
+      console.log("RequestsTabContent: Handling accept for request:", id);
+      onAcceptRequest(id, data);
+      
+      // Notify parent components about the update
+      if (onRequestUpdated) {
+        onRequestUpdated();
+      }
+    }
+  };
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -44,7 +58,8 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
             request={request}
             formatDate={formatDate}
             onClearRequest={onClearRequest}
-            onAccept={onAcceptRequest}
+            onAccept={handleAcceptRequest}
+            onRequestUpdated={onRequestUpdated}
           />
         ))
       ) : (
