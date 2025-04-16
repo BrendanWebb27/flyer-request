@@ -66,9 +66,13 @@ export const userSearchApi = {
     
     // Get suggestions from mock users
     const suggestions = mockUsers.filter(user => 
-      user.username.toLowerCase().includes(query.toLowerCase()) ||
-      user.email.toLowerCase().includes(query.toLowerCase())
-    );
+      (user.username && user.username.toLowerCase().includes(query.toLowerCase())) ||
+      user.email.toLowerCase().includes(query.toLowerCase()) ||
+      (user.manNumber && user.manNumber.toLowerCase().includes(query.toLowerCase()))
+    ).map(user => ({
+      username: user.username || user.email.split('@')[0],
+      email: user.email
+    }));
     
     console.log("API: Found suggestions:", suggestions.length);
     return suggestions;

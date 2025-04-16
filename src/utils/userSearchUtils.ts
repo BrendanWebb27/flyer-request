@@ -51,7 +51,10 @@ export function performMockSearch(query: string): UserProfile[] {
     console.log("Extracted man number from query:", extractedManNumber);
     
     // Check if this username matches any in our mock database
-    const matchedUser = mockUsers.find(user => user.username.toLowerCase().includes(extractedManNumber.toLowerCase()));
+    const matchedUser = mockUsers.find(user => 
+      user.username.toLowerCase().includes(extractedManNumber.toLowerCase()) ||
+      (user.manNumber && user.manNumber.toLowerCase().includes(extractedManNumber.toLowerCase()))
+    );
     
     if (matchedUser) {
       console.log("Found user with matching man number in mock database:", matchedUser);
@@ -76,7 +79,7 @@ export function performMockSearch(query: string): UserProfile[] {
         email: associatedEmail,
         organization: "36 FGS",
         isVerified: verifiedEmails.includes(associatedEmail),
-        username: username,
+        username: username, // Using the original query as the username
         manNumber: `AF${extractedManNumber}`,
         workShift: "dayshift", // Default value
         isFlyer: false, // Default value
@@ -101,7 +104,7 @@ export function performMockSearch(query: string): UserProfile[] {
           ? getEmailOrganization(trimmedQuery) || "36 FGS"
           : "36 FGS",
         isVerified: isAlreadyVerified || Math.random() > 0.3, // Verified if in our records, otherwise 70% chance
-        username: matchedUser?.username || undefined,
+        username: matchedUser?.username || trimmedQuery.split('@')[0], // Use username if available or create from email
         manNumber: matchedUser?.manNumber || `AF${Math.floor(10000 + Math.random() * 90000)}`,
         workShift: "dayshift", // Default value
         isFlyer: false, // Default value
@@ -120,7 +123,8 @@ export function performMockSearch(query: string): UserProfile[] {
     // Try to find a username match for this man number
     const matchedUser = mockUsers.find(user => 
       user.manNumber === `AF${manNumber}` || 
-      user.username.startsWith(manNumber)
+      user.username.startsWith(manNumber) ||
+      (user.username && user.username.includes(manNumber))
     );
     
     if (matchedUser) {
@@ -138,7 +142,21 @@ export function performMockSearch(query: string): UserProfile[] {
       }];
     }
     
-    throw new Error("No user found with that man number");
+    // Create a new profile with the man number if no match found
+    const generatedUsername = `${manNumber} User`;
+    const associatedEmail = `user${manNumber}@us.af.mil`;
+    
+    return [{ 
+      email: associatedEmail,
+      organization: "36 FGS",
+      isVerified: verifiedEmails.includes(associatedEmail),
+      username: generatedUsername, // Generate a username based on the man number
+      manNumber: `AF${manNumber}`,
+      workShift: "dayshift",
+      isFlyer: false,
+      flyerRole: "none",
+      isSupport: false
+    }];
   }
   
   throw new Error("Please enter a valid email, man number, or username (##### Name)");

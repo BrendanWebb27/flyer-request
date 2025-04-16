@@ -52,7 +52,6 @@ const UserSearchResults: React.FC<UserSearchResultsProps> = ({ results, onSelect
                 </div>
               )}
               
-              {/* Display workShift if available */}
               {user.workShift && (
                 <div className="text-sm text-muted-foreground">
                   <strong>Shift:</strong> {user.workShift}
