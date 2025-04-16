@@ -58,15 +58,9 @@ export const usePushNotifications = () => {
   // Unsubscribe from push notifications
   const unsubscribe = useCallback(async () => {
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      if (!supabaseUrl) {
-        console.error('Supabase URL is missing');
-        return false;
-      }
-      
       // Unregister with Supabase
       if (subscription) {
-        await fetch(`${supabaseUrl}/functions/v1/unregister-push`, {
+        await fetch('https://your-app-id.supabase.co/functions/v1/unregister-push', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

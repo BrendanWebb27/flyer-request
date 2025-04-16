@@ -3,16 +3,6 @@
  * Utilities for managing push notifications
  */
 
-// Define types for push subscriptions - making all required properties explicitly required
-export interface PushSubscriptionJSON {
-  endpoint: string; // This is required
-  expirationTime: number | null;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
-}
-
 // Store the subscription in local storage
 export const saveSubscription = (subscription: PushSubscriptionJSON): void => {
   if (!subscription) return;
@@ -56,30 +46,13 @@ export const subscribeToPush = async (): Promise<PushSubscriptionJSON | null> =>
       return null;
     }
     
-    // Get VAPID key from environment
-    // You should set this in your Vite environment variables
-    const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-    if (!vapidPublicKey) {
-      console.error('VAPID public key is missing');
-      return null;
-    }
-    
     // Get the subscription
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+      applicationServerKey: urlBase64ToUint8Array(process.env.VITE_VAPID_PUBLIC_KEY || '')
     });
     
-    // Convert browser's PushSubscription to our PushSubscriptionJSON type
-    const subscriptionJSON: PushSubscriptionJSON = {
-      endpoint: subscription.endpoint,
-      expirationTime: subscription.expirationTime,
-      keys: {
-        p256dh: subscription.toJSON().keys.p256dh,
-        auth: subscription.toJSON().keys.auth
-      }
-    };
-    
+    const subscriptionJSON = subscription.toJSON();
     saveSubscription(subscriptionJSON);
     
     // Register with Supabase
@@ -111,15 +84,8 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 // Register subscription with Supabase
 async function registerSubscriptionWithSupabase(subscription: PushSubscriptionJSON): Promise<void> {
   try {
-    // Get your Supabase URL from environment variables
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    if (!supabaseUrl) {
-      console.error('Supabase URL is missing');
-      return;
-    }
-    
     // Call the Supabase Edge Function to register the subscription
-    const response = await fetch(`${supabaseUrl}/functions/v1/register-push`, {
+    const response = await fetch('https://your-app-id.supabase.co/functions/v1/register-push', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,4 +108,14 @@ async function registerSubscriptionWithSupabase(subscription: PushSubscriptionJS
   } catch (error) {
     console.error('Error registering push subscription:', error);
   }
+}
+
+// Define types for push subscriptions
+export interface PushSubscriptionJSON {
+  endpoint: string;
+  expirationTime: number | null;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 }
