@@ -9,6 +9,7 @@ import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import ProfileForm from "@/components/profile/ProfileForm";
 import FlyerStatusForm from "@/components/profile/FlyerStatusForm";
 import ProfileActions from "@/components/profile/ProfileActions";
+import NotificationsForm from "@/components/profile/NotificationsForm";
 
 const Profile: React.FC = () => {
   const { toast } = useToast();
@@ -114,6 +115,9 @@ const Profile: React.FC = () => {
           />
         </CardFooter>
       </Card>
+      
+      {/* Add the notifications form */}
+      <NotificationsForm isEditing={isEditing} />
     </div>
   );
 };
