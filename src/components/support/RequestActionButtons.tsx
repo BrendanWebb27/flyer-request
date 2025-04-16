@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Request } from "@/types/request";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
@@ -35,14 +34,10 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
   const showAcceptButton = isSupport && request.status === "pending";
   const showCompleteButton = isSupport && request.status === "active";
   
-  // Show clear button logic:
-  // 1. If user is support, only show for completed requests
-  // 2. If user is not support but has a general work center, show for pending and active
-  // 3. If user is neither support nor has general work center, always show
-  const showClearButton = (isSupport && request.status === "completed") ||
-                          (!isSupport && isGeneralWorkCenter(userProfile) && 
-                           (request.status === "pending" || request.status === "active")) ||
-                          (!isSupport && !isGeneralWorkCenter(userProfile));
+  // Updated clear button logic to align with isGeneralWorkCenter
+  const showClearButton = 
+    (isSupport && request.status === "completed") ||
+    (!isSupport && (request.status === "pending" || request.status === "active"));
 
   return (
     <div className="flex items-center gap-2 flex-nowrap justify-end">
@@ -70,7 +65,6 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
         />
       )}
       
-      {/* View Details always available to all users */}
       <ViewDetailsButton 
         requestId={request.id}
         request={request}

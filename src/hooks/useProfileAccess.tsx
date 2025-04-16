@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { clearExpiredUserData, getVerifiedEmails } from "@/utils/userDataExpiration";
 import { UserProfile } from "@/types/profile";
@@ -63,11 +62,11 @@ export function useProfileAccess() {
     }
   }, []);
 
-  // Check if user belongs to a general work center
+  // Modify isGeneralWorkCenter to treat regular users the same as general work center users
   const isGeneralWorkCenter = (userProfile?: UserProfile | null) => {
-    if (!userProfile) return false;
+    if (!userProfile) return true; // Default to true for non-support users
     const generalWorkCenters = ["AVI", "ENG", "WPN", "APG", "E&E"];
-    return generalWorkCenters.includes(userProfile.workCenter || '');
+    return generalWorkCenters.includes(userProfile.workCenter || '') || !isSupportOrganization(userProfile.organization);
   };
 
   // Custom save function that also updates support status
