@@ -4,10 +4,10 @@ import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getVerifiedEmails } from "@/utils/userDataExpiration";
 import UserSearchResults from "@/components/support/UserSearchResults";
 import UserSuggestions from "@/components/support/UserSuggestions";
 import { useUserSearch } from "@/hooks/useUserSearch";
+import type { UserProfile } from "@/hooks/useUserSearch";
 
 interface UserLookupProps {
   onUserSelect?: (user: UserProfile) => void;

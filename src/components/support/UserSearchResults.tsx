@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-interface UserProfile {
+export interface UserProfile {
   email: string;
   manNumber?: string;
   organization?: string;

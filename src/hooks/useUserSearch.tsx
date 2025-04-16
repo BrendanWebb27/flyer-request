@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { getVerifiedEmails, getEmailOrganization } from "@/utils/userDataExpiration";
 import { isValidDomain, isValidCode } from "@/utils/organizationVerification";
 
-interface UserProfile {
+export interface UserProfile {
   email: string;
   manNumber?: string;
   organization?: string;
