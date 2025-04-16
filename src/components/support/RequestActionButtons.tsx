@@ -1,11 +1,8 @@
 
 import React from "react";
 import { Request } from "@/types/request";
-import { useProfileAccess } from "@/hooks/useProfileAccess";
-import AcceptRequestButton from "./buttons/AcceptRequestButton";
-import CompleteRequestButton from "./buttons/CompleteRequestButton";
-import ClearRequestButton from "./buttons/ClearRequestButton";
-import ViewDetailsButton from "./buttons/ViewDetailsButton";
+import RequestButtonGroup from "./buttons/RequestButtonGroup";
+import { useActionTypeSelector } from "./buttons/ActionTypeSelector";
 
 interface RequestActionButtonsProps {
   request: Request;
@@ -21,71 +18,35 @@ interface RequestActionButtonsProps {
 
 const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
   request,
+  requestIndex,
   acceptRequest,
   completeRequest,
   addNote,
+  clearRequest,
   setActiveRequest,
   handleClearRequest
 }) => {
-  const { isSupport } = useProfileAccess();
-  
-  // Support users should see different buttons based on request status
-  const showAcceptButton = isSupport && request.status === "pending";
-  const showCompleteButton = isSupport && request.status === "active";
-  
-  // Simplified clear button logic:
-  // 1. Support users can ONLY clear completed requests
-  // 2. Non-support users can clear pending or active requests
-  const showClearButton = 
-    (isSupport && request.status === "completed") ||
-    (!isSupport && (request.status === "pending" || request.status === "active"));
+  // Use our selector hook to determine which buttons to display
+  const {
+    showCompleteButton,
+    showClearButton,
+    isPending
+  } = useActionTypeSelector(request);
     
-  // Handler to prevent event bubbling
-  const handleDetailClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setActiveRequest(request.id);
-  };
-
   return (
     <div className="flex items-center gap-2 flex-nowrap justify-end">
-      {/* For pending requests, we only show the ViewDetailsButton which now handles both viewing and accepting */}
-      {showAcceptButton ? (
-        <ViewDetailsButton 
-          requestId={request.id}
-          request={request}
-          onAccept={acceptRequest}
-          onComplete={completeRequest}
-          onClick={handleDetailClick}
-          showAcceptInDetails={true} // New prop to show Accept functionality in details
-        />
-      ) : (
-        <>
-          {showCompleteButton && (
-            <CompleteRequestButton 
-              request={request}
-              completeRequest={completeRequest}
-              addNote={addNote}
-              setActiveRequest={setActiveRequest}
-            />
-          )}
-          
-          {showClearButton && (
-            <ClearRequestButton 
-              requestId={request.id}
-              handleClearRequest={handleClearRequest}
-            />
-          )}
-          
-          <ViewDetailsButton 
-            requestId={request.id}
-            request={request}
-            onAccept={acceptRequest}
-            onComplete={completeRequest}
-            onClick={handleDetailClick}
-            showAcceptInDetails={false}
-          />
-        </>
-      )}
+      <RequestButtonGroup 
+        request={request}
+        requestIndex={requestIndex}
+        acceptRequest={acceptRequest}
+        completeRequest={completeRequest}
+        addNote={addNote}
+        setActiveRequest={setActiveRequest}
+        handleClearRequest={handleClearRequest}
+        showCompleteButton={showCompleteButton}
+        showClearButton={showClearButton}
+        isPending={isPending}
+      />
     </div>
   );
 };
