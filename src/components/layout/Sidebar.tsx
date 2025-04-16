@@ -32,8 +32,20 @@ const Sidebar: React.FC = () => {
   const [userRole, setUserRole] = useState<UserRole>("general");
   
   useEffect(() => {
-    const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
-    setUserRole(hasAccess ? "support" : "general");
+    const checkSupport = () => {
+      const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
+      setUserRole(hasAccess ? "support" : "general");
+    };
+    
+    // Check on mount and whenever location changes
+    checkSupport();
+    
+    // Listen for storage events (profile updates)
+    window.addEventListener("storage", checkSupport);
+    
+    return () => {
+      window.removeEventListener("storage", checkSupport);
+    };
   }, [location.pathname]); // Re-check on route change
 
   // Fixed isActiveRoute function that properly checks for exact route matches
@@ -147,7 +159,6 @@ const Sidebar: React.FC = () => {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        {/* Removed SidebarFooter with sign out button */}
       </SidebarComponent>
     </>
   );

@@ -18,6 +18,7 @@ const queryClient = new QueryClient();
 
 // Route guard component for support-only routes
 const SupportRoute = ({ children }: { children: JSX.Element }) => {
+  // User must be in the Support organization to access support routes
   const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
   
   if (!hasAccess) {

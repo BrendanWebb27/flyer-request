@@ -24,9 +24,20 @@ const Profile: React.FC = () => {
       workShift: "dayshift",
       isFlyer: true,
       flyerRole: "primary",
-      isSupport: true // Default support status
+      isSupport: false // Default to false
     };
   });
+
+  // Check if the organization is "Support" and update isSupport accordingly
+  useEffect(() => {
+    const isUserSupport = profile.organization === "Support";
+    if (profile.isSupport !== isUserSupport) {
+      setProfile(prev => ({
+        ...prev,
+        isSupport: isUserSupport
+      }));
+    }
+  }, [profile.organization]);
 
   // Save profile data to localStorage whenever it changes
   useEffect(() => {
@@ -43,15 +54,6 @@ const Profile: React.FC = () => {
     // Simulate API call
     setTimeout(() => {
       setIsEditing(false);
-      
-      // Save updated profile to localStorage
-      localStorage.setItem("userProfile", JSON.stringify(profile));
-      
-      // Update support access flag
-      localStorage.setItem("supportAccessGranted", profile.isSupport ? "true" : "false");
-      
-      // Notify other components about the change
-      window.dispatchEvent(new Event("storage"));
       
       toast({
         title: "Profile Updated",
