@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Request } from "@/types/request";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
@@ -25,16 +26,15 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
   setActiveRequest,
   handleClearRequest
 }) => {
-  const { isSupport, getUserProfile, isGeneralWorkCenter } = useProfileAccess();
-  
-  // Get user profile to check permissions
-  const userProfile = getUserProfile();
+  const { isSupport } = useProfileAccess();
   
   // Support users should see different buttons based on request status
   const showAcceptButton = isSupport && request.status === "pending";
   const showCompleteButton = isSupport && request.status === "active";
   
-  // Updated clear button logic to align with isGeneralWorkCenter
+  // Simplified clear button logic:
+  // 1. Support users can ONLY clear completed requests
+  // 2. Non-support users can clear pending or active requests
   const showClearButton = 
     (isSupport && request.status === "completed") ||
     (!isSupport && (request.status === "pending" || request.status === "active"));

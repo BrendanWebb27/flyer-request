@@ -19,23 +19,17 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({
   requestStatus = "unknown" 
 }) => {
   const { toast } = useToast();
-  const { isSupport, getUserProfile, isGeneralWorkCenter } = useProfileAccess();
+  const { isSupport } = useProfileAccess();
   const [isOpen, setIsOpen] = React.useState(false);
-  
-  // Get user profile to verify permissions
-  const userProfile = getUserProfile();
   
   // Check if user should see the clear button based on role and request status
   const shouldShowClearButton = () => {
     if (isSupport) {
       // Support users can only clear completed requests
       return requestStatus === "completed";
-    } else if (isGeneralWorkCenter(userProfile)) {
-      // General work center users can clear pending and active requests
-      return requestStatus === "pending" || requestStatus === "active";
     } else {
-      // Regular users can clear any request
-      return true;
+      // Non-support users can clear pending and active requests
+      return requestStatus === "pending" || requestStatus === "active";
     }
   };
   
