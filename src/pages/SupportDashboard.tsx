@@ -47,6 +47,7 @@ const SupportDashboard: React.FC = () => {
   const handleSignOut = () => {
     localStorage.removeItem("supportAccessGranted");
     localStorage.removeItem("organizationAccess");
+    localStorage.removeItem("supportUserEmail");
     setHasAccess(false);
     toast({
       title: "Signed Out",
@@ -66,11 +67,13 @@ const SupportDashboard: React.FC = () => {
 
   // Organization information (in a real app, this would come from context or state)
   const organization = localStorage.getItem("organizationAccess") || "Organization";
+  const userEmail = localStorage.getItem("supportUserEmail") || "";
 
   return (
     <div className="space-y-6">
       <DashboardHeader 
-        organization={organization} 
+        organization={organization}
+        userEmail={userEmail}
         onSignOut={handleSignOut} 
       />
       

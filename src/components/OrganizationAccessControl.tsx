@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Shield } from "lucide-react";
+import { Shield, Mail } from "lucide-react";
 
 interface OrganizationAccessControlProps {
   onAccessGranted: () => void;
@@ -15,15 +15,65 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
 }) => {
   const { toast } = useToast();
   const [code, setCode] = useState("");
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
+  const [step, setStep] = useState<"email" | "code">("email");
 
-  // In a real application, this would come from a database or API
-  // This is just for demonstration purposes
+  // In a real application, these would come from a database or API
+  // Allowed domain patterns for organization email verification
+  const allowedDomains = [
+    "company.org",
+    "department.company.org",
+    "support-staff.org"
+  ];
+  
+  // Valid codes per organization domain
   const validCodes: Record<string, string> = {
     "ORG001-FLYER": "IT Department",
     "ORG002-FLYER": "Operations",
     "ORG003-FLYER": "Human Resources"
+  };
+
+  const checkEmailDomain = () => {
+    setIsLoading(true);
+    
+    // Get domain part of email
+    const emailParts = email.split('@');
+    if (emailParts.length !== 2) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    const domain = emailParts[1].toLowerCase();
+    
+    // Check if domain is allowed
+    const isDomainAllowed = allowedDomains.some(allowedDomain => 
+      domain === allowedDomain || domain.endsWith('.' + allowedDomain)
+    );
+    
+    setTimeout(() => {
+      if (isDomainAllowed) {
+        setStep("code");
+        toast({
+          title: "Email Verified",
+          description: "Please enter your organization code to continue.",
+        });
+      } else {
+        setAttempts(prev => prev + 1);
+        toast({
+          title: "Unauthorized Domain",
+          description: "Your email domain is not authorized for this application.",
+          variant: "destructive",
+        });
+      }
+      setIsLoading(false);
+    }, 1000);
   };
 
   const handleVerify = () => {
@@ -38,9 +88,10 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
           title: "Access Granted",
           description: `You now have support access for ${organization}`,
         });
-        // Store access in localStorage
+        // Store access in localStorage with additional email info
         localStorage.setItem("organizationAccess", organization);
         localStorage.setItem("supportAccessGranted", "true");
+        localStorage.setItem("supportUserEmail", email); // Store verified email
         onAccessGranted();
       } else {
         setAttempts(prev => prev + 1);
@@ -66,41 +117,83 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
           </div>
           <CardTitle className="text-2xl text-center">Organization Verification</CardTitle>
           <CardDescription className="text-center">
-            Enter your organization's one-time registration code to access the support dashboard
+            {step === "email" 
+              ? "Enter your organization email to verify access"
+              : "Enter your organization's one-time registration code"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Input
-                id="code"
-                type="text"
-                placeholder="Enter registration code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="text-center tracking-widest"
-                disabled={isLoading || attempts >= 5}
-              />
-              {attempts >= 3 && attempts < 5 && (
-                <p className="text-amber-500 text-sm text-center">
-                  Warning: {5 - attempts} attempts remaining before lockout
-                </p>
-              )}
-              {attempts >= 5 && (
-                <p className="text-red-500 text-sm text-center">
-                  Too many failed attempts. Please contact your administrator.
-                </p>
-              )}
-            </div>
-            <Button 
-              onClick={handleVerify} 
-              className="w-full bg-flyerPurple-600 hover:bg-flyerPurple-700"
-              disabled={!code || isLoading || attempts >= 5}
-            >
-              {isLoading ? "Verifying..." : "Verify Access"}
-            </Button>
+            {step === "email" ? (
+              <>
+                <div className="space-y-2">
+                  <div className="flex">
+                    <Mail className="mr-2 h-4 w-4 opacity-50 mt-3" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your.name@organization.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="flex-1"
+                      disabled={isLoading || attempts >= 5}
+                    />
+                  </div>
+                  {attempts >= 3 && attempts < 5 && (
+                    <p className="text-amber-500 text-sm text-center">
+                      Warning: {5 - attempts} attempts remaining before lockout
+                    </p>
+                  )}
+                  {attempts >= 5 && (
+                    <p className="text-red-500 text-sm text-center">
+                      Too many failed attempts. Please contact your administrator.
+                    </p>
+                  )}
+                </div>
+                <Button 
+                  onClick={checkEmailDomain} 
+                  className="w-full bg-flyerPurple-600 hover:bg-flyerPurple-700"
+                  disabled={!email || isLoading || attempts >= 5}
+                >
+                  {isLoading ? "Verifying..." : "Verify Email"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Input
+                    id="code"
+                    type="text"
+                    placeholder="Enter registration code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="text-center tracking-widest"
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={handleVerify} 
+                    className="w-full bg-flyerPurple-600 hover:bg-flyerPurple-700"
+                    disabled={!code || isLoading}
+                  >
+                    {isLoading ? "Verifying..." : "Verify Access"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setStep("email")}
+                    disabled={isLoading}
+                  >
+                    Change Email
+                  </Button>
+                </div>
+              </>
+            )}
             <p className="text-xs text-center text-muted-foreground">
-              This code should be provided by your organization administrator
+              {step === "email" 
+                ? "Only organization domains are allowed access"
+                : "This code should be provided by your organization administrator"}
             </p>
           </div>
         </CardContent>
