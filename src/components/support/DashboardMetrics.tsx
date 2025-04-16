@@ -22,6 +22,7 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
             <div>
               <p className="text-sm font-medium text-muted-foreground">Pending Requests</p>
               <p className="text-3xl font-bold">{pendingCount}</p>
+              <p className="text-xs text-muted-foreground mt-1">Awaiting acceptance</p>
             </div>
             <div className="p-2 rounded-full bg-yellow-500">
               <Clock className="h-5 w-5 text-white" />
@@ -36,6 +37,7 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
             <div>
               <p className="text-sm font-medium text-muted-foreground">Active Requests</p>
               <p className="text-3xl font-bold">{activeCount}</p>
+              <p className="text-xs text-muted-foreground mt-1">Currently in progress</p>
             </div>
             <div className="p-2 rounded-full bg-green-500">
               <MapPin className="h-5 w-5 text-white" />
@@ -50,6 +52,7 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
             <div>
               <p className="text-sm font-medium text-muted-foreground">Completed Today</p>
               <p className="text-3xl font-bold">{completedCount}</p>
+              <p className="text-xs text-muted-foreground mt-1">Within last 24 hours</p>
             </div>
             <div className="p-2 rounded-full bg-blue-500">
               <Calendar className="h-5 w-5 text-white" />

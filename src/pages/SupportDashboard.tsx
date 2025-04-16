@@ -21,8 +21,8 @@ const SupportDashboard: React.FC = () => {
     acceptRequest, 
     completeRequest, 
     formatDate, 
-    countByStatus,
-    addNote
+    addNote,
+    metrics
   } = useSupportRequests();
   
   const location = useLocation();
@@ -52,6 +52,11 @@ const SupportDashboard: React.FC = () => {
     });
   };
 
+  // Log metrics for debugging
+  useEffect(() => {
+    console.log("Dashboard metrics:", metrics);
+  }, [metrics]);
+
   // If user doesn't have access, show the access control component
   if (!hasAccess) {
     return <OrganizationAccessControl onAccessGranted={() => setHasAccess(true)} />;
@@ -68,9 +73,9 @@ const SupportDashboard: React.FC = () => {
       />
       
       <DashboardMetrics 
-        pendingCount={countByStatus("pending")}
-        activeCount={countByStatus("active")}
-        completedCount={countByStatus("completed")}
+        pendingCount={metrics.pending}
+        activeCount={metrics.active}
+        completedCount={metrics.completedToday}
       />
 
       <RequestTabs defaultValue={activeTab}>

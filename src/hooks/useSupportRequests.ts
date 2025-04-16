@@ -1,12 +1,30 @@
 
-import { useState } from "react";
-import { Request } from "@/types/request";
+import { useState, useCallback, useEffect } from "react";
+import { Request, RequestStatus } from "@/types/request";
 import { useToast } from "@/hooks/use-toast";
 import { loadRequests, saveRequests } from "@/utils/requestPersistence";
 import { acceptRequest, completeRequest, addNoteToRequest } from "@/utils/requestOperations";
-import { formatDate, countRequestsByStatus } from "@/utils/requestUtils";
+import { formatDate } from "@/utils/requestUtils";
 import { useRequestNotifications } from "@/hooks/useRequestNotifications";
 import { useRequestSync } from "@/hooks/useRequestSync";
+
+// Helper function for counting requests by status
+const countRequestsByStatus = (requests: Request[], status: RequestStatus | "all") => {
+  if (status === "all") return requests.length;
+  return requests.filter(r => r.status === status).length;
+};
+
+// Helper to count completed requests today
+const countCompletedToday = (requests: Request[]) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Start of today
+  
+  return requests.filter(request => {
+    if (request.status !== "completed" || !request.completedAt) return false;
+    const completedDate = new Date(request.completedAt);
+    return completedDate >= today;
+  }).length;
+};
 
 export const useSupportRequests = () => {
   const { toast } = useToast();
@@ -18,6 +36,17 @@ export const useSupportRequests = () => {
   
   // Hook to sync requests across tabs/components
   useRequestSync(setRequests);
+
+  // Calculate request metrics (memoized when requests change)
+  const metrics = useCallback(() => {
+    return {
+      total: requests.length,
+      pending: countRequestsByStatus(requests, "pending"),
+      active: countRequestsByStatus(requests, "active"),
+      completed: countRequestsByStatus(requests, "completed"),
+      completedToday: countCompletedToday(requests)
+    };
+  }, [requests]);
 
   const handleAcceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
     const updatedRequests = acceptRequest(requests, id, data);
@@ -80,6 +109,8 @@ export const useSupportRequests = () => {
     undoClearRequest,
     addNote: handleAddNote,
     formatDate,
-    countByStatus: (status: any) => countRequestsByStatus(requests, status)
+    countByStatus: (status: RequestStatus | "all") => countRequestsByStatus(requests, status),
+    metrics: metrics()
   };
 };
+

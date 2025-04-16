@@ -24,6 +24,11 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
             
             setRequests(parsedRequests);
             console.log("useRequestSync: Updated requests from storage event", parsedRequests);
+            
+            // Force metrics to update with small delay to ensure state consistency
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('metricsUpdate'));
+            }, 50);
           } catch (err) {
             console.error("Error parsing requests from storage:", err);
             
@@ -32,12 +37,19 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
             setRequests(directRequests);
           }
         }
+      } else {
+        // For custom events, ensure metrics update
+        window.dispatchEvent(new CustomEvent('metricsUpdate'));
       }
     };
     
     // Set up event listeners with priority handling
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
+    window.addEventListener('metricsUpdate', () => {
+      const refreshedRequests = loadRequests();
+      setRequests(refreshedRequests);
+    });
     
     // Initial load
     const initialRequests = loadRequests();
@@ -53,6 +65,7 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('requestUpdated', handleStorageChange);
+      window.removeEventListener('metricsUpdate', handleStorageChange);
       clearInterval(refreshInterval);
     };
   }, [setRequests]);
