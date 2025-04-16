@@ -46,7 +46,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
           {buttonText}
         </Button>
       </SheetTrigger>
-      <SheetContent onClick={(e) => e.stopPropagation()}>
+      <SheetContent onClick={(e) => e.stopPropagation()} onPointerDownOutside={(e) => e.preventDefault()}>
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>

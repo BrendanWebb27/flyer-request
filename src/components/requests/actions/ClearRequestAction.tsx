@@ -18,32 +18,34 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
   };
 
   return (
-    <ActionButtonSheet
-      buttonText="Clear"
-      buttonIcon={<Trash2 size={16} />}
-      buttonVariant="outline"
-      buttonClass="text-red-500 border-red-200 hover:bg-red-50"
-      title={`Clear Request ${requestId}`}
-    >
-      <div onClick={(e) => e.stopPropagation()}>
-        <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
-        <div className="flex justify-end gap-2 mt-6">
-          <SheetClose asChild>
-            <Button variant="outline" onClick={(e) => e.stopPropagation()}>
-              Cancel
-            </Button>
-          </SheetClose>
-          <SheetClose asChild>
-            <Button 
-              variant="destructive" 
-              onClick={handleClearRequest}
-            >
-              Clear Request
-            </Button>
-          </SheetClose>
+    <div onClick={(e) => e.stopPropagation()}>
+      <ActionButtonSheet
+        buttonText="Clear"
+        buttonIcon={<Trash2 size={16} />}
+        buttonVariant="outline"
+        buttonClass="text-red-500 border-red-200 hover:bg-red-50"
+        title={`Clear Request ${requestId}`}
+      >
+        <div onClick={(e) => e.stopPropagation()}>
+          <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
+          <div className="flex justify-end gap-2 mt-6">
+            <SheetClose asChild>
+              <Button variant="outline" onClick={(e) => e.stopPropagation()}>
+                Cancel
+              </Button>
+            </SheetClose>
+            <SheetClose asChild>
+              <Button 
+                variant="destructive" 
+                onClick={handleClearRequest}
+              >
+                Clear Request
+              </Button>
+            </SheetClose>
+          </div>
         </div>
-      </div>
-    </ActionButtonSheet>
+      </ActionButtonSheet>
+    </div>
   );
 };
 
