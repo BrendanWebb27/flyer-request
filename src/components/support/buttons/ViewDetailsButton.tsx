@@ -9,7 +9,7 @@ import RequestDetailsDialog from "@/components/requests/RequestDetailsDialog";
 
 interface ViewDetailsButtonProps {
   requestId: string;
-  onClick?: (e: React.MouseEvent) => void;  // Updated to accept React.MouseEvent
+  onClick?: (e?: React.MouseEvent) => void;  // Make event parameter optional
   request?: Request;
   onAccept?: (id: string, data: { assignedTo: string; estimatedTime: string }) => void;
   onComplete?: (id: string, note?: { text: string, author: string }) => void;
@@ -40,7 +40,7 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
     
     // If we have a direct handler, use it
     if (onClick) {
-      onClick(e);  // Pass the event to the handler
+      onClick(e);  // Pass the event to the handler, now optional
       return;
     }
     
