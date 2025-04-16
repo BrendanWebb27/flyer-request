@@ -8,11 +8,17 @@ interface CompleteRequestButtonProps {
 }
 
 const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({ onClick }) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault(); // Add preventDefault to ensure no navigation occurs
+    onClick(e);
+  };
+
   return (
     <Button 
       size="sm" 
       className="bg-green-600 hover:bg-green-700"
-      onClick={onClick}
+      onClick={handleClick}
     >
       <Check size={16} className="mr-1" />
       Complete

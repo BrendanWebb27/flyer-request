@@ -32,6 +32,7 @@ const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
           className="text-red-500 border-red-200 hover:bg-red-50"
           onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault(); // Add preventDefault to ensure no navigation occurs
           }}
         >
           <Trash2 size={16} />
@@ -46,9 +47,13 @@ const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             onClear();
           }}>
             Clear Request
