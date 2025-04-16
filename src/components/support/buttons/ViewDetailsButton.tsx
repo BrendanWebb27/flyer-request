@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Eye } from "lucide-react";
+import { Eye, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Request } from "@/types/request";
 import RequestDetailsDialog from "@/components/requests/RequestDetailsDialog";
@@ -13,6 +13,7 @@ interface ViewDetailsButtonProps {
   request?: Request;
   onAccept?: (id: string, data: { assignedTo: string; estimatedTime: string }) => void;
   onComplete?: (id: string, note?: { text: string, author: string }) => void;
+  showAcceptInDetails?: boolean;  // New prop to control if we should show accept UI prominently
 }
 
 const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({ 
@@ -20,7 +21,8 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   onClick,
   request,
   onAccept,
-  onComplete
+  onComplete,
+  showAcceptInDetails = false
 }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -48,16 +50,28 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
     navigate(`/request/${requestId}`);
   };
 
+  // If this is the merged accept/details button
+  const isPendingAndAcceptable = showAcceptInDetails && request?.status === "pending" && onAccept;
+
   return (
     <>
       <Button 
-        variant="ghost" 
+        variant={isPendingAndAcceptable ? "default" : "ghost"}
         size="sm"
-        className="whitespace-nowrap flex-shrink-0"
+        className={`whitespace-nowrap flex-shrink-0 ${isPendingAndAcceptable ? "bg-flyerPurple-600 hover:bg-flyerPurple-700" : ""}`}
         onClick={handleClick}
       >
-        <Eye size={16} className="mr-1" />
-        Details
+        {isPendingAndAcceptable ? (
+          <>
+            <CheckCircle size={16} className="mr-1" />
+            Accept/Details
+          </>
+        ) : (
+          <>
+            <Eye size={16} className="mr-1" />
+            Details
+          </>
+        )}
       </Button>
 
       {/* Only render dialog if we have request data */}
@@ -72,6 +86,7 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
               onClose={() => setOpen(false)}
               onAccept={onAccept}
               onComplete={onComplete}
+              highlightAccept={showAcceptInDetails} // Pass this prop to highlight the accept functionality
             />
           </DialogContent>
         </Dialog>

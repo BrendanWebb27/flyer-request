@@ -48,37 +48,44 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
 
   return (
     <div className="flex items-center gap-2 flex-nowrap justify-end">
-      {showAcceptButton && (
-        <AcceptRequestButton 
-          request={request}
-          acceptRequest={acceptRequest}
-          setActiveRequest={setActiveRequest}
-        />
-      )}
-      
-      {showCompleteButton && (
-        <CompleteRequestButton 
-          request={request}
-          completeRequest={completeRequest}
-          addNote={addNote}
-          setActiveRequest={setActiveRequest}
-        />
-      )}
-      
-      {showClearButton && (
-        <ClearRequestButton 
+      {/* For pending requests, we only show the ViewDetailsButton which now handles both viewing and accepting */}
+      {showAcceptButton ? (
+        <ViewDetailsButton 
           requestId={request.id}
-          handleClearRequest={handleClearRequest}
+          request={request}
+          onAccept={acceptRequest}
+          onComplete={completeRequest}
+          onClick={handleDetailClick}
+          showAcceptInDetails={true} // New prop to show Accept functionality in details
         />
+      ) : (
+        <>
+          {showCompleteButton && (
+            <CompleteRequestButton 
+              request={request}
+              completeRequest={completeRequest}
+              addNote={addNote}
+              setActiveRequest={setActiveRequest}
+            />
+          )}
+          
+          {showClearButton && (
+            <ClearRequestButton 
+              requestId={request.id}
+              handleClearRequest={handleClearRequest}
+            />
+          )}
+          
+          <ViewDetailsButton 
+            requestId={request.id}
+            request={request}
+            onAccept={acceptRequest}
+            onComplete={completeRequest}
+            onClick={handleDetailClick}
+            showAcceptInDetails={false}
+          />
+        </>
       )}
-      
-      <ViewDetailsButton 
-        requestId={request.id}
-        request={request}
-        onAccept={acceptRequest}
-        onComplete={completeRequest}
-        onClick={handleDetailClick}
-      />
     </div>
   );
 };

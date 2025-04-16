@@ -16,13 +16,15 @@ interface RequestDetailsDialogProps {
   onClose: () => void;
   onAccept?: (id: string, data: { assignedTo: string; estimatedTime: string }) => void;
   onComplete?: (id: string, note: { text: string, author: string }) => void;
+  highlightAccept?: boolean; // New prop to determine if we should highlight accept functionality
 }
 
 const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({ 
   request, 
   onClose, 
   onAccept,
-  onComplete 
+  onComplete,
+  highlightAccept = false
 }) => {
   const [estimatedTime, setEstimatedTime] = useState("");
   const [note, setNote] = useState("");
@@ -123,8 +125,10 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
           
           {/* Accept action - only for support staff */}
           {isPending && onAccept && (
-            <div className="space-y-4 border-t pt-4 mt-4">
-              <h4 className="font-medium">Accept Request</h4>
+            <div className={`space-y-4 border-t pt-4 mt-4 ${highlightAccept ? 'bg-flyerPurple-50 p-4 rounded-lg border border-flyerPurple-200' : ''}`}>
+              <h4 className={`font-medium ${highlightAccept ? 'text-flyerPurple-700' : ''}`}>
+                {highlightAccept ? 'Accept This Request' : 'Accept Request'}
+              </h4>
               <div className="space-y-2">
                 <Label htmlFor="estimatedTime" className="flex items-center gap-2">
                   <Clock size={16} className="text-flyerPurple-500" />
@@ -149,12 +153,12 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
               
               <Button 
                 onClick={handleAccept}
-                className="w-full bg-flyerPurple-600 hover:bg-flyerPurple-700"
+                className={`w-full ${highlightAccept ? 'bg-flyerPurple-600 hover:bg-flyerPurple-700 text-lg py-6' : 'bg-flyerPurple-600 hover:bg-flyerPurple-700'}`}
                 disabled={!estimatedTime}
                 id="acceptRequestButton"
               >
-                <Check size={16} className="mr-2" />
-                Accept Request
+                <Check size={highlightAccept ? 20 : 16} className="mr-2" />
+                {highlightAccept ? 'Accept Request Now' : 'Accept Request'}
               </Button>
             </div>
           )}
