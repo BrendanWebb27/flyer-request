@@ -38,7 +38,6 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
   };
   
   // Handler for clicks inside the dialog to prevent propagation
-  // This prevents sidebar or parent elements from capturing the click
   const handleDialogClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();

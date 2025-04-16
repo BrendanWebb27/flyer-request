@@ -112,8 +112,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   const canCompleteRequest = isSupport && isActive && onComplete;
   
   // Determine if we should show the clear button
-  // Support users can only clear completed requests
-  // General users can clear all types of requests
+  // Now all users can clear requests, but for support users, only completed requests can be cleared
   const showClearButton = !isSupport || 
                           (isSupport && request?.status === "completed");
 
@@ -121,9 +120,15 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     <div 
       className="flex gap-2 self-end md:self-center" 
       onClick={handleDialogClick}
-      onMouseDown={handleDialogClick} // Add mouse down handler
+      onMouseDown={handleDialogClick}
     >
-      {showClearButton && (
+      {/* Always show clear button for non-support users */}
+      {!isSupport && (
+        <ClearRequestAlert onClear={handleClearRequest} />
+      )}
+      
+      {/* For support users, show clear button only for completed requests */}
+      {isSupport && request?.status === "completed" && (
         <ClearRequestAlert onClear={handleClearRequest} />
       )}
       
@@ -137,6 +142,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         />
       )}
       
+      {/* Always show details button for all users */}
       <RequestDetailsButton 
         request={request}
         open={detailsOpen}

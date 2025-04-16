@@ -19,16 +19,16 @@ interface ClearRequestAlertProps {
 }
 
 const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
-  // Handler to prevent event propagation
+  // Handler to prevent event propagation and default behavior
   const handleDialogClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
   
-  // Enhanced button click handler
+  // Enhanced button click handler that stops propagation
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    e.preventDefault(); // Prevent any navigation or default behavior
+    e.preventDefault();
   };
   
   // Handler for the cancel button
@@ -46,13 +46,14 @@ const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
   
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild onClick={handleButtonClick}>
+      <AlertDialogTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
           className="text-red-500 border-red-200 hover:bg-red-50"
+          onClick={handleButtonClick}
         >
-          <Trash2 size={16} />
+          <Trash2 size={16} className="mr-1" />
           Clear
         </Button>
       </AlertDialogTrigger>
