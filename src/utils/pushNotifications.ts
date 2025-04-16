@@ -52,7 +52,16 @@ export const subscribeToPush = async (): Promise<PushSubscriptionJSON | null> =>
       applicationServerKey: urlBase64ToUint8Array(process.env.VITE_VAPID_PUBLIC_KEY || '')
     });
     
-    const subscriptionJSON = subscription.toJSON();
+    // Convert to our consistent interface
+    const subscriptionJSON: PushSubscriptionJSON = {
+      endpoint: subscription.toJSON().endpoint || '',
+      expirationTime: subscription.toJSON().expirationTime,
+      keys: {
+        p256dh: subscription.toJSON().keys?.p256dh || '',
+        auth: subscription.toJSON().keys?.auth || ''
+      }
+    };
+    
     saveSubscription(subscriptionJSON);
     
     // Register with Supabase
@@ -112,7 +121,7 @@ async function registerSubscriptionWithSupabase(subscription: PushSubscriptionJS
 
 // Define types for push subscriptions
 export interface PushSubscriptionJSON {
-  endpoint: string;
+  endpoint: string; // Making this required
   expirationTime: number | null;
   keys: {
     p256dh: string;
