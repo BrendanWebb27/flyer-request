@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -17,22 +16,16 @@ export const useActiveRequests = () => {
   const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  // Use a ref for the refresh trigger to avoid re-renders
   const refreshTriggerRef = useRef(0);
   const [refreshCount, setRefreshCount] = useState(0);
   
-  // Check for support access
   const isSupport = localStorage.getItem("supportAccessGranted") === "true";
-  
-  // This would come from authentication in a real app
   const currentUserId = "user123";
   
-  // Extract status from URL query params
   const urlParams = new URLSearchParams(location.search);
   const statusParam = urlParams.get("status") as RequestStatus | null;
   const [activeTab, setActiveTab] = useState<string>(statusParam || "all");
 
-  // Update URL when tab changes
   const updateUrlWithActiveTab = useCallback(() => {
     if (statusParam !== activeTab && activeTab !== "all") {
       navigate(`/active?status=${activeTab}`, { replace: true });
@@ -41,7 +34,6 @@ export const useActiveRequests = () => {
     }
   }, [activeTab, navigate, statusParam]);
 
-  // Handle clearing a request
   const handleClearRequest = useCallback((id: string) => {
     const requestIndex = requests.findIndex(req => req.id === id);
     clearRequest(id);
@@ -70,40 +62,43 @@ export const useActiveRequests = () => {
       )
     });
     
-    // Clear the recently cleared item after a timeout
     setTimeout(() => {
       setRecentlyCleared(null);
-    }, 10000); // 10 seconds
+    }, 10000);
   }, [requests, clearRequest, toast, recentlyCleared, undoClearRequest]);
 
-  // Handle accepting a request with estimated time
   const handleAcceptRequest = useCallback((id: string, data: { estimatedTime: string }) => {
-    console.log("ActiveRequests: Accepting request", id, data);
+    console.log("useActiveRequests: Handling accept for request", { id, data });
+    console.log("Current requests before accept:", requests);
     
     try {
-      // Call the accept function to update the request status
+      console.log("Before accept - Current active tab:", activeTab);
+      console.log("Before accept - Current requests:", requests);
+      
       acceptRequest(id, { 
-        assignedTo: "Current Support Staff", // In a real app, you'd get the current user's name
+        assignedTo: "Current Support Staff", 
         estimatedTime: data.estimatedTime 
       });
       
-      // Show a toast notification
+      console.log("After accept - Requests updated");
+      
       toast({
         title: "Request Accepted",
         description: `You'll arrive in ${data.estimatedTime}.`,
       });
       
-      // Force an immediate state refresh
       setRefreshCount(prev => prev + 1);
       
-      // Switch to active tab with a small delay to allow state updates to complete
       setTimeout(() => {
+        console.log("Switching to active tab");
         setActiveTab("active");
         navigate(`/active?status=active`, { replace: true });
         refreshTriggerRef.current += 1;
+        
+        console.log("After tab switch - Active tab:", activeTab);
       }, 300);
     } catch (error) {
-      console.error("Error accepting request:", error);
+      console.error("Error in handleAcceptRequest:", error);
       toast({
         title: "Error",
         description: "Failed to accept request. Please try again.",
@@ -111,26 +106,21 @@ export const useActiveRequests = () => {
       });
     }
     
-  }, [acceptRequest, navigate, toast]);
+  }, [acceptRequest, navigate, toast, requests, activeTab]);
 
-  // Force refresh when explicitly requested
   const handleRequestUpdated = useCallback(() => {
     console.log("ActiveRequests: Request update detected");
     refreshTriggerRef.current += 1;
     setRefreshCount(prev => prev + 1);
   }, []);
 
-  // Filter requests based on user role
   const filteredRequests = requests.filter(req => {
     if (!isSupport) {
-      // For general users, only show their own requests
       return req.requestedBy === currentUserId;
     }
-    // Support users see all requests without filtering by requestedBy
     return true;
   });
 
-  // Only display tabs that the user has access to
   const availableTabs = isSupport 
     ? ["all", "pending", "active", "completed"] 
     : ["all", "pending", "active"];
