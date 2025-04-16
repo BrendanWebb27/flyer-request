@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -71,7 +72,7 @@ const Sidebar: React.FC = () => {
       icon: FileText,
       label: "New Request",
       route: "/request",
-      roles: ["general", "support"],
+      roles: ["general"], // Remove support role to hide this for support users
     },
     {
       icon: Clock,

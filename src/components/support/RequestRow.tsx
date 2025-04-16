@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +8,7 @@ import RequestActionPanel from "@/components/RequestActionPanel";
 import CompletionForm from "./CompletionForm";
 import { Trash2, Check, Undo } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +46,7 @@ const RequestRow: React.FC<RequestRowProps> = ({
 }) => {
   const { toast } = useToast();
   const [showUndoToast, setShowUndoToast] = useState(false);
+  const { isSupport } = useProfileAccess();
 
   const getStatusBadge = (status: RequestStatus) => {
     switch (status) {
@@ -64,7 +65,6 @@ const RequestRow: React.FC<RequestRowProps> = ({
     if (clearRequest) {
       clearRequest(request.id);
       
-      // Show toast with undo option
       toast({
         title: "Request Cleared",
         description: "The request has been removed from your view.",
@@ -87,6 +87,9 @@ const RequestRow: React.FC<RequestRowProps> = ({
       });
     }
   };
+
+  const showClearButton = !isSupport || 
+                          (isSupport && request.status === "completed");
 
   return (
     <TableRow key={request.id}>
@@ -142,33 +145,35 @@ const RequestRow: React.FC<RequestRowProps> = ({
             </Sheet>
           )}
           
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-red-500 border-red-200 hover:bg-red-50"
-              >
-                <Trash2 size={16} className="mr-1" />
-                Clear
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Clear this request?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will remove request {request.id} from your view. You'll have the option to undo this action.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearRequest}>
-                  <Check size={16} className="mr-1" />
-                  Confirm
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {showClearButton && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-red-500 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 size={16} className="mr-1" />
+                  Clear
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear this request?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will remove request {request.id} from your view. You'll have the option to undo this action.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearRequest}>
+                    <Check size={16} className="mr-1" />
+                    Confirm
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           
           <Button variant="ghost" size="sm">
             Details

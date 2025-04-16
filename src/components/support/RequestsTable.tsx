@@ -5,6 +5,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components
 import { Request, RequestStatus } from "@/types/request";
 import RequestRow from "./RequestRow";
 import EmptyTableRow from "./EmptyTableRow";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface RequestsTableProps {
   requests: Request[];
@@ -28,6 +29,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
   undoClearRequest
 }) => {
   const [activeRequest, setActiveRequest] = useState<string | null>(null);
+  const { isSupport } = useProfileAccess();
 
   // Filter requests based on the active tab
   const filteredRequests = React.useMemo(() => {

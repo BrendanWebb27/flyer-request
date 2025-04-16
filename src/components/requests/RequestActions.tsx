@@ -116,35 +116,43 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   const isActive = request?.status === "active";
   // Only show the complete button if user is support staff
   const canCompleteRequest = isSupport && isActive && onComplete;
+  
+  // Determine if we should show the clear button
+  // Support users can only clear completed requests
+  // General users can clear all types of requests
+  const showClearButton = !isSupport || 
+                          (isSupport && request?.status === "completed");
 
   return (
     <div className="flex gap-2 self-end md:self-center">
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-red-500 border-red-200 hover:bg-red-50"
-          >
-            <Trash2 size={16} />
-            Clear
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clear this request?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove the request from your view. You can undo this action for a short time after clearing.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onClear(requestId)}>
-              Clear Request
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {showClearButton && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="text-red-500 border-red-200 hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+              Clear
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear this request?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will remove the request from your view. You can undo this action for a short time after clearing.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onClear(requestId)}>
+                Clear Request
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
       
       {canCompleteRequest && (
         <Button 
