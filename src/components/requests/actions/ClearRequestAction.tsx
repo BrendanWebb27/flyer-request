@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import ActionButtonSheet from "./ActionButtonSheet";
@@ -11,10 +11,13 @@ interface ClearRequestActionProps {
 }
 
 const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onClear }) => {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  
   const handleClearRequest = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onClear(requestId);
+    setSheetOpen(false);
   };
 
   const stopPropagation = (e: React.MouseEvent) => {

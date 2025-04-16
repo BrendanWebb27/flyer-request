@@ -62,9 +62,16 @@ const SheetContent = React.forwardRef<
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
       onPointerDownOutside={(e) => {
-        // Prevent closing on pointer down outside, this is crucial
+        // This is crucial - prevent closing on pointer down outside
         e.preventDefault();
-        props.onPointerDownOutside?.(e);
+      }}
+      onFocusOutside={(e) => {
+        // Also prevent closing on focus outside
+        e.preventDefault();
+      }}
+      onInteractOutside={(e) => {
+        // Prevent any outside interactions from closing the sheet
+        e.preventDefault();
       }}
       {...props}
     >

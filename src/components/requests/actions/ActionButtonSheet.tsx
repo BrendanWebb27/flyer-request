@@ -27,20 +27,24 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   const [open, setOpen] = useState(false);
   
   const handleButtonClick = (e: React.MouseEvent) => {
+    // Stop propagation to prevent parent elements from receiving the click
     e.preventDefault();
     e.stopPropagation();
+    
+    // If there's an additional click handler, call it
     if (onButtonClick) {
       onButtonClick(e);
     }
   };
 
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    console.log("Sheet open state changed to:", newOpen);
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild onClick={handleTriggerClick}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetTrigger asChild>
         <Button 
           variant={buttonVariant}
           size={buttonSize}
