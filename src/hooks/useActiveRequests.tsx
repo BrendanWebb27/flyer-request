@@ -62,10 +62,11 @@ export const useActiveRequests = () => {
 
   // Filter requests based on user role and ownership
   const filteredRequests = requests.filter(req => {
-    console.log(`Checking request ${req.id}: requested by ${req.requestedBy}, current user: ${currentUserEmail}`);
+    console.log(`Checking request ${req.id}: requested by ${req.requestedBy}, current user: ${currentUserEmail}, isSupport: ${isSupport}`);
     
+    // Support staff should see all requests
     if (isSupport) {
-      // Support staff can see all requests
+      console.log(`Support user sees request ${req.id}`);
       return true;
     } else {
       // Regular users only see their own requests
@@ -75,7 +76,7 @@ export const useActiveRequests = () => {
     }
   });
   
-  console.log(`Found ${filteredRequests.length} requests for user ${currentUserEmail}`);
+  console.log(`Found ${filteredRequests.length} requests for user ${currentUserEmail} (isSupport: ${isSupport})`);
 
   // Define available tabs based on user role
   const availableTabs = isSupport 

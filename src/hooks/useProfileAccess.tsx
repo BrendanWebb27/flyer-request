@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { clearExpiredUserData, updateUserActivityTimestamp, getVerifiedEmails, getEmailOrganization } from "@/utils/userDataExpiration";
 
@@ -30,6 +29,7 @@ export function useProfileAccess() {
       // Only check support access if data wasn't cleared
       const checkSupportAccess = () => {
         const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
+        console.log("Support access check:", hasAccess);
         setIsSupport(hasAccess);
         
         // Check if user is verified
@@ -70,6 +70,7 @@ export function useProfileAccess() {
     }
     
     const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
+    console.log("getSupportAccess result:", hasAccess);
     
     // Update activity timestamp if the user has access
     if (hasAccess) {
@@ -80,6 +81,7 @@ export function useProfileAccess() {
   };
   
   const setSupportAccess = (hasAccess: boolean) => {
+    console.log("Setting support access to:", hasAccess);
     localStorage.setItem("supportAccessGranted", hasAccess ? "true" : "false");
     
     // Update activity timestamp when setting access
