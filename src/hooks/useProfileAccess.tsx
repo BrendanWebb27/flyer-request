@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { clearExpiredUserData, updateUserActivityTimestamp } from "@/utils/userDataExpiration";
 
 interface UserProfile {
   name?: string;
@@ -18,31 +19,60 @@ export function useProfileAccess() {
   // Check if the user has support access
   const [isSupport, setIsSupport] = useState(false);
   
-  // Load support status on initial mount
+  // Load support status on initial mount and check for expired data
   useEffect(() => {
-    const checkSupportAccess = () => {
-      const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
-      setIsSupport(hasAccess);
-    };
+    // Check for expired user data first
+    const wasDataCleared = clearExpiredUserData();
     
-    // Check on mount
-    checkSupportAccess();
-    
-    // Listen for storage events (profile updates)
-    window.addEventListener("storage", checkSupportAccess);
-    
-    return () => {
-      window.removeEventListener("storage", checkSupportAccess);
-    };
+    if (!wasDataCleared) {
+      // Only check support access if data wasn't cleared
+      const checkSupportAccess = () => {
+        const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
+        setIsSupport(hasAccess);
+        
+        // Update activity timestamp when checking access
+        if (hasAccess) {
+          updateUserActivityTimestamp();
+        }
+      };
+      
+      // Check on mount
+      checkSupportAccess();
+      
+      // Listen for storage events (profile updates)
+      window.addEventListener("storage", checkSupportAccess);
+      
+      return () => {
+        window.removeEventListener("storage", checkSupportAccess);
+      };
+    }
   }, []);
 
   // Helper functions to work with support access
   const getSupportAccess = () => {
-    return localStorage.getItem("supportAccessGranted") === "true";
+    // Check for expired data first
+    if (clearExpiredUserData()) {
+      return false;
+    }
+    
+    const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
+    
+    // Update activity timestamp if the user has access
+    if (hasAccess) {
+      updateUserActivityTimestamp();
+    }
+    
+    return hasAccess;
   };
   
   const setSupportAccess = (hasAccess: boolean) => {
     localStorage.setItem("supportAccessGranted", hasAccess ? "true" : "false");
+    
+    // Update activity timestamp when setting access
+    if (hasAccess) {
+      updateUserActivityTimestamp();
+    }
+    
     setIsSupport(hasAccess);
     
     // Dispatch storage event to notify other components
@@ -56,8 +86,15 @@ export function useProfileAccess() {
   
   // Get user profile from localStorage
   const getUserProfile = () => {
+    // Check for expired data first
+    if (clearExpiredUserData()) {
+      return null;
+    }
+    
     const savedProfile = localStorage.getItem("userProfile");
     if (savedProfile) {
+      // Update activity timestamp when getting user profile
+      updateUserActivityTimestamp();
       return JSON.parse(savedProfile);
     }
     
@@ -66,6 +103,9 @@ export function useProfileAccess() {
   
   // Get all profiles from localStorage, including any mock support staff
   const getAllSupportProfiles = (): UserProfile[] => {
+    // Update activity timestamp when getting profiles
+    updateUserActivityTimestamp();
+    
     // Get the current user's profile first
     const currentProfile = getUserProfile();
     
@@ -117,6 +157,9 @@ export function useProfileAccess() {
   // Save profile to localStorage
   const saveUserProfile = (profile: any) => {
     localStorage.setItem("userProfile", JSON.stringify(profile));
+    
+    // Update activity timestamp when saving profile
+    updateUserActivityTimestamp();
     
     // Update support access based on organization
     const hasAccess = isSupportOrganization(profile.organization);

@@ -10,6 +10,7 @@ import {
   isValidCode, 
   getOrganizationFromCode 
 } from "@/utils/organizationVerification";
+import { updateUserActivityTimestamp } from "@/utils/userDataExpiration";
 
 interface OrganizationAccessControlProps {
   onAccessGranted: () => void;
@@ -56,6 +57,9 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
       const organization = getOrganizationFromCode(code);
       
       if (organization) {
+        // Set the initial activity timestamp when a user is verified
+        updateUserActivityTimestamp();
+        
         toast({
           title: "Access Granted",
           description: `You now have support access for ${organization}`,

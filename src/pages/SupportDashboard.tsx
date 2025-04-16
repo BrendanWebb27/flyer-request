@@ -6,6 +6,7 @@ import { useSupportRequests } from "@/hooks/useSupportRequests";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RequestStatus } from "@/types/request";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { updateUserActivityTimestamp, clearExpiredUserData } from "@/utils/userDataExpiration";
 
 // Component imports
 import OrganizationAccessControl from "@/components/OrganizationAccessControl";
@@ -40,11 +41,22 @@ const SupportDashboard: React.FC = () => {
   const statusParam = urlParams.get("status") as RequestStatus | "all" | null;
   const activeTab = statusParam || "all";
   
-  // Check if user has already been granted access
+  // Check if user data has expired and if user has already been granted access
   useEffect(() => {
+    // Check for data expiration first
+    const wasDataCleared = clearExpiredUserData();
+    
+    if (wasDataCleared) {
+      setHasAccess(false);
+      return;
+    }
+    
+    // If data wasn't cleared, check for access
     const accessGranted = localStorage.getItem("supportAccessGranted") === "true";
     if (accessGranted) {
       setHasAccess(true);
+      // Update activity timestamp when the user accesses the dashboard
+      updateUserActivityTimestamp();
     }
   }, []);
 
@@ -53,6 +65,7 @@ const SupportDashboard: React.FC = () => {
     localStorage.removeItem("supportAccessGranted");
     localStorage.removeItem("organizationAccess");
     localStorage.removeItem("supportUserEmail");
+    localStorage.removeItem("lastUserActivity");
     setHasAccess(false);
     toast({
       title: "Signed Out",
@@ -67,15 +80,24 @@ const SupportDashboard: React.FC = () => {
 
   // If user doesn't have access, show the access control component
   if (!hasAccess) {
-    return <OrganizationAccessControl onAccessGranted={() => setHasAccess(true)} />;
+    return <OrganizationAccessControl onAccessGranted={() => {
+      setHasAccess(true);
+      // Update activity timestamp when access is granted
+      updateUserActivityTimestamp();
+    }} />;
   }
 
   // Organization information (in a real app, this would come from context or state)
   const organization = localStorage.getItem("organizationAccess") || "Organization";
   const userEmail = localStorage.getItem("supportUserEmail") || "";
 
+  // Update activity timestamp on user interactions
+  const handleUserInteraction = () => {
+    updateUserActivityTimestamp();
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" onClick={handleUserInteraction}>
       <DashboardHeader 
         organization={organization}
         userEmail={userEmail}

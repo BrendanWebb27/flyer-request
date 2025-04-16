@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
+import { updateUserActivityTimestamp } from "@/utils/userDataExpiration";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import ProfileForm from "@/components/profile/ProfileForm";
@@ -30,6 +31,11 @@ const Profile: React.FC = () => {
     };
   });
 
+  // Update the activity timestamp when the profile page is loaded
+  useEffect(() => {
+    updateUserActivityTimestamp();
+  }, []);
+
   // Check if the organization is "Support" and update isSupport accordingly
   useEffect(() => {
     const isUserSupport = isSupportOrganization(profile.organization);
@@ -44,12 +50,16 @@ const Profile: React.FC = () => {
   // Save profile data to localStorage whenever it changes
   useEffect(() => {
     saveUserProfile(profile);
+    // Update activity timestamp whenever profile is updated
+    updateUserActivityTimestamp();
   }, [profile, saveUserProfile]);
 
   const handleSaveProfile = () => {
     // Simulate API call
     setTimeout(() => {
       setIsEditing(false);
+      // Update activity timestamp on profile save
+      updateUserActivityTimestamp();
       
       toast({
         title: "Profile Updated",
