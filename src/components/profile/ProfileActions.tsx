@@ -22,17 +22,18 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({
   };
 
   return (
-    <div className="flex gap-2 justify-end w-full">
+    <div className="flex gap-2 justify-end w-full min-w-[180px]">
       {isEditing ? (
         <>
           <Button 
             variant="outline" 
             onClick={(e) => handleButtonClick(e, () => setIsEditing(false))}
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button 
-            className="bg-flyerPurple-600 hover:bg-flyerPurple-700" 
+            className="bg-flyerPurple-600 hover:bg-flyerPurple-700 w-full sm:w-auto" 
             onClick={(e) => handleButtonClick(e, onSave)}
           >
             Save Changes
@@ -40,7 +41,7 @@ const ProfileActions: React.FC<ProfileActionsProps> = ({
         </>
       ) : (
         <Button 
-          className="bg-flyerPurple-600 hover:bg-flyerPurple-700" 
+          className="bg-flyerPurple-600 hover:bg-flyerPurple-700 w-full sm:w-auto" 
           onClick={(e) => handleButtonClick(e, () => setIsEditing(true))}
         >
           Edit Profile

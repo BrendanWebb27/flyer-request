@@ -19,9 +19,9 @@ const OrganizationVerificationSection: React.FC<OrganizationVerificationSectionP
   };
   
   return (
-    <div className="pt-4 flex flex-col items-start">
+    <div className="pt-4 flex flex-col items-start w-full">
       <button
-        className="text-sm text-flyerPurple-600 hover:text-flyerPurple-700 font-medium px-0"
+        className="text-sm text-flyerPurple-600 hover:text-flyerPurple-700 font-medium px-0 text-left"
         onClick={handleButtonClick}
       >
         Verify Organization Access
