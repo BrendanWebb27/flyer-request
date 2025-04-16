@@ -17,6 +17,7 @@ const Profile: React.FC = () => {
   const { getUserProfile, saveUserProfile, isSupport, isSupportOrganization } = useProfileAccess();
   const [isEditing, setIsEditing] = useState(false);
   const [showOrgVerification, setShowOrgVerification] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
   
   // Load profile data from localStorage or use defaults
   const [profile, setProfile] = useState(() => {
@@ -33,6 +34,13 @@ const Profile: React.FC = () => {
       isSupport: false // Default to false
     };
   });
+
+  // Check if email is verified
+  useEffect(() => {
+    // Check localStorage for email verification status
+    const emailVerified = localStorage.getItem("emailVerified") === "true";
+    setIsEmailVerified(emailVerified);
+  }, []);
 
   // Update the activity timestamp when the profile page is loaded
   useEffect(() => {
@@ -77,6 +85,9 @@ const Profile: React.FC = () => {
 
   const handleAccessGranted = () => {
     setShowOrgVerification(false);
+    setIsEmailVerified(true);
+    localStorage.setItem("emailVerified", "true");
+    
     toast({
       title: "Organization Verified",
       description: "Your organization access has been verified successfully."
@@ -130,8 +141,25 @@ const Profile: React.FC = () => {
             />
           )}
           
-          {/* Organization verification button - should always be visible for non-support users regardless of edit mode */}
-          {!profile.isSupport && (
+          {/* Email verification status indicator */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-medium">Email Verification</h4>
+                <p className="text-xs text-muted-foreground">
+                  {isEmailVerified ? "Your email has been verified" : "Email verification required for system access"}
+                </p>
+              </div>
+              <div className={`px-2 py-1 rounded ${isEmailVerified ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                <span className="text-xs font-medium">
+                  {isEmailVerified ? "Verified" : "Not Verified"}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Organization verification button - for all users who haven't verified email */}
+          {!isEmailVerified && (
             <div className="pt-4">
               <button
                 className="text-sm text-flyerPurple-600 hover:text-flyerPurple-700 font-medium"
@@ -140,7 +168,7 @@ const Profile: React.FC = () => {
                 Verify Organization Access
               </button>
               <p className="text-xs text-muted-foreground mt-1">
-                Verify your organization access to gain support privileges
+                Verify your organization access to gain system privileges
               </p>
             </div>
           )}
