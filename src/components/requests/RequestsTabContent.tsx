@@ -38,10 +38,16 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
     console.log(`RequestsTabContent: Filtered requests:`, filteredRequests);
   }, [filteredRequests, status]);
 
+  // Force re-render when requests are updated
+  const requestsKey = useMemo(() => {
+    return `requests-${status}-${filteredRequests.length}-${Date.now()}`;
+  }, [status, filteredRequests]);
+
   return (
     <>
       {filteredRequests.length > 0 ? (
         <RequestsGrid
+          key={requestsKey}
           requests={filteredRequests}
           formatDate={formatDate}
           onClearRequest={onClearRequest}

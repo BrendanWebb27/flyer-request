@@ -41,7 +41,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("Form submitted with values:", values);
+    console.log("RequestDetailsDialog: Form submitted with values:", values);
     
     if (onAccept) {
       setIsSubmitting(true);
@@ -49,7 +49,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
       try {
         // Convert input to format: "X minutes"
         const formattedTime = `${values.estimatedTime} minutes`;
-        console.log("Calling onAccept with:", request.id, { estimatedTime: formattedTime });
+        console.log("RequestDetailsDialog: Calling onAccept with:", request.id, { estimatedTime: formattedTime });
         
         // Call the accept function
         onAccept(request.id, { estimatedTime: formattedTime });
@@ -57,6 +57,11 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
         // Reset form state
         form.reset();
         setShowTimeInput(false);
+        
+        // Close dialog if needed
+        if (onClose) {
+          onClose();
+        }
       } catch (error) {
         console.error("Error in RequestDetailsDialog:", error);
         toast({

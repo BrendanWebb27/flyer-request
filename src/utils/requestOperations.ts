@@ -1,4 +1,3 @@
-
 import { Request, RequestStatus, Note } from "@/types/request";
 import { saveRequests } from "./requestPersistence";
 
@@ -9,6 +8,16 @@ export const acceptRequest = (
 ): Request[] => {
   console.log("acceptRequest called with:", { id, data });
   console.log("Current requests before update:", requests);
+  
+  // Find the request to update
+  const requestToUpdate = requests.find(req => req.id === id);
+  
+  if (!requestToUpdate) {
+    console.error("Could not find request with ID:", id);
+    return requests;
+  }
+  
+  console.log("Found request to update:", requestToUpdate);
   
   const updatedRequests = requests.map(request => 
     request.id === id 
@@ -28,6 +37,11 @@ export const acceptRequest = (
   
   // Force save to localStorage
   saveRequests(updatedRequests);
+  
+  // Dispatch a custom event to trigger UI updates
+  window.dispatchEvent(new CustomEvent('requestStatusChanged', {
+    detail: { id, newStatus: 'active' }
+  }));
   
   return updatedRequests;
 };

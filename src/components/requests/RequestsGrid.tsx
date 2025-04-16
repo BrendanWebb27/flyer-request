@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Request } from "@/types/request";
 import RequestCard from "./RequestCard";
 
@@ -26,6 +26,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
       
       // Notify parent components about the update
       if (onRequestUpdated) {
+        console.log("RequestsGrid: Notifying parent of update");
         setTimeout(() => {
           onRequestUpdated();
         }, 100);
@@ -34,12 +35,20 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   };
 
   console.log("RequestsGrid rendering with", requests.length, "requests");
+  
+  // Create a stable key for each request that includes status to force re-render
+  const requestsWithKeys = useMemo(() => {
+    return requests.map(req => ({
+      request: req,
+      key: `${req.id}-${req.status}-${Date.now()}`
+    }));
+  }, [requests]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {requests.map((request) => (
+      {requestsWithKeys.map(({ request, key }) => (
         <RequestCard
-          key={`${request.id}-${request.status}`}
+          key={key}
           request={request}
           formatDate={formatDate}
           onClearRequest={onClearRequest}

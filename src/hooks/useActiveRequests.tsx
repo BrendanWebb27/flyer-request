@@ -33,7 +33,18 @@ export const useActiveRequests = () => {
       console.log("Syncing activeTab with URL param:", statusParam);
       setActiveTab(statusParam);
     }
-  }, [statusParam]);
+  }, [statusParam, activeTab]);
+
+  // Listen for request status changes 
+  useEffect(() => {
+    const handleStatusChange = () => {
+      console.log("Request status change detected, updating UI");
+      setRefreshCount(prev => prev + 1);
+    };
+    
+    window.addEventListener('requestStatusChanged', handleStatusChange);
+    return () => window.removeEventListener('requestStatusChanged', handleStatusChange);
+  }, []);
 
   const updateUrlWithActiveTab = useCallback(() => {
     if (statusParam !== activeTab && activeTab !== "all") {
@@ -81,16 +92,13 @@ export const useActiveRequests = () => {
     console.log("Current requests before accept:", requests);
     
     try {
-      console.log("Before accept - Current active tab:", activeTab);
-      console.log("Before accept - Current requests:", requests);
-      
       // Accept the request
       acceptRequest(id, { 
         assignedTo: "Current Support Staff", 
         estimatedTime: data.estimatedTime 
       });
       
-      console.log("After accept - Requests updated");
+      console.log("After accept - Request should be updated");
       
       toast({
         title: "Request Accepted",
@@ -106,14 +114,13 @@ export const useActiveRequests = () => {
         setActiveTab("active");
         navigate(`/active?status=active`, { replace: true });
         
-        // Increment the refresh trigger to force child components to re-render
-        refreshTriggerRef.current += 1;
+        // Force components to re-render again after navigation
         setRefreshCount(prev => prev + 1);
         
-        // Trigger a storage event to notify other components
-        window.dispatchEvent(new Event('requestUpdated'));
-        
         console.log("After tab switch - Active tab:", "active");
+        
+        // Dispatch global event
+        window.dispatchEvent(new Event('requestUpdated'));
       }, 300);
     } catch (error) {
       console.error("Error in handleAcceptRequest:", error);
@@ -124,7 +131,7 @@ export const useActiveRequests = () => {
       });
     }
     
-  }, [acceptRequest, navigate, toast, requests, activeTab]);
+  }, [acceptRequest, navigate, toast, requests]);
 
   const handleRequestUpdated = useCallback(() => {
     console.log("ActiveRequests: Request update detected");
