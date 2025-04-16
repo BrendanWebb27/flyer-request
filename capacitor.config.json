@@ -1,0 +1,14 @@
+
+{
+  "appId": "app.lovable.4e9341100f6049c18980fc75868dde91",
+  "appName": "flyer-request",
+  "server": {
+    "url": "https://4e934110-0f60-49c1-8980-fc75868dde91.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}
