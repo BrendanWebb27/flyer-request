@@ -38,12 +38,11 @@ export function performMockSearch(query: string): UserProfile[] {
       organization: usernameMatch.organization || "36 FGS",
       isVerified: verifiedEmails.includes(usernameMatch.email),
       username: usernameMatch.username,
-      // Add these fields to ensure compatibility with UserProfile type
       manNumber: usernameMatch.manNumber || `AF${extractedManNumber || '00000'}`,
       workShift: "dayshift", // Default value
       isFlyer: false, // Default value
       flyerRole: "none", // Default value
-      isSupport: false // Default value
+      isSupport: false // Default value - now required
     }];
   }
   else if (extractedManNumber) {
@@ -62,12 +61,11 @@ export function performMockSearch(query: string): UserProfile[] {
         organization: matchedUser.organization || "36 FGS",
         isVerified: verifiedEmails.includes(matchedUser.email),
         username: matchedUser.username,
-        // Add these fields to ensure compatibility with UserProfile type
         manNumber: matchedUser.manNumber || `AF${extractedManNumber}`,
         workShift: "dayshift", // Default value
         isFlyer: false, // Default value
         flyerRole: "none", // Default value
-        isSupport: false // Default value
+        isSupport: false // Default value - now required
       }];
     } else {
       console.log("Creating new user profile with extracted man number");
@@ -79,12 +77,11 @@ export function performMockSearch(query: string): UserProfile[] {
         organization: "36 FGS",
         isVerified: verifiedEmails.includes(associatedEmail),
         username: username,
-        // Add these fields to ensure compatibility with UserProfile type
         manNumber: `AF${extractedManNumber}`,
         workShift: "dayshift", // Default value
         isFlyer: false, // Default value
         flyerRole: "none", // Default value
-        isSupport: false // Default value
+        isSupport: false // Default value - now required
       }];
     }
   }
@@ -105,12 +102,11 @@ export function performMockSearch(query: string): UserProfile[] {
           : "36 FGS",
         isVerified: isAlreadyVerified || Math.random() > 0.3, // Verified if in our records, otherwise 70% chance
         username: matchedUser?.username || undefined,
-        // Add these fields to ensure compatibility with UserProfile type
         manNumber: matchedUser?.manNumber || `AF${Math.floor(10000 + Math.random() * 90000)}`,
         workShift: "dayshift", // Default value
         isFlyer: false, // Default value
         flyerRole: "none", // Default value
-        isSupport: false // Default value
+        isSupport: false // Default value - now required
       }];
     }
     
@@ -134,12 +130,11 @@ export function performMockSearch(query: string): UserProfile[] {
         organization: matchedUser.organization || "36 FGS",
         isVerified: verifiedEmails.includes(matchedUser.email),
         username: matchedUser.username,
-        // Add these fields to ensure compatibility with UserProfile type
         manNumber: matchedUser.manNumber || `AF${manNumber}`,
         workShift: "dayshift", // Default value
         isFlyer: false, // Default value
         flyerRole: "none", // Default value
-        isSupport: false // Default value
+        isSupport: false // Default value - now required
       }];
     }
     

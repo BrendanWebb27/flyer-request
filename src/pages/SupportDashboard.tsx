@@ -8,6 +8,7 @@ import { RequestStatus } from "@/types/request";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { updateUserActivityTimestamp, clearExpiredUserData } from "@/utils/userDataExpiration";
 import { forceRequestSync } from "@/utils/requestPersistence";
+import { getSupportAccess } from "@/utils/supportAccess";
 
 // Component imports
 import OrganizationAccessControl from "@/components/OrganizationAccessControl";
@@ -16,6 +17,10 @@ import DashboardMetrics from "@/components/support/DashboardMetrics";
 import RequestTabs from "@/components/support/RequestTabs";
 import RequestsTable from "@/components/support/RequestsTable";
 import UserLookup from "@/components/support/UserLookup";
+
+// Add Button and RefreshCcw imports
+import { Button } from "@/components/ui/button";
+import { RefreshCcw } from "lucide-react";
 
 const SupportDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -75,7 +80,7 @@ const SupportDashboard: React.FC = () => {
     }
     
     // If data wasn't cleared, check for access
-    const accessGranted = localStorage.getItem("supportAccessGranted") === "true";
+    const accessGranted = getSupportAccess();
     if (accessGranted) {
       setHasAccess(true);
       // Update activity timestamp when the user accesses the dashboard
@@ -179,9 +184,5 @@ const SupportDashboard: React.FC = () => {
     </div>
   );
 };
-
-// Add missing import
-import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
 
 export default SupportDashboard;

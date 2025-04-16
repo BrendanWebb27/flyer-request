@@ -9,6 +9,7 @@ import UserSuggestions from "@/components/support/UserSuggestions";
 import { useUserSearch } from "@/hooks/useUserSearch";
 import { UserProfile } from "@/types/userSearch";
 import { logAllProfiles } from "@/utils/profileUtils";
+import { toast } from "@/components/ui/use-toast";
 
 interface UserLookupProps {
   onUserSelect?: (user: UserProfile) => void;
@@ -29,7 +30,20 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
   
   // Debug profiles on mount - can be removed in production
   useEffect(() => {
-    logAllProfiles();
+    try {
+      logAllProfiles();
+      
+      // Check for support access
+      const hasSupport = localStorage.getItem("supportAccessGranted") === "true";
+      console.log("Support access in UserLookup:", hasSupport);
+      
+      // Get any cached search results
+      const searchCache = localStorage.getItem("userSearchCache");
+      console.log("Search cache available:", !!searchCache);
+      
+    } catch (e) {
+      console.error("Error in UserLookup mount effect:", e);
+    }
   }, []);
   
   // Filter suggestions based on search query
@@ -44,6 +58,15 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
   // Handle search function
   const handleSearch = () => {
     setShowSuggestions(false);
+    if (!searchQuery.trim()) {
+      toast({
+        title: "Search Error",
+        description: "Please enter a search term",
+        variant: "destructive",
+      });
+      return;
+    }
+    console.log("Performing search for:", searchQuery);
     performSearch(searchQuery);
   };
   
@@ -56,8 +79,17 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
   
   // Handle selection of a suggestion
   const handleSuggestionSelect = (suggestion: {username: string, email: string}) => {
+    console.log("Selected suggestion:", suggestion);
     handleSelectSuggestion(suggestion, setSearchQuery);
     setShowSuggestions(false);
+  };
+  
+  // Handle user selection when viewing details
+  const handleUserSelect = (user: UserProfile) => {
+    console.log("Selected user:", user);
+    if (onUserSelect) {
+      onUserSelect(user);
+    }
   };
   
   return (
@@ -118,7 +150,7 @@ const UserLookup: React.FC<UserLookupProps> = ({ onUserSelect }) => {
           {searchResults.length > 0 && (
             <UserSearchResults 
               results={searchResults} 
-              onSelect={onUserSelect}
+              onSelect={handleUserSelect}
             />
           )}
         </div>

@@ -64,10 +64,14 @@ export const userSearchApi = {
       console.error("Error processing search cache:", e);
     }
     
-    return mockUsers.filter(user => 
+    // Get suggestions from mock users
+    const suggestions = mockUsers.filter(user => 
       user.username.toLowerCase().includes(query.toLowerCase()) ||
       user.email.toLowerCase().includes(query.toLowerCase())
     );
+    
+    console.log("API: Found suggestions:", suggestions.length);
+    return suggestions;
   },
   
   // Verify a user's organization code - would be a separate endpoint in real API
@@ -75,7 +79,9 @@ export const userSearchApi = {
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(isValidCode(verificationCode));
+        const isValid = isValidCode(verificationCode);
+        console.log("API: Verifying code:", verificationCode, "Valid:", isValid);
+        resolve(isValid);
       }, 300);
     });
   }

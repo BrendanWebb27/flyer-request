@@ -24,6 +24,16 @@ export function useUserSearch(setError: (error: string) => void): UserSearchHook
   // Load verified emails on mount
   useEffect(() => {
     setVerifiedEmails(getVerifiedEmails());
+    
+    // Check local storage for previously saved results
+    try {
+      const savedCache = localStorage.getItem("userSearchCache");
+      if (savedCache) {
+        setSearchCache(JSON.parse(savedCache));
+      }
+    } catch (e) {
+      console.error("Error loading search cache:", e);
+    }
   }, []);
   
   // Clean up any pending requests when component unmounts
@@ -46,6 +56,7 @@ export function useUserSearch(setError: (error: string) => void): UserSearchHook
 
     // Check cache first
     if (searchCache[trimmedQuery]) {
+      console.log("Found results in cache for query:", trimmedQuery);
       setSearchResults(searchCache[trimmedQuery]);
       return;
     }
@@ -64,13 +75,23 @@ export function useUserSearch(setError: (error: string) => void): UserSearchHook
     
     try {
       // Perform the search
+      console.log("Performing search for query:", trimmedQuery);
       const results = await userSearchApi.searchUsers(trimmedQuery);
+      console.log("Search results:", results);
       
       // Cache the results
-      setSearchCache(prev => ({
-        ...prev,
+      const newCache = {
+        ...searchCache,
         [trimmedQuery]: results
-      }));
+      };
+      setSearchCache(newCache);
+      
+      // Also save to localStorage for persistence
+      try {
+        localStorage.setItem("userSearchCache", JSON.stringify(newCache));
+      } catch (e) {
+        console.error("Error saving search cache:", e);
+      }
       
       setSearchResults(results);
     } catch (error) {

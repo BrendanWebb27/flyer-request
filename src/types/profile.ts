@@ -10,5 +10,6 @@ export interface UserProfile {
   workShift: string; // Required to match usage in Profile.tsx
   isFlyer: boolean; // Required to match usage in Profile.tsx
   flyerRole: string; // Required to match usage in Profile.tsx
-  isSupport: boolean; // Changed from optional to required to match usage in Profile.tsx
+  isSupport: boolean; // Required for support functionality
+  email?: string; // Added to align with userSearch.ts
 }
