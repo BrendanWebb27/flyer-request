@@ -7,6 +7,11 @@ export interface UserProfile {
   isVerified: boolean;
   verificationCode?: string;
   username?: string;
+  // Add the missing properties that are being used in userSearchUtils.ts
+  workShift?: string;
+  isFlyer?: boolean;
+  flyerRole?: string;
+  isSupport?: boolean;
 }
 
 export interface UserSuggestion {
