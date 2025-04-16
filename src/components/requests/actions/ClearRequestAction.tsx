@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import ActionButtonSheet from "./ActionButtonSheet";
+import { SheetClose } from "@/components/ui/sheet";
 
 interface ClearRequestActionProps {
   requestId: string;
@@ -25,24 +26,22 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
       <div>
         <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
         <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={(e) => {
-            e.stopPropagation();
-            const sheetClose = document.querySelector('[data-radix-collection-item]');
-            if (sheetClose instanceof HTMLElement) sheetClose.click();
-          }}>
-            Cancel
-          </Button>
-          <Button 
-            variant="destructive" 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClearRequest();
-              const sheetClose = document.querySelector('[data-radix-collection-item]');
-              if (sheetClose instanceof HTMLElement) sheetClose.click();
-            }}
-          >
-            Clear Request
-          </Button>
+          <SheetClose asChild>
+            <Button variant="outline">
+              Cancel
+            </Button>
+          </SheetClose>
+          <SheetClose asChild>
+            <Button 
+              variant="destructive" 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClearRequest();
+              }}
+            >
+              Clear Request
+            </Button>
+          </SheetClose>
         </div>
       </div>
     </ActionButtonSheet>

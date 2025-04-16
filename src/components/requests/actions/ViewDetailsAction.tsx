@@ -4,6 +4,7 @@ import { Eye } from "lucide-react";
 import { Request } from "@/types/request";
 import { Button } from "@/components/ui/button";
 import ActionButtonSheet from "./ActionButtonSheet";
+import { SheetClose } from "@/components/ui/sheet";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface ViewDetailsActionProps {
@@ -98,39 +99,39 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
           {isSupport && (
             <div className="flex justify-end gap-2 mt-6">
               {request.status === "pending" && onAccept && (
-                <Button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (setDetailsOpen) setDetailsOpen(true);
-                    const sheetClose = document.querySelector('[data-radix-collection-item]');
-                    if (sheetClose instanceof HTMLElement) sheetClose.click();
-                    
-                    // Add a short delay to ensure the first dialog is closed
-                    setTimeout(() => {
-                      // Open the accept dialog - simulate clicking the accept button
-                      const acceptButton = document.getElementById('acceptRequestButton');
-                      if (acceptButton) acceptButton.click();
-                    }, 100);
-                  }}
-                >
-                  Accept Request
-                </Button>
+                <SheetClose asChild>
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (setDetailsOpen) setDetailsOpen(true);
+                      
+                      // Add a short delay to ensure the first dialog is closed
+                      setTimeout(() => {
+                        // Open the accept dialog - simulate clicking the accept button
+                        const acceptButton = document.getElementById('acceptRequestButton');
+                        if (acceptButton) acceptButton.click();
+                      }, 100);
+                    }}
+                  >
+                    Accept Request
+                  </Button>
+                </SheetClose>
               )}
               
               {request.status === "active" && onComplete && (
-                <Button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const notes = prompt("Add completion notes (optional):");
-                    if (notes !== null) { // Only if not cancelled
-                      handleComplete(requestId, notes);
-                      const sheetClose = document.querySelector('[data-radix-collection-item]');
-                      if (sheetClose instanceof HTMLElement) sheetClose.click();
-                    }
-                  }}
-                >
-                  Complete Request
-                </Button>
+                <SheetClose asChild>
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const notes = prompt("Add completion notes (optional):");
+                      if (notes !== null) { // Only if not cancelled
+                        handleComplete(requestId, notes);
+                      }
+                    }}
+                  >
+                    Complete Request
+                  </Button>
+                </SheetClose>
               )}
             </div>
           )}

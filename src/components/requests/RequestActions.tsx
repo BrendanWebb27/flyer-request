@@ -112,7 +112,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     <div 
       className="flex gap-2 self-end md:self-center" 
       onClick={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Clear button */}
       {showClearButton && (

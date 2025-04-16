@@ -2,6 +2,8 @@
 import React from "react";
 import ActionButtonSheet from "./ActionButtonSheet";
 import { Button } from "@/components/ui/button";
+import { SheetClose } from "@/components/ui/sheet";
+import { CheckCircle } from "lucide-react";
 import CompleteRequestButton from "../CompleteRequestButton";
 
 interface CompleteRequestActionProps {
@@ -34,18 +36,19 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
           rows={4}
           id="completionNotes"
         />
-        <Button
-          className="w-full"
-          onClick={(e) => {
-            e.stopPropagation();
-            const notes = document.getElementById('completionNotes') as HTMLTextAreaElement;
-            handleComplete(notes?.value || "Request completed");
-            const sheetClose = document.querySelector('[data-radix-collection-item]');
-            if (sheetClose instanceof HTMLElement) sheetClose.click();
-          }}
-        >
-          Mark as Completed
-        </Button>
+        <SheetClose asChild>
+          <Button
+            className="w-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              const notes = document.getElementById('completionNotes') as HTMLTextAreaElement;
+              handleComplete(notes?.value || "Request completed");
+            }}
+          >
+            <CheckCircle size={16} className="mr-2" />
+            Mark as Completed
+          </Button>
+        </SheetClose>
       </div>
     </ActionButtonSheet>
   );

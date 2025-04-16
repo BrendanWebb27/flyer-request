@@ -25,16 +25,17 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   onButtonClick
 }) => {
   return (
-    <Sheet modal={true}>
+    <Sheet>
       <SheetTrigger asChild>
         <Button 
           variant={buttonVariant}
           size={buttonSize}
           className={buttonClass}
           onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            if (onButtonClick) onButtonClick(e);
+            if (onButtonClick) {
+              e.stopPropagation();
+              onButtonClick(e);
+            }
           }}
         >
           {buttonIcon && <span className="mr-1">{buttonIcon}</span>}
