@@ -33,6 +33,10 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
         buttonVariant="outline"
         buttonClass="text-red-500 border-red-200 hover:bg-red-50"
         title={`Clear Request ${requestId}`}
+        onButtonClick={(e) => {
+          stopPropagation(e);
+          setSheetOpen(true);
+        }}
       >
         <div onClick={stopPropagation}>
           <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
@@ -45,14 +49,12 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
                 Cancel
               </Button>
             </SheetClose>
-            <SheetClose asChild>
-              <Button 
-                variant="destructive" 
-                onClick={handleClearRequest}
-              >
-                Clear Request
-              </Button>
-            </SheetClose>
+            <Button 
+              variant="destructive" 
+              onClick={handleClearRequest}
+            >
+              Clear Request
+            </Button>
           </div>
         </div>
       </ActionButtonSheet>

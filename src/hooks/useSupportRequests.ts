@@ -7,6 +7,7 @@ import { acceptRequest, completeRequest, addNoteToRequest } from "@/utils/reques
 import { formatDate } from "@/utils/requestUtils";
 import { useRequestNotifications } from "@/hooks/useRequestNotifications";
 import { useRequestSync } from "@/hooks/useRequestSync";
+import { initialRequests } from "@/data/mockRequests";
 
 // Helper function for counting requests by status
 const countRequestsByStatus = (requests: Request[], status: RequestStatus | "all") => {
@@ -28,7 +29,16 @@ const countCompletedToday = (requests: Request[]) => {
 
 export const useSupportRequests = () => {
   const { toast } = useToast();
-  const [requests, setRequests] = useState<Request[]>(() => loadRequests());
+  const [requests, setRequests] = useState<Request[]>(() => {
+    // Initialize with mock requests if localStorage is empty
+    const savedRequests = loadRequests();
+    if (savedRequests.length === 0) {
+      console.log("No requests found in localStorage, initializing with mock data");
+      saveRequests(initialRequests);
+      return initialRequests;
+    }
+    return savedRequests;
+  });
   const [clearedRequests, setClearedRequests] = useState<Request[]>([]);
 
   // Hook to handle notifications for requests
@@ -36,6 +46,15 @@ export const useSupportRequests = () => {
   
   // Hook to sync requests across tabs/components
   useRequestSync(setRequests);
+
+  // Force load initial requests if empty
+  useEffect(() => {
+    if (requests.length === 0) {
+      console.log("No requests found, loading initial data");
+      setRequests(initialRequests);
+      saveRequests(initialRequests);
+    }
+  }, [requests.length]);
 
   // Calculate request metrics (memoized when requests change)
   const metrics = useCallback(() => {
@@ -51,6 +70,7 @@ export const useSupportRequests = () => {
   const handleAcceptRequest = (id: string, data: { assignedTo: string; estimatedTime: string }) => {
     const updatedRequests = acceptRequest(requests, id, data);
     setRequests(updatedRequests);
+    saveRequests(updatedRequests);
     
     toast({
       title: "Request Accepted",
@@ -61,6 +81,7 @@ export const useSupportRequests = () => {
   const handleCompleteRequest = (id: string, note?: { text: string, author: string }) => {
     const updatedRequests = completeRequest(requests, id, note);
     setRequests(updatedRequests);
+    saveRequests(updatedRequests);
     
     toast({
       title: "Request Completed",
@@ -99,6 +120,7 @@ export const useSupportRequests = () => {
   const handleAddNote = (id: string, note: { text: string, author: string }) => {
     const updatedRequests = addNoteToRequest(requests, id, note);
     setRequests(updatedRequests);
+    saveRequests(updatedRequests);
   };
 
   return {

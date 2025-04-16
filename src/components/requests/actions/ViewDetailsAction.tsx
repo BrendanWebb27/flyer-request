@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Eye } from "lucide-react";
 import { Request } from "@/types/request";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
   setDetailsOpen
 }) => {
   const { isSupport } = useProfileAccess();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   
   // Define a handler to stop propagation
   const stopPropagation = (e: React.MouseEvent) => {
@@ -59,6 +60,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         buttonVariant="default"
         buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
         title="Request Details"
+        onButtonClick={() => setIsSheetOpen(true)}
       >
         <div onClick={stopPropagation}>
           {request ? (

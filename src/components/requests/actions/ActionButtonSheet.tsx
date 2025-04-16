@@ -37,6 +37,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
 
+  // Improved sheet opening/closing handling
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     console.log("Sheet open state changed to:", newOpen);
@@ -44,7 +45,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild onClick={(e) => e.stopPropagation()}>
         <Button 
           variant={buttonVariant}
           size={buttonSize}
@@ -56,10 +57,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         </Button>
       </SheetTrigger>
       <SheetContent 
-        onPointerDownOutside={(e) => {
-          // Prevent closing on pointer down outside
-          e.preventDefault();
-        }}
+        side="right"
         onClick={(e) => e.stopPropagation()}
       >
         <SheetHeader>

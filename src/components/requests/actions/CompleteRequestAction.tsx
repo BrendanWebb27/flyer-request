@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import ActionButtonSheet from "./ActionButtonSheet";
 import { Button } from "@/components/ui/button";
 import { SheetClose } from "@/components/ui/sheet";
@@ -14,6 +14,8 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
   requestId, 
   onComplete 
 }) => {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  
   // Define a handler to stop propagation
   const stopPropagation = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,6 +39,7 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
         buttonVariant="outline"
         buttonClass="text-green-500 border-green-200 hover:bg-green-50"
         title={`Complete Request ${requestId}`}
+        onButtonClick={() => setIsSheetOpen(true)}
       >
         <div className="space-y-4" onClick={stopPropagation}>
           <textarea 
@@ -46,18 +49,16 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
             id="completionNotes"
             onClick={stopPropagation}
           />
-          <SheetClose asChild>
-            <Button
-              className="w-full"
-              onClick={(e) => {
-                const notes = document.getElementById('completionNotes') as HTMLTextAreaElement;
-                handleComplete(e, notes?.value || "Request completed");
-              }}
-            >
-              <CheckCircle size={16} className="mr-2" />
-              Mark as Completed
-            </Button>
-          </SheetClose>
+          <Button
+            className="w-full"
+            onClick={(e) => {
+              const notes = document.getElementById('completionNotes') as HTMLTextAreaElement;
+              handleComplete(e, notes?.value || "Request completed");
+            }}
+          >
+            <CheckCircle size={16} className="mr-2" />
+            Mark as Completed
+          </Button>
         </div>
       </ActionButtonSheet>
     </div>
