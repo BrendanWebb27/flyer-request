@@ -21,6 +21,7 @@ import {
 import { Request } from "@/types/request";
 import RequestDetailsDialog from "./RequestDetailsDialog";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface RequestActionsProps {
   requestId: string;
@@ -39,6 +40,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
     if (onAccept) {
@@ -49,6 +51,12 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       
       // Close dialog immediately
       setOpen(false);
+      
+      // Show toast to confirm action
+      toast({
+        title: "Request Accepted",
+        description: `You'll arrive in ${data.estimatedTime}.`,
+      });
       
       // Force multiple update events to ensure all components refresh
       setTimeout(() => {
@@ -67,8 +75,10 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
           onRequestUpdated();
         }
         
-        // Force reload the page as a last resort if needed
-        // window.location.reload();
+        // Force a page reload as a last resort to ensure UI is updated
+        setTimeout(() => {
+          window.location.href = `/active?status=active&t=${Date.now()}`;
+        }, 300);
       }, 100);
     }
   };

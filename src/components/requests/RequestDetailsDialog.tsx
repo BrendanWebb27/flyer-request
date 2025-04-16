@@ -49,20 +49,13 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
       
       onAccept(request.id, { estimatedTime: formattedTime });
       
-      toast({
-        title: "Request Accepted",
-        description: `You'll arrive in ${formattedTime}.`,
-      });
-      
       // Reset form state and close input
       form.reset();
       setShowTimeInput(false);
       
       // Force close the dialog 
       if (onClose) {
-        setTimeout(() => {
-          onClose();
-        }, 100);
+        onClose();
       }
     }
   };

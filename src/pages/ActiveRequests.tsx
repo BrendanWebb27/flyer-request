@@ -36,9 +36,9 @@ const ActiveRequests: React.FC = () => {
   // Update URL when tab changes
   useEffect(() => {
     if (statusParam !== activeTab && activeTab !== "all") {
-      navigate(`/active?status=${activeTab}`, { replace: true });
+      navigate(`/active?status=${activeTab}&t=${Date.now()}`, { replace: true });
     } else if (statusParam !== activeTab && activeTab === "all") {
-      navigate("/active", { replace: true });
+      navigate(`/active?t=${Date.now()}`, { replace: true });
     }
   }, [activeTab, navigate, statusParam]);
 
@@ -62,9 +62,15 @@ const ActiveRequests: React.FC = () => {
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
     
+    // Set up a periodic refresh to ensure UI stays updated
+    const refreshInterval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 3000);
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('requestUpdated', handleStorageChange);
+      clearInterval(refreshInterval);
     };
   }, []);
   
@@ -105,7 +111,7 @@ const ActiveRequests: React.FC = () => {
   };
 
   // Handle accepting a request with estimated time
-  const handleAcceptRequest = (id: string, data: { estimatedTime: string }) => {
+  const handleAcceptRequest = useCallback((id: string, data: { estimatedTime: string }) => {
     console.log("ActiveRequests: Accepting request", id, data);
     
     acceptRequest(id, { 
@@ -123,12 +129,18 @@ const ActiveRequests: React.FC = () => {
     // Dispatch events to update all components
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new CustomEvent('requestUpdated'));
-  };
+    
+    // Show a toast notification
+    toast({
+      title: "Request Accepted",
+      description: `You'll arrive in ${data.estimatedTime}.`,
+    });
+  }, [acceptRequest, navigate, toast]);
   
   // Force refresh when requests change
   useEffect(() => {
     // This effect runs when requests change (including when they're loaded from localStorage)
-    console.log("Requests updated in ActiveRequests component");
+    console.log("Requests updated in ActiveRequests component", requests);
   }, [requests, refreshTrigger]);
   
   // Filter requests based on user role and ensure it's reactive
@@ -155,6 +167,11 @@ const ActiveRequests: React.FC = () => {
           {availableTabs.map(tab => (
             <TabsTrigger key={tab} value={tab}>
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab !== "all" && requests.filter(r => r.status === tab).length > 0 && (
+                <span className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs">
+                  {requests.filter(r => r.status === tab).length}
+                </span>
+              )}
             </TabsTrigger>
           ))}
         </TabsList>

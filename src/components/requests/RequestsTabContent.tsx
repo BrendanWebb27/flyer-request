@@ -25,11 +25,14 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
 }) => {
   const [localRequests, setLocalRequests] = useState<Request[]>([]);
   
-  // Update local requests when prop requests change
+  // Update local requests when prop requests change - with deep comparison
   useEffect(() => {
-    setLocalRequests(requests);
-    console.log("RequestsTabContent: Requests updated from props", requests);
-  }, [requests]);
+    const requestsChanged = JSON.stringify(requests) !== JSON.stringify(localRequests);
+    if (requestsChanged) {
+      console.log("RequestsTabContent: Requests updated from props", requests);
+      setLocalRequests(requests);
+    }
+  }, [requests, localRequests]);
   
   // Filter requests based on tab
   const filteredRequests = React.useMemo(() => {
@@ -47,7 +50,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
     console.log("Filtered requests updated:", filteredRequests);
   }, [filteredRequests]);
   
-  // Listen for global request updates
+  // Listen for global request updates with a more reliable approach
   useEffect(() => {
     const handleRequestUpdate = () => {
       console.log("RequestsTabContent: Global request update detected");
@@ -59,13 +62,18 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
     window.addEventListener('requestUpdated', handleRequestUpdate);
     window.addEventListener('storage', handleRequestUpdate);
     
+    // Initial callback to ensure data is loaded
+    setTimeout(() => {
+      handleRequestUpdate();
+    }, 100);
+    
     return () => {
       window.removeEventListener('requestUpdated', handleRequestUpdate);
       window.removeEventListener('storage', handleRequestUpdate);
     };
   }, [onRequestUpdated]);
   
-  // Handle a request status change
+  // Handle a request status change with improved state update
   const handleRequestStatusChange = useCallback((requestId: string, newStatus: RequestStatus) => {
     console.log(`RequestsTabContent: Request ${requestId} status changed to ${newStatus}`);
     
@@ -76,10 +84,16 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
       )
     );
     
-    // Notify parent of update
+    // Notify parent of update with a small delay to ensure state updates first
     if (onRequestUpdated) {
-      onRequestUpdated();
+      setTimeout(() => {
+        onRequestUpdated();
+      }, 50);
     }
+    
+    // Force global update events
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('requestUpdated'));
   }, [onRequestUpdated]);
 
   return (
@@ -87,7 +101,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
       {filteredRequests.length > 0 ? (
         filteredRequests.map((request) => (
           <RequestCard
-            key={`${request.id}-${request.status}`}
+            key={`${request.id}-${request.status}-${Date.now()}`} // Force re-render on any change
             request={request}
             formatDate={formatDate}
             onClearRequest={onClearRequest}

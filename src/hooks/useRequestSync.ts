@@ -16,28 +16,44 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       
       // Only for StorageEvent, check if it's specifically our key
       if (event instanceof StorageEvent) {
-        if (event.key === 'requestsUpdate' && event.newValue) {
+        if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate') {
           try {
-            const parsedRequests = JSON.parse(event.newValue);
+            const parsedRequests = event.key === 'requestsUpdate' && event.newValue
+              ? JSON.parse(event.newValue)
+              : loadRequests(); // Fallback to loading if key is different
+            
             setRequests(parsedRequests);
             console.log("useRequestSync: Updated requests from storage event", parsedRequests);
           } catch (err) {
             console.error("Error parsing requests from storage:", err);
+            
+            // Try loading directly as fallback
+            const directRequests = loadRequests();
+            setRequests(directRequests);
           }
         }
       }
     };
     
+    // Set up event listeners with priority handling
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('requestUpdated', handleStorageChange);
     
     // Initial load
     const initialRequests = loadRequests();
     setRequests(initialRequests);
+    console.log("useRequestSync: Initial requests loaded", initialRequests);
+    
+    // Set up periodic refresh to ensure data is always current
+    const refreshInterval = setInterval(() => {
+      const refreshedRequests = loadRequests();
+      setRequests(refreshedRequests);
+    }, 2000); // Check every 2 seconds
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('requestUpdated', handleStorageChange);
+      clearInterval(refreshInterval);
     };
   }, [setRequests]);
 };
