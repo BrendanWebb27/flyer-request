@@ -5,8 +5,6 @@ import { TabsContent } from "@/components/ui/tabs";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RequestStatus } from "@/types/request";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 
 // Component imports
 import OrganizationAccessControl from "@/components/OrganizationAccessControl";
@@ -25,7 +23,8 @@ const SupportDashboard: React.FC = () => {
     formatDate, 
     addNote,
     metrics,
-    clearRequest
+    clearRequest,
+    undoClearRequest
   } = useSupportRequests();
   
   const location = useLocation();
@@ -55,29 +54,6 @@ const SupportDashboard: React.FC = () => {
     });
   };
 
-  // Handle clearing all completed requests
-  const handleClearCompleted = () => {
-    const completedRequests = requests.filter(req => req.status === "completed");
-    
-    if (completedRequests.length === 0) {
-      toast({
-        title: "No Completed Requests",
-        description: "There are no completed requests to clear.",
-      });
-      return;
-    }
-
-    // Clear each completed request
-    completedRequests.forEach(request => {
-      clearRequest(request.id);
-    });
-
-    toast({
-      title: "Completed Requests Cleared",
-      description: `${completedRequests.length} completed requests have been cleared.`,
-    });
-  };
-
   // Log metrics for debugging
   useEffect(() => {
     console.log("Dashboard metrics:", metrics);
@@ -104,18 +80,7 @@ const SupportDashboard: React.FC = () => {
         completedCount={metrics.completedToday}
       />
       
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Support Requests</h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-red-500 border-red-200 hover:bg-red-50"
-          onClick={handleClearCompleted}
-        >
-          <Trash2 size={16} className="mr-2" />
-          Clear Completed Requests
-        </Button>
-      </div>
+      <h2 className="text-2xl font-bold">Support Requests</h2>
 
       <RequestTabs defaultValue={activeTab}>
         {["all", "pending", "active", "completed"].map((tab) => (
@@ -127,6 +92,8 @@ const SupportDashboard: React.FC = () => {
               acceptRequest={acceptRequest}
               completeRequest={completeRequest}
               addNote={addNote}
+              clearRequest={clearRequest}
+              undoClearRequest={undoClearRequest}
             />
           </TabsContent>
         ))}

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,24 +7,46 @@ import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/co
 import { Request, RequestStatus } from "@/types/request";
 import RequestActionPanel from "@/components/RequestActionPanel";
 import CompletionForm from "./CompletionForm";
+import { Trash2, Check, Undo } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 
 interface RequestRowProps {
   request: Request;
+  requestIndex: number;
   formatDate: (dateString: string) => string;
   acceptRequest: (id: string, data: { assignedTo: string; estimatedTime: string }) => void;
   completeRequest: (id: string, note?: { text: string, author: string }) => void;
   addNote?: (id: string, note: { text: string, author: string }) => void;
+  clearRequest?: (id: string) => void;
+  undoClearRequest?: (id: string, index: number) => void;
   setActiveRequest: (id: string | null) => void;
 }
 
 const RequestRow: React.FC<RequestRowProps> = ({
   request,
+  requestIndex,
   formatDate,
   acceptRequest,
   completeRequest,
   addNote,
+  clearRequest,
+  undoClearRequest,
   setActiveRequest,
 }) => {
+  const { toast } = useToast();
+  const [showUndoToast, setShowUndoToast] = useState(false);
+
   const getStatusBadge = (status: RequestStatus) => {
     switch (status) {
       case "active":
@@ -35,6 +57,34 @@ const RequestRow: React.FC<RequestRowProps> = ({
         return <Badge variant="outline" className="border-blue-500 text-blue-500">Completed</Badge>;
       case "cancelled":
         return <Badge variant="destructive">Cancelled</Badge>;
+    }
+  };
+
+  const handleClearRequest = () => {
+    if (clearRequest) {
+      clearRequest(request.id);
+      
+      // Show toast with undo option
+      toast({
+        title: "Request Cleared",
+        description: "The request has been removed from your view.",
+        action: (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="border-green-500 text-green-600 hover:bg-green-50"
+            onClick={() => {
+              if (undoClearRequest) {
+                undoClearRequest(request.id, requestIndex);
+                setShowUndoToast(false);
+              }
+            }}
+          >
+            <Undo size={16} className="mr-1" />
+            Undo
+          </Button>
+        ),
+      });
     }
   };
 
@@ -91,6 +141,34 @@ const RequestRow: React.FC<RequestRowProps> = ({
               </SheetContent>
             </Sheet>
           )}
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-red-500 border-red-200 hover:bg-red-50"
+              >
+                <Trash2 size={16} className="mr-1" />
+                Clear
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear this request?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove request {request.id} from your view. You'll have the option to undo this action.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleClearRequest}>
+                  <Check size={16} className="mr-1" />
+                  Confirm
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           
           <Button variant="ghost" size="sm">
             Details

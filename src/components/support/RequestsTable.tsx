@@ -13,6 +13,8 @@ interface RequestsTableProps {
   acceptRequest: (id: string, data: { assignedTo: string; estimatedTime: string }) => void;
   completeRequest: (id: string, note?: { text: string, author: string }) => void;
   addNote?: (id: string, note: { text: string, author: string }) => void;
+  clearRequest?: (id: string) => void;
+  undoClearRequest?: (id: string, index: number) => void;
 }
 
 const RequestsTable: React.FC<RequestsTableProps> = ({
@@ -21,7 +23,9 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
   formatDate,
   acceptRequest,
   completeRequest,
-  addNote
+  addNote,
+  clearRequest,
+  undoClearRequest
 }) => {
   const [activeRequest, setActiveRequest] = useState<string | null>(null);
 
@@ -56,14 +60,17 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
           </TableHeader>
           <TableBody>
             {filteredRequests.length > 0 ? (
-              filteredRequests.map((request) => (
+              filteredRequests.map((request, index) => (
                 <RequestRow 
                   key={request.id}
                   request={request}
+                  requestIndex={index}
                   formatDate={formatDate}
                   acceptRequest={acceptRequest}
                   completeRequest={completeRequest}
                   addNote={addNote}
+                  clearRequest={clearRequest}
+                  undoClearRequest={undoClearRequest}
                   setActiveRequest={setActiveRequest}
                 />
               ))
