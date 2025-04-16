@@ -52,7 +52,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
   };
 
   return (
-    <div onClick={stopPropagation}>
+    <div onClick={stopPropagation} onMouseDown={stopPropagation}>
       <ActionButtonSheet
         buttonText="View Details"
         buttonIcon={<Eye size={16} />}
@@ -60,9 +60,9 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
         title="Request Details"
       >
-        <div onClick={stopPropagation}>
+        <div onClick={stopPropagation} onMouseDown={stopPropagation}>
           {request ? (
-            <div className="space-y-4">
+            <div className="space-y-4" onClick={stopPropagation} onMouseDown={stopPropagation}>
               <div className="grid grid-cols-2 gap-2">
                 <div className="font-semibold">ID:</div>
                 <div>{request.id}</div>

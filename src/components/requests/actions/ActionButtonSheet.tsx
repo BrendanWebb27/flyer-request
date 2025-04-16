@@ -46,7 +46,11 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet 
+      open={open} 
+      onOpenChange={setOpen}
+      modal={true}
+    >
       <SheetTrigger asChild>
         <Button 
           variant={buttonVariant}
@@ -61,13 +65,21 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       <SheetContent 
         side="right"
         onClick={(e) => e.stopPropagation()}
-        onInteractOutside={(e) => {
-          // Only prevent default if it's not a button click meant to close the sheet
+        onPointerDownOutside={(e) => {
+          // Prevent closing when clicking outside if it's not a button meant to close
           const target = e.target as HTMLElement;
           if (!target.closest('[data-sheet-close="true"]')) {
             e.preventDefault();
           }
         }}
+        onInteractOutside={(e) => {
+          // Prevent closing when interacting outside if it's not a button meant to close
+          const target = e.target as HTMLElement;
+          if (!target.closest('[data-sheet-close="true"]')) {
+            e.preventDefault();
+          }
+        }}
+        className="overflow-y-auto max-h-screen"
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>

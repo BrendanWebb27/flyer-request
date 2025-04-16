@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import ActionButtonSheet from "./ActionButtonSheet";
 import { SheetClose } from "@/components/ui/sheet";
+import { useToast } from "@/hooks/use-toast";
 
 interface ClearRequestActionProps {
   requestId: string;
@@ -11,6 +12,8 @@ interface ClearRequestActionProps {
 }
 
 const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onClear }) => {
+  const { toast } = useToast();
+  
   const stopPropagation = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -19,11 +22,17 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
   const handleClearRequest = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
     onClear(requestId);
+    
+    toast({
+      title: "Request Cleared",
+      description: `Request ${requestId} has been removed from your view.`,
+    });
   };
 
   return (
-    <div onClick={stopPropagation}>
+    <div onClick={stopPropagation} onMouseDown={stopPropagation}>
       <ActionButtonSheet
         buttonText="Clear"
         buttonIcon={<Trash2 size={16} />}
@@ -31,7 +40,7 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
         buttonClass="text-red-500 border-red-200 hover:bg-red-50"
         title={`Clear Request ${requestId}`}
       >
-        <div onClick={stopPropagation}>
+        <div onClick={stopPropagation} onMouseDown={stopPropagation}>
           <p className="mb-4">Are you sure you want to clear this request? This will remove it from your view.</p>
           <div className="flex justify-end gap-2 mt-6">
             <SheetClose asChild data-sheet-close="true">
