@@ -1,8 +1,8 @@
 
-import React, { useEffect, useState, useMemo } from "react";
-import { Card } from "@/components/ui/card";
+import React, { useEffect, useMemo } from "react";
 import { RequestStatus, Request } from "@/types/request";
-import RequestCard from "./RequestCard";
+import RequestsGrid from "./RequestsGrid";
+import EmptyRequestsState from "./EmptyRequestsState";
 
 interface RequestsTabContentProps {
   requests: Request[];
@@ -35,39 +35,21 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   useEffect(() => {
     console.log("RequestsTabContent: Received requests for status:", status);
   }, [requests, status]);
-  
-  // Handle request acceptance with proper notification
-  const handleAcceptRequest = (id: string, data: { estimatedTime: string }) => {
-    if (onAcceptRequest) {
-      console.log("RequestsTabContent: Handling accept for request:", id);
-      onAcceptRequest(id, data);
-      
-      // Notify parent components about the update
-      if (onRequestUpdated) {
-        onRequestUpdated();
-      }
-    }
-  };
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <>
       {filteredRequests.length > 0 ? (
-        filteredRequests.map((request) => (
-          <RequestCard
-            key={request.id} // Simplified key to prevent unnecessary re-renders
-            request={request}
-            formatDate={formatDate}
-            onClearRequest={onClearRequest}
-            onAccept={handleAcceptRequest}
-            onRequestUpdated={onRequestUpdated}
-          />
-        ))
+        <RequestsGrid
+          requests={filteredRequests}
+          formatDate={formatDate}
+          onClearRequest={onClearRequest}
+          onAcceptRequest={onAcceptRequest}
+          onRequestUpdated={onRequestUpdated}
+        />
       ) : (
-        <Card className="col-span-full p-6 text-center">
-          <p className="text-muted-foreground">No {status !== "all" ? status : ""} requests found.</p>
-        </Card>
+        <EmptyRequestsState status={status} />
       )}
-    </div>
+    </>
   );
 };
 
