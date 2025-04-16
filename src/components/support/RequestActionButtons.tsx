@@ -39,6 +39,12 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
   const showClearButton = 
     (isSupport && request.status === "completed") ||
     (!isSupport && (request.status === "pending" || request.status === "active"));
+    
+  // Handler to prevent event bubbling
+  const handleDetailClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveRequest(request.id);
+  };
 
   return (
     <div className="flex items-center gap-2 flex-nowrap justify-end">
@@ -71,7 +77,7 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
         request={request}
         onAccept={acceptRequest}
         onComplete={completeRequest}
-        onClick={() => setActiveRequest(request.id)}
+        onClick={handleDetailClick}
       />
     </div>
   );

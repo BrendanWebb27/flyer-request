@@ -25,19 +25,22 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   
-  // Completely rebuilt click handler with no restrictions
-  const handleClick = () => {
-    console.log("Details button clicked for request:", requestId);
+  const handleClick = (e: React.MouseEvent) => {
+    // Stop event propagation to prevent parent handlers from triggering
+    e.stopPropagation();
+    e.preventDefault();
     
-    // If we have a direct handler, use it
-    if (onClick) {
-      onClick();
-      return;
-    }
+    console.log("Details button clicked for request:", requestId);
     
     // If we have request data, simply open the dialog
     if (request) {
       setOpen(true);
+      return;
+    }
+    
+    // If we have a direct handler, use it
+    if (onClick) {
+      onClick();
       return;
     }
     
