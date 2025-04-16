@@ -111,7 +111,10 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   return (
     <div 
       className="flex gap-2 self-end md:self-center" 
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
     >
       {/* Clear button */}
       {showClearButton && (

@@ -24,6 +24,15 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   children,
   onButtonClick
 }) => {
+  // Prevent event bubbling to parent elements
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onButtonClick) {
+      onButtonClick(e);
+    }
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -31,18 +40,13 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
           variant={buttonVariant}
           size={buttonSize}
           className={buttonClass}
-          onClick={(e) => {
-            if (onButtonClick) {
-              e.stopPropagation();
-              onButtonClick(e);
-            }
-          }}
+          onClick={handleButtonClick}
         >
           {buttonIcon && <span className="mr-1">{buttonIcon}</span>}
           {buttonText}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent onClick={(e) => e.stopPropagation()}>
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
