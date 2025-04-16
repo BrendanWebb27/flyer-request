@@ -130,7 +130,7 @@ const Profile: React.FC = () => {
             />
           )}
           
-          {/* Organization verification button */}
+          {/* Organization verification button - should always be visible for non-support users regardless of edit mode */}
           {!profile.isSupport && (
             <div className="pt-4">
               <button
