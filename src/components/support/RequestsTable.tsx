@@ -1,11 +1,11 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Request, RequestStatus } from "@/types/request";
+import { Table, TableBody } from "@/components/ui/table";
+import { Request } from "@/types/request";
+import RequestTableHeader from "./RequestTableHeader";
 import RequestRow from "./RequestRow";
-import EmptyTableRow from "./EmptyTableRow";
-import { useProfileAccess } from "@/hooks/useProfileAccess";
+import RequestEmptyRow from "./RequestEmptyRow";
 
 interface RequestsTableProps {
   requests: Request[];
@@ -28,16 +28,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
   clearRequest,
   undoClearRequest
 }) => {
-  const [activeRequest, setActiveRequest] = useState<string | null>(null);
-  const { isSupport } = useProfileAccess();
-
-  // Filter requests based on the active tab
-  const filteredRequests = React.useMemo(() => {
-    if (activeTab === "all") {
-      return requests;
-    }
-    return requests.filter(request => request.status === activeTab as RequestStatus);
-  }, [requests, activeTab]);
+  const [activeRequest, setActiveRequest] = React.useState<string | null>(null);
 
   return (
     <Card>
@@ -50,19 +41,10 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
       </CardHeader>
       <CardContent>
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Estimated Arrival</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+          <RequestTableHeader />
           <TableBody>
-            {filteredRequests.length > 0 ? (
-              filteredRequests.map((request, index) => (
+            {requests.length > 0 ? (
+              requests.map((request, index) => (
                 <RequestRow 
                   key={request.id}
                   request={request}
@@ -77,7 +59,7 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
                 />
               ))
             ) : (
-              <EmptyTableRow activeTab={activeTab} colSpan={6} />
+              <RequestEmptyRow activeTab={activeTab} />
             )}
           </TableBody>
         </Table>
