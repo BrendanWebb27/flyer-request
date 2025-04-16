@@ -10,11 +10,13 @@ import ProfileForm from "@/components/profile/ProfileForm";
 import FlyerStatusForm from "@/components/profile/FlyerStatusForm";
 import ProfileActions from "@/components/profile/ProfileActions";
 import NotificationsForm from "@/components/profile/NotificationsForm";
+import OrganizationAccessControl from "@/components/OrganizationAccessControl";
 
 const Profile: React.FC = () => {
   const { toast } = useToast();
   const { getUserProfile, saveUserProfile, isSupport, isSupportOrganization } = useProfileAccess();
   const [isEditing, setIsEditing] = useState(false);
+  const [showOrgVerification, setShowOrgVerification] = useState(false);
   
   // Load profile data from localStorage or use defaults
   const [profile, setProfile] = useState(() => {
@@ -69,6 +71,23 @@ const Profile: React.FC = () => {
     }, 500);
   };
 
+  const handleVerifyOrganization = () => {
+    setShowOrgVerification(true);
+  };
+
+  const handleAccessGranted = () => {
+    setShowOrgVerification(false);
+    toast({
+      title: "Organization Verified",
+      description: "Your organization access has been verified successfully."
+    });
+    // Reload the profile to reflect the changes
+    const savedProfile = getUserProfile();
+    if (savedProfile) {
+      setProfile(savedProfile);
+    }
+  };
+
   const organizations = [
     "Support", 
     "APG", 
@@ -77,6 +96,11 @@ const Profile: React.FC = () => {
     "ENG", 
     "WPN"
   ];
+
+  // Show organization verification if requested
+  if (showOrgVerification) {
+    return <OrganizationAccessControl onAccessGranted={handleAccessGranted} />;
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -104,6 +128,21 @@ const Profile: React.FC = () => {
               setProfile={setProfile}
               isEditing={isEditing}
             />
+          )}
+          
+          {/* Organization verification button */}
+          {!profile.isSupport && (
+            <div className="pt-4">
+              <button
+                className="text-sm text-flyerPurple-600 hover:text-flyerPurple-700 font-medium"
+                onClick={handleVerifyOrganization}
+              >
+                Verify Organization Access
+              </button>
+              <p className="text-xs text-muted-foreground mt-1">
+                Verify your organization access to gain support privileges
+              </p>
+            </div>
           )}
         </CardContent>
         <CardFooter className="flex justify-end gap-4">

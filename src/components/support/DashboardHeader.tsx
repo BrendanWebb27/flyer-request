@@ -1,18 +1,15 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
 
 interface DashboardHeaderProps {
   organization: string;
   userEmail?: string;
-  onSignOut: () => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
   organization, 
-  userEmail,
-  onSignOut 
+  userEmail
 }) => {
   return (
     <div className="flex items-center justify-between mb-6">
@@ -30,13 +27,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           )}
         </div>
       </div>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={onSignOut}
-      >
-        Change Organization
-      </Button>
     </div>
   );
 };

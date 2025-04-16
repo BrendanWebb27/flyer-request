@@ -60,19 +60,6 @@ const SupportDashboard: React.FC = () => {
     }
   }, []);
 
-  // Handle sign out
-  const handleSignOut = () => {
-    localStorage.removeItem("supportAccessGranted");
-    localStorage.removeItem("organizationAccess");
-    localStorage.removeItem("supportUserEmail");
-    localStorage.removeItem("lastUserActivity");
-    setHasAccess(false);
-    toast({
-      title: "Signed Out",
-      description: "You have been signed out of the support dashboard",
-    });
-  };
-
   // Log metrics for debugging
   useEffect(() => {
     console.log("Dashboard metrics:", metrics);
@@ -101,7 +88,6 @@ const SupportDashboard: React.FC = () => {
       <DashboardHeader 
         organization={organization}
         userEmail={userEmail}
-        onSignOut={handleSignOut} 
       />
       
       <DashboardMetrics 
