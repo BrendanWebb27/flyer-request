@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +10,8 @@ import FlyerStatusForm from "@/components/profile/FlyerStatusForm";
 import ProfileActions from "@/components/profile/ProfileActions";
 import NotificationsForm from "@/components/profile/NotificationsForm";
 import OrganizationAccessControl from "@/components/OrganizationAccessControl";
+import ProfileDebugger from "@/components/profile/ProfileDebugger";
+import { checkForProfile, logAllProfiles } from "@/utils/profileUtils";
 
 const Profile: React.FC = () => {
   const { toast } = useToast();
@@ -45,6 +46,17 @@ const Profile: React.FC = () => {
   // Update the activity timestamp when the profile page is loaded
   useEffect(() => {
     updateUserActivityTimestamp();
+    
+    // Check for profile with username "69" as requested
+    const { exists, profile } = checkForProfile("69");
+    if (exists) {
+      console.log("Found profile with username '69':", profile);
+    } else {
+      console.log("No profile found with username '69'");
+    }
+    
+    // Log all profiles for debugging
+    logAllProfiles();
   }, []);
 
   // Check if the organization is "Support" and update isSupport accordingly
@@ -116,6 +128,9 @@ const Profile: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <ProfileHeader />
+      
+      {/* Add the ProfileDebugger component */}
+      <ProfileDebugger />
       
       <Card>
         <CardHeader>

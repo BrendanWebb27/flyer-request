@@ -173,6 +173,37 @@ export function useProfileAccess() {
     return supportProfiles;
   };
   
+  // NEW FUNCTION: Find a profile by username (or manNumber)
+  const findProfileByUsername = (username: string): UserProfile | null => {
+    // First check in the current user's profile
+    const currentProfile = getUserProfile();
+    if (currentProfile && currentProfile.manNumber === username) {
+      return currentProfile;
+    }
+    
+    // Then check in all support profiles
+    const supportProfiles = getAllSupportProfiles();
+    const foundProfile = supportProfiles.find(
+      profile => profile.manNumber === username || profile.name?.includes(username)
+    );
+    
+    // Also check in localStorage for any other profiles
+    try {
+      const allProfiles = localStorage.getItem("allUserProfiles");
+      if (allProfiles) {
+        const parsedProfiles = JSON.parse(allProfiles) as UserProfile[];
+        const profile = parsedProfiles.find(
+          p => p.manNumber === username || p.name?.includes(username)
+        );
+        if (profile) return profile;
+      }
+    } catch (e) {
+      console.error("Error parsing stored profiles:", e);
+    }
+    
+    return foundProfile || null;
+  };
+  
   // Save profile to localStorage
   const saveUserProfile = (profile: any) => {
     localStorage.setItem("userProfile", JSON.stringify(profile));
@@ -215,6 +246,7 @@ export function useProfileAccess() {
     isSupportOrganization,
     getUserProfile,
     saveUserProfile,
-    getAllSupportProfiles
+    getAllSupportProfiles,
+    findProfileByUsername
   };
 }
