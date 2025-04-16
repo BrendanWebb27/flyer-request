@@ -56,7 +56,10 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
   // Accept request
   const handleAccept = () => {
     if (onAccept && estimatedTime) {
-      onAccept(request.id, { estimatedTime });
+      onAccept(request.id, { 
+        assignedTo: "Current Support Staff", // Fixed default value
+        estimatedTime 
+      });
       onClose();
     }
   };

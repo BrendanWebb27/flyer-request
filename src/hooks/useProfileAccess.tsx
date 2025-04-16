@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
-import { clearExpiredUserData, updateUserActivityTimestamp, getVerifiedEmails, getEmailOrganization } from "@/utils/userDataExpiration";
 
-interface UserProfile {
-  name?: string;
-  manNumber?: string;
-  organization: string;
-  workShift?: string;
-  isFlyer?: boolean;
-  flyerRole?: string;
-}
+import { useEffect, useState } from "react";
+import { clearExpiredUserData, getVerifiedEmails } from "@/utils/userDataExpiration";
+import { UserProfile } from "@/types/profile";
+import { 
+  getUserProfile, 
+  saveUserProfile, 
+  getAllSupportProfiles,
+  isSupportOrganization,
+  findProfileByUsername
+} from "@/utils/profileOperations";
+import {
+  getSupportAccess,
+  setSupportAccess,
+  isUserVerified,
+  updateSupportAccessFromProfile
+} from "@/utils/supportAccess";
 
 /**
  * Custom hook to handle profile access and support role management
@@ -43,11 +49,6 @@ export function useProfileAccess() {
           localStorage.setItem("emailVerified", "true");
           setIsVerified(true);
         }
-        
-        // Update activity timestamp when checking access
-        if (hasAccess) {
-          updateUserActivityTimestamp();
-        }
       };
       
       // Check on mount
@@ -62,183 +63,14 @@ export function useProfileAccess() {
     }
   }, []);
 
-  // Helper functions to work with support access
-  const getSupportAccess = () => {
-    // Check for expired data first
-    if (clearExpiredUserData()) {
-      return false;
-    }
-    
-    const hasAccess = localStorage.getItem("supportAccessGranted") === "true";
-    console.log("getSupportAccess result:", hasAccess);
-    
-    // Update activity timestamp if the user has access
-    if (hasAccess) {
-      updateUserActivityTimestamp();
-    }
-    
-    return hasAccess;
-  };
-  
-  const setSupportAccess = (hasAccess: boolean) => {
-    console.log("Setting support access to:", hasAccess);
-    localStorage.setItem("supportAccessGranted", hasAccess ? "true" : "false");
-    
-    // Update activity timestamp when setting access
-    if (hasAccess) {
-      updateUserActivityTimestamp();
-    }
-    
-    setIsSupport(hasAccess);
-    
-    // Dispatch storage event to notify other components
-    window.dispatchEvent(new Event("storage"));
-  };
-  
-  // Helper to check if user is verified
-  const isUserVerified = () => {
-    return localStorage.getItem("emailVerified") === "true";
-  };
-  
-  // Helper to check if a user's organization is support
-  const isSupportOrganization = (organization: string) => {
-    return organization === "Support";
-  };
-  
-  // Get user profile from localStorage
-  const getUserProfile = () => {
-    // Check for expired data first
-    if (clearExpiredUserData()) {
-      return null;
-    }
-    
-    const savedProfile = localStorage.getItem("userProfile");
-    if (savedProfile) {
-      // Update activity timestamp when getting user profile
-      updateUserActivityTimestamp();
-      return JSON.parse(savedProfile);
-    }
-    
-    return null;
-  };
-  
-  // Get all profiles from localStorage, including any mock support staff
-  const getAllSupportProfiles = (): UserProfile[] => {
-    // Update activity timestamp when getting profiles
-    updateUserActivityTimestamp();
-    
-    // Get the current user's profile first
-    const currentProfile = getUserProfile();
-    
-    // Check if we should include the current user in support staff
-    const isCurrentUserSupport = currentProfile && 
-                               currentProfile.organization === "Support";
-    
-    // Get any stored support profiles 
-    let supportProfiles: UserProfile[] = [];
-    const storedProfiles = localStorage.getItem("supportProfiles");
-    
-    if (storedProfiles) {
-      supportProfiles = JSON.parse(storedProfiles);
-    }
-    
-    // Add mock support staff if no profiles are available
-    if (supportProfiles.length === 0 && !isCurrentUserSupport) {
-      supportProfiles = [
-        { name: "John Doe", organization: "Support", workShift: "dayshift" },
-        { name: "Sarah Johnson", organization: "Support", workShift: "dayshift" },
-        { name: "Mike Wilson", organization: "Support", workShift: "nightshift" },
-        { name: "Emily Brown", organization: "Support", workShift: "nightshift" }
-      ];
-      
-      // Store mock profiles for future use
-      localStorage.setItem("supportProfiles", JSON.stringify(supportProfiles));
-    }
-    
-    // Add current user if they are support staff
-    if (isCurrentUserSupport && currentProfile) {
-      const currentUserName = currentProfile.name || "Current Support Staff";
-      
-      // Check if current user is already in the list
-      const exists = supportProfiles.some(
-        profile => profile.name === currentUserName
-      );
-      
-      if (!exists) {
-        supportProfiles.unshift({
-          ...currentProfile,
-          name: currentUserName
-        });
-      }
-    }
-    
-    return supportProfiles;
-  };
-  
-  // NEW FUNCTION: Find a profile by username (or manNumber)
-  const findProfileByUsername = (username: string): UserProfile | null => {
-    // First check in the current user's profile
-    const currentProfile = getUserProfile();
-    if (currentProfile && currentProfile.manNumber === username) {
-      return currentProfile;
-    }
-    
-    // Then check in all support profiles
-    const supportProfiles = getAllSupportProfiles();
-    const foundProfile = supportProfiles.find(
-      profile => profile.manNumber === username || profile.name?.includes(username)
-    );
-    
-    // Also check in localStorage for any other profiles
-    try {
-      const allProfiles = localStorage.getItem("allUserProfiles");
-      if (allProfiles) {
-        const parsedProfiles = JSON.parse(allProfiles) as UserProfile[];
-        const profile = parsedProfiles.find(
-          p => p.manNumber === username || p.name?.includes(username)
-        );
-        if (profile) return profile;
-      }
-    } catch (e) {
-      console.error("Error parsing stored profiles:", e);
-    }
-    
-    return foundProfile || null;
-  };
-  
-  // Save profile to localStorage
-  const saveUserProfile = (profile: any) => {
-    localStorage.setItem("userProfile", JSON.stringify(profile));
-    
-    // Update activity timestamp when saving profile
-    updateUserActivityTimestamp();
-    
-    // Update support access based on organization
-    const hasAccess = isSupportOrganization(profile.organization);
-    setSupportAccess(hasAccess);
-    
-    // If profile is for support staff, update the support profiles list
-    if (hasAccess) {
-      const supportProfiles = getAllSupportProfiles();
-      
-      // Check if profile already exists in support profiles
-      const existingIndex = supportProfiles.findIndex(
-        p => p.manNumber === profile.manNumber
-      );
-      
-      if (existingIndex >= 0) {
-        // Update existing profile
-        supportProfiles[existingIndex] = {...profile};
-      } else {
-        // Add profile to support staff list
-        supportProfiles.unshift({...profile});
-      }
-      
-      // Save updated support profiles
-      localStorage.setItem("supportProfiles", JSON.stringify(supportProfiles));
-    }
+  // Custom save function that also updates support status
+  const saveUserProfileWithAccessUpdate = (profile: UserProfile) => {
+    saveUserProfile(profile);
+    updateSupportAccessFromProfile(profile);
+    setIsSupport(isSupportOrganization(profile.organization));
   };
 
+  // Return all the functions and state needed by components
   return {
     isSupport,
     isVerified,
@@ -247,7 +79,7 @@ export function useProfileAccess() {
     setSupportAccess,
     isSupportOrganization,
     getUserProfile,
-    saveUserProfile,
+    saveUserProfile: saveUserProfileWithAccessUpdate,
     getAllSupportProfiles,
     findProfileByUsername
   };
