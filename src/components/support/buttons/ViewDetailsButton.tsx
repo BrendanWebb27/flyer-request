@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Request } from "@/types/request";
 import RequestDetailsDialog from "@/components/requests/RequestDetailsDialog";
 
@@ -25,14 +25,10 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   
-  // Stop propagation for all events
-  const stopAllEvents = (e: React.UIEvent) => {
+  // Handle button click with propagation control
+  const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-  };
-  
-  const handleClick = (e: React.MouseEvent) => {
-    stopAllEvents(e);
     
     if (onClick) {
       onClick();
@@ -62,6 +58,7 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent 
             className="max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
           >
             <RequestDetailsDialog 
               request={request}

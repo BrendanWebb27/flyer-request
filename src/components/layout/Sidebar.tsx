@@ -121,26 +121,12 @@ const Sidebar: React.FC = () => {
     },
   ];
 
+  // Simplifying the support navigation - removing redundant items
   const supportUserNavItems = [
     {
       icon: HeadphonesIcon, 
       label: "Support Dashboard",
       route: "/support",
-    },
-    {
-      icon: AlertCircle,
-      label: "Pending Requests",
-      route: "/support?status=pending",
-    },
-    {
-      icon: Clock,
-      label: "Active Requests",
-      route: "/support?status=active",
-    },
-    {
-      icon: CheckCircle2,
-      label: "Completed Requests",
-      route: "/support?status=completed",
     },
     {
       icon: UserCircle,

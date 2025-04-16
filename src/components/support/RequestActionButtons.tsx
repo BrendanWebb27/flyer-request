@@ -14,6 +14,7 @@ interface RequestActionButtonsProps {
   completeRequest: (id: string, note?: { text: string, author: string }) => void;
   addNote?: (id: string, note: { text: string, author: string }) => void;
   clearRequest?: (id: string) => void;
+  undoClearRequest?: (id: string, index: number) => void;
   setActiveRequest: (id: string | null) => void;
   handleClearRequest: () => void;
 }
@@ -43,12 +44,15 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
   const stopPropagation = (e: React.UIEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    return false;
   };
 
   return (
     <div 
-      className="flex items-center gap-2 flex-nowrap justify-end"
+      className="flex items-center gap-2 flex-nowrap justify-end" 
       onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerDown={stopPropagation}
     >
       {showAcceptButton && (
         <AcceptRequestButton 
