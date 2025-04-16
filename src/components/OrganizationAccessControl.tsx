@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,19 +19,14 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
   const [attempts, setAttempts] = useState(0);
   const [step, setStep] = useState<"email" | "code">("email");
 
-  // In a real application, these would come from a database or API
-  // Allowed domain patterns for organization email verification
-  const allowedDomains = [
-    "company.org",
-    "department.company.org",
-    "support-staff.org"
-  ];
+  // Update allowed domains to only accept @us.af.mil emails
+  const allowedDomains = ["us.af.mil"];
   
   // Valid codes per organization domain
   const validCodes: Record<string, string> = {
-    "ORG001-FLYER": "IT Department",
-    "ORG002-FLYER": "Operations",
-    "ORG003-FLYER": "Human Resources"
+    "ORG001-FLYER": "Air Force HQ",
+    "ORG002-FLYER": "Air Force Operations",
+    "ORG003-FLYER": "Air Force Support"
   };
 
   const checkEmailDomain = () => {
@@ -52,9 +46,9 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
     
     const domain = emailParts[1].toLowerCase();
     
-    // Check if domain is allowed
+    // Check if domain exactly matches allowed domains
     const isDomainAllowed = allowedDomains.some(allowedDomain => 
-      domain === allowedDomain || domain.endsWith('.' + allowedDomain)
+      domain === allowedDomain
     );
     
     setTimeout(() => {
@@ -68,7 +62,7 @@ const OrganizationAccessControl: React.FC<OrganizationAccessControlProps> = ({
         setAttempts(prev => prev + 1);
         toast({
           title: "Unauthorized Domain",
-          description: "Your email domain is not authorized for this application.",
+          description: "Only @us.af.mil email addresses are authorized.",
           variant: "destructive",
         });
       }
