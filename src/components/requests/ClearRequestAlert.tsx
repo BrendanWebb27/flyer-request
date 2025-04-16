@@ -21,6 +21,7 @@ interface ClearRequestAlertProps {
 const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
   // Handler to prevent event propagation
   const handleDialogClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
   };
   
@@ -56,7 +57,13 @@ const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
           Clear
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent onClick={handleDialogClick}>
+      <AlertDialogContent 
+        onClick={handleDialogClick}
+        onPointerDownOutside={(e) => {
+          // Prevent clicking outside from auto-closing
+          e.preventDefault();
+        }}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>Clear this request?</AlertDialogTitle>
           <AlertDialogDescription>

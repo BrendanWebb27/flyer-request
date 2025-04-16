@@ -38,12 +38,14 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
   };
   
   // Handler for clicks inside the dialog to prevent propagation
+  // This prevents sidebar or parent elements from capturing the click
   const handleDialogClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
   };
   
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} modal={true}>
       <DialogTrigger asChild>
         <Button 
           size="sm" 
@@ -55,7 +57,17 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
           View Details
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto" onClick={handleDialogClick}>
+      <DialogContent 
+        className="max-w-md max-h-[80vh] overflow-y-auto" 
+        onClick={handleDialogClick}
+        onPointerDownOutside={(e) => {
+          // Prevent auto-closing when clicking outside
+          e.preventDefault();
+        }}
+        onEscapeKeyDown={(e) => {
+          // Allow ESC key to still close the dialog
+        }}
+      >
         {request ? (
           <RequestDetailsDialog 
             request={request} 
