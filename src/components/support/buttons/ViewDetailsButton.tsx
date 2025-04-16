@@ -25,28 +25,24 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   
-  // Handle button click with improved propagation control
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Completely rebuilt click handler with no restrictions
+  const handleClick = () => {
+    console.log("Details button clicked for request:", requestId);
     
+    // If we have a direct handler, use it
     if (onClick) {
       onClick();
-    } else if (request) {
-      // If we have request data, open the dialog
-      setOpen(true);
-    } else {
-      // Fallback to navigation if no request data
-      navigate(`/request/${requestId}`);
+      return;
     }
-
-    return false; // Ensure no propagation
-  };
-
-  // Ensure dialog content clicks don't propagate
-  const handleContentClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    
+    // If we have request data, simply open the dialog
+    if (request) {
+      setOpen(true);
+      return;
+    }
+    
+    // Fallback to navigation
+    navigate(`/request/${requestId}`);
   };
 
   return (
@@ -56,8 +52,6 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
         size="sm"
         className="whitespace-nowrap flex-shrink-0"
         onClick={handleClick}
-        onMouseDown={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
       >
         <Eye size={16} className="mr-1" />
         Details
@@ -69,10 +63,7 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
           open={open} 
           onOpenChange={setOpen}
         >
-          <DialogContent 
-            className="max-h-[80vh] overflow-y-auto"
-            onClick={handleContentClick}
-          >
+          <DialogContent className="max-h-[80vh] overflow-y-auto">
             <RequestDetailsDialog 
               request={request}
               onClose={() => setOpen(false)}

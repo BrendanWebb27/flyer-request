@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { loadRequests, forceRequestSync } from "@/utils/requestPersistence";
 
 type SetRequestsFunction = React.Dispatch<React.SetStateAction<any[]>>;
@@ -10,6 +10,7 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
   const updateInProgress = useRef(false);
   const updateInterval = useRef<number | null>(null);
   const forceSyncTimeout = useRef<number | null>(null);
+  const broadcastChannel = useRef<BroadcastChannel | null>(null);
   
   useEffect(() => {
     // Set up mounted flag for cleanup
@@ -49,26 +50,41 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       }
     };
 
+    // Setup BroadcastChannel for more reliable cross-tab communication (like Uber's real-time system)
+    try {
+      broadcastChannel.current = new BroadcastChannel('request_updates');
+      broadcastChannel.current.onmessage = (event) => {
+        console.log("BroadcastChannel message received:", event.data);
+        if (event.data.type === 'new_request' || event.data.type === 'request_update') {
+          updateRequests(true);
+        }
+      };
+    } catch (e) {
+      console.log('BroadcastChannel not supported, falling back to storage events only');
+    }
+
     const handleStorageChange = (event: StorageEvent | CustomEvent) => {
       const isStorageEvent = event instanceof StorageEvent;
       
       if (isStorageEvent) {
         // For storage events, only update if it's our specific keys
         if (event.key === 'requestsUpdate' || event.key === 'lastRequestUpdate' || 
-            event.key === 'requestSyncTrigger' || event.key?.startsWith('request_notification_')) {
+            event.key === 'requestSyncTrigger' || event.key === 'requestUpdatePing' ||
+            event.key?.startsWith('request_notification_')) {
           console.log("Storage change detected:", event.key);
           updateRequests(true);
         }
       } else {
-        // For custom events, check if it's a force sync
+        // For custom events, check if it's a force sync or high priority
         const customEvent = event as CustomEvent;
         const forceSync = customEvent.detail?.forceSync;
+        const urgent = customEvent.detail?.urgent;
         
-        // Use a small delay for normal updates, immediate for force syncs
-        if (forceSync) {
+        // Use immediate update for urgent/forced syncs
+        if (forceSync || urgent) {
           updateRequests(true);
         } else {
-          setTimeout(() => updateRequests(true), 100);
+          setTimeout(() => updateRequests(true), 50); // Very short delay
         }
       }
     };
@@ -78,17 +94,21 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       console.log("Force sync event received");
       updateRequests(true);
       
-      // Refresh again after a sequence of small delays for race conditions
+      // Perform multiple refreshes at staggered intervals (similar to ride-sharing app updates)
       if (forceSyncTimeout.current !== null) {
         clearTimeout(forceSyncTimeout.current);
       }
       
+      // Multiple rapid updates to ensure we catch all changes
       forceSyncTimeout.current = window.setTimeout(() => {
         updateRequests(true);
         forceSyncTimeout.current = window.setTimeout(() => {
           updateRequests(true);
-        }, 1000);
-      }, 300);
+          forceSyncTimeout.current = window.setTimeout(() => {
+            updateRequests(true);
+          }, 500);
+        }, 200);
+      }, 50);
     };
     
     // Set up event listeners with more types of events
@@ -96,16 +116,17 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
     window.addEventListener('requestUpdated', handleStorageChange);
     window.addEventListener('requestsForceSync', handleForceSync);
     window.addEventListener('metricsUpdate', handleStorageChange);
+    window.addEventListener('requestUpdatePing', handleForceSync);
     
     // Initial load with multiple attempts
     updateRequests(true);
-    setTimeout(() => updateRequests(true), 200);
-    setTimeout(() => updateRequests(true), 500);
+    setTimeout(() => updateRequests(true), 100);
+    setTimeout(() => updateRequests(true), 300);
     
-    // Set up a more frequent refresh interval
+    // Set up a more frequent refresh interval (similar to ride-sharing real-time updates)
     updateInterval.current = window.setInterval(() => {
-      updateRequests(true); // Force update on interval
-    }, 1500); // Check every 1.5 seconds (more frequent than before)
+      updateRequests(false); // Regular update on interval
+    }, 1000); // Check every second (more frequent for real-time feel)
     
     // Cleanup function
     return () => {
@@ -114,6 +135,7 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       window.removeEventListener('requestUpdated', handleStorageChange);
       window.removeEventListener('requestsForceSync', handleForceSync);
       window.removeEventListener('metricsUpdate', handleStorageChange);
+      window.removeEventListener('requestUpdatePing', handleForceSync);
       
       if (updateInterval.current !== null) {
         clearInterval(updateInterval.current);
@@ -121,6 +143,11 @@ export const useRequestSync = (setRequests: SetRequestsFunction) => {
       
       if (forceSyncTimeout.current !== null) {
         clearTimeout(forceSyncTimeout.current);
+      }
+
+      // Close broadcast channel if available
+      if (broadcastChannel.current) {
+        broadcastChannel.current.close();
       }
     };
   }, [setRequests]);

@@ -40,20 +40,8 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
     (isSupport && request.status === "completed") ||
     (!isSupport && (request.status === "pending" || request.status === "active"));
 
-  // Enhanced function to handle stopping event propagation
-  const stopPropagation = (e: React.UIEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  };
-
   return (
-    <div 
-      className="flex items-center gap-2 flex-nowrap justify-end" 
-      onClick={stopPropagation}
-      onMouseDown={stopPropagation}
-      onPointerDown={stopPropagation}
-    >
+    <div className="flex items-center gap-2 flex-nowrap justify-end">
       {showAcceptButton && (
         <AcceptRequestButton 
           request={request}

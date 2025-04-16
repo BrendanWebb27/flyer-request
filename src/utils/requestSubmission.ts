@@ -4,35 +4,51 @@ import { loadRequests, saveRequests } from "./requestPersistence";
 
 // Function to ensure all tabs are notified of request submission
 export const notifyAllTabsAboutNewRequest = (newRequest: Request) => {
-  // Use a custom event to notify all tabs
+  // Use a custom event to notify all tabs with immediate dispatch
   window.dispatchEvent(new CustomEvent('requestsForceSync', {
     detail: {
       timestamp: new Date().toISOString(),
       action: 'newRequest',
-      request: newRequest
+      request: newRequest,
+      urgent: true // Flag to indicate this needs immediate handling
     }
   }));
   
-  // Dispatch a specific event for support users to see
+  // Dispatch a specific event for support users to see with high priority
   window.dispatchEvent(new CustomEvent('supportNewRequest', {
     detail: {
       request: newRequest,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      priority: 'high'
     }
   }));
   
-  // Use localStorage to notify other tabs
-  const notificationKey = `request_notification_${Date.now()}`;
-  localStorage.setItem(notificationKey, JSON.stringify({
-    type: 'new_request',
-    requestId: newRequest.id,
-    timestamp: Date.now()
-  }));
-  
-  // Clean up old notifications (to avoid localStorage bloat)
-  setTimeout(() => {
-    localStorage.removeItem(notificationKey);
-  }, 5000);
+  // Use broadcastChannel API for more reliable cross-tab communication
+  try {
+    const requestChannel = new BroadcastChannel('request_updates');
+    requestChannel.postMessage({
+      type: 'new_request',
+      requestId: newRequest.id,
+      request: newRequest,
+      timestamp: Date.now()
+    });
+    setTimeout(() => requestChannel.close(), 1000);
+  } catch (e) {
+    console.log('BroadcastChannel not supported, falling back to localStorage');
+    // Use localStorage as fallback
+    const notificationKey = `request_notification_${Date.now()}`;
+    localStorage.setItem(notificationKey, JSON.stringify({
+      type: 'new_request',
+      requestId: newRequest.id,
+      request: newRequest,
+      timestamp: Date.now()
+    }));
+    
+    // Clean up old notifications (to avoid localStorage bloat)
+    setTimeout(() => {
+      localStorage.removeItem(notificationKey);
+    }, 5000);
+  }
   
   // Force an additional sync by modifying a sync trigger in localStorage
   localStorage.setItem('requestSyncTrigger', Date.now().toString());
@@ -44,6 +60,12 @@ export const notifyAllTabsAboutNewRequest = (newRequest: Request) => {
     url: window.location.href,
     storageArea: localStorage
   }));
+
+  // Additional ping to ensure all tabs update - similar to how ride-sharing apps maintain connections
+  setTimeout(() => {
+    localStorage.setItem('requestUpdatePing', Date.now().toString());
+    window.dispatchEvent(new CustomEvent('requestUpdatePing'));
+  }, 300);
 };
 
 // Modify the existing submitFlyerRequest function to include notification
