@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,6 +30,18 @@ const SupportRoute = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
+// Route guard component for regular users
+const UserRoute = ({ children }: { children: JSX.Element }) => {
+  // Use our custom hook to check if user is support staff
+  const { isSupport } = useProfileAccess();
+  
+  if (isSupport) {
+    return <Navigate to="/support" replace />;
+  }
+  
+  return children;
+};
+
 const App = () => {
   // Use the hook to track support status changes
   const { isSupport } = useProfileAccess();
@@ -42,7 +55,11 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={
+                <UserRoute>
+                  <Dashboard />
+                </UserRoute>
+              } />
               <Route path="/request" element={<RequestForm />} />
               <Route path="/active" element={<ActiveRequests />} />
               <Route path="/profile" element={<Profile />} />

@@ -66,7 +66,7 @@ const Sidebar: React.FC = () => {
       icon: Home,
       label: "Dashboard",
       route: "/dashboard",
-      roles: ["general", "support"],
+      roles: ["general"], // Changed from ["general", "support"] to ["general"] only
     },
     {
       icon: FileText,
