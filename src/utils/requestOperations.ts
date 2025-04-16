@@ -1,3 +1,4 @@
+
 import { Request, RequestStatus, Note } from "@/types/request";
 import { saveRequests } from "./requestPersistence";
 
@@ -25,6 +26,7 @@ export const acceptRequest = (
     updatedRequests.find(req => req.id === id)
   );
   
+  // Force save to localStorage
   saveRequests(updatedRequests);
   
   return updatedRequests;

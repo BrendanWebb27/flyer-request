@@ -26,16 +26,20 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
       
       // Notify parent components about the update
       if (onRequestUpdated) {
-        onRequestUpdated();
+        setTimeout(() => {
+          onRequestUpdated();
+        }, 100);
       }
     }
   };
+
+  console.log("RequestsGrid rendering with", requests.length, "requests");
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {requests.map((request) => (
         <RequestCard
-          key={request.id}
+          key={`${request.id}-${request.status}`}
           request={request}
           formatDate={formatDate}
           onClearRequest={onClearRequest}

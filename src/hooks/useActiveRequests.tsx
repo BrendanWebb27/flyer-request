@@ -1,4 +1,5 @@
-import { useState, useCallback, useRef } from "react";
+
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
@@ -25,6 +26,14 @@ export const useActiveRequests = () => {
   const urlParams = new URLSearchParams(location.search);
   const statusParam = urlParams.get("status") as RequestStatus | null;
   const [activeTab, setActiveTab] = useState<string>(statusParam || "all");
+
+  // This effect ensures we're always in sync with URL parameters
+  useEffect(() => {
+    if (statusParam && statusParam !== activeTab) {
+      console.log("Syncing activeTab with URL param:", statusParam);
+      setActiveTab(statusParam);
+    }
+  }, [statusParam]);
 
   const updateUrlWithActiveTab = useCallback(() => {
     if (statusParam !== activeTab && activeTab !== "all") {
@@ -75,6 +84,7 @@ export const useActiveRequests = () => {
       console.log("Before accept - Current active tab:", activeTab);
       console.log("Before accept - Current requests:", requests);
       
+      // Accept the request
       acceptRequest(id, { 
         assignedTo: "Current Support Staff", 
         estimatedTime: data.estimatedTime 
@@ -87,15 +97,23 @@ export const useActiveRequests = () => {
         description: `You'll arrive in ${data.estimatedTime}.`,
       });
       
+      // Important: Force a refresh to update the component state
       setRefreshCount(prev => prev + 1);
       
+      // Switch to active tab with a slight delay to allow state updates
       setTimeout(() => {
         console.log("Switching to active tab");
         setActiveTab("active");
         navigate(`/active?status=active`, { replace: true });
-        refreshTriggerRef.current += 1;
         
-        console.log("After tab switch - Active tab:", activeTab);
+        // Increment the refresh trigger to force child components to re-render
+        refreshTriggerRef.current += 1;
+        setRefreshCount(prev => prev + 1);
+        
+        // Trigger a storage event to notify other components
+        window.dispatchEvent(new Event('requestUpdated'));
+        
+        console.log("After tab switch - Active tab:", "active");
       }, 300);
     } catch (error) {
       console.error("Error in handleAcceptRequest:", error);

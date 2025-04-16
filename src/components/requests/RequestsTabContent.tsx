@@ -25,16 +25,18 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
 }) => {
   // Filter requests based on tab - using useMemo to prevent unnecessary recalculations
   const filteredRequests = useMemo(() => {
+    console.log(`RequestsTabContent: Filtering requests for status: ${status}`, requests);
     if (status === "all") {
       return [...requests];
     }
     return requests.filter(request => request.status === status);
   }, [requests, status]);
   
-  // When component receives new requests, log them but don't cause extra re-renders
+  // Log requests when component receives new data
   useEffect(() => {
-    console.log("RequestsTabContent: Received requests for status:", status);
-  }, [requests, status]);
+    console.log(`RequestsTabContent: Received ${filteredRequests.length} requests for status: ${status}`);
+    console.log(`RequestsTabContent: Filtered requests:`, filteredRequests);
+  }, [filteredRequests, status]);
 
   return (
     <>
