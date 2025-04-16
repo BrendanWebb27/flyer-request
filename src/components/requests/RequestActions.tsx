@@ -31,6 +31,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   // Prevent auto-closing of dialogs by stopping propagation
   const handleDialogClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
   };
   
   const handleAccept = (id: string, data: { estimatedTime: string }) => {
@@ -117,7 +118,11 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
                           (isSupport && request?.status === "completed");
 
   return (
-    <div className="flex gap-2 self-end md:self-center" onClick={handleDialogClick}>
+    <div 
+      className="flex gap-2 self-end md:self-center" 
+      onClick={handleDialogClick}
+      onMouseDown={handleDialogClick} // Add mouse down handler
+    >
       {showClearButton && (
         <ClearRequestAlert onClear={handleClearRequest} />
       )}
@@ -126,6 +131,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         <CompleteRequestButton 
           onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             setDetailsOpen(true);
           }}
         />

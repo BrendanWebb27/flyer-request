@@ -46,12 +46,11 @@ const ClearRequestAlert: React.FC<ClearRequestAlertProps> = ({ onClear }) => {
   
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
+      <AlertDialogTrigger asChild onClick={handleButtonClick}>
         <Button 
           variant="outline" 
           size="sm"
           className="text-red-500 border-red-200 hover:bg-red-50"
-          onClick={handleButtonClick}
         >
           <Trash2 size={16} />
           Clear

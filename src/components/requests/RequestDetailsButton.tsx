@@ -43,6 +43,11 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
     e.preventDefault();
     e.stopPropagation();
   };
+
+  // Only close dialog when explicitly requested
+  const handleCloseDialog = () => {
+    setOpen(false);
+  };
   
   return (
     <Dialog open={open} onOpenChange={setOpen} modal={true}>
@@ -66,7 +71,7 @@ const RequestDetailsButton: React.FC<RequestDetailsButtonProps> = ({
             request={request} 
             onAccept={handleAccept}
             onComplete={handleComplete}
-            onClose={() => setOpen(false)}
+            onClose={handleCloseDialog}
           />
         ) : (
           <div className="py-8 text-center">
