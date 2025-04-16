@@ -92,52 +92,65 @@ const Sidebar: React.FC = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [getSupportAccess]);
 
-  const navItems = [
+  // Define navigation items based on user role
+  const generalUserNavItems = [
     {
       icon: Home,
       label: "Dashboard",
       route: "/dashboard",
-      roles: ["general"],
     },
     {
       icon: FileText,
       label: "New Request",
       route: "/request",
-      roles: ["general"],
     },
     {
       icon: Clock,
       label: "Active Requests",
       route: "/active",
-      roles: ["general", "support"],
     },
     {
       icon: AlertCircle,
       label: "Pending Requests",
       route: "/active?status=pending",
-      roles: ["general", "support"],
-    },
-    {
-      icon: CheckCircle2,
-      label: "Completed Requests",
-      route: "/active?status=completed",
-      roles: ["support"],
-    },
-    {
-      icon: HeadphonesIcon,
-      label: "Support Dashboard",
-      route: "/support",
-      roles: ["support"],
     },
     {
       icon: UserCircle,
       label: "Profile",
       route: "/profile",
-      roles: ["general", "support"],
     },
   ];
 
-  const filteredNavItems = navItems.filter(item => item.roles.includes(userRole));
+  const supportUserNavItems = [
+    {
+      icon: HeadphonesIcon, 
+      label: "Support Dashboard",
+      route: "/support",
+    },
+    {
+      icon: AlertCircle,
+      label: "Pending Requests",
+      route: "/support?status=pending",
+    },
+    {
+      icon: Clock,
+      label: "Active Requests",
+      route: "/support?status=active",
+    },
+    {
+      icon: CheckCircle2,
+      label: "Completed Requests",
+      route: "/support?status=completed",
+    },
+    {
+      icon: UserCircle,
+      label: "Profile",
+      route: "/profile",
+    },
+  ];
+
+  // Choose navigation items based on user role
+  const navItems = userRole === "support" ? supportUserNavItems : generalUserNavItems;
 
   return (
     <>
@@ -159,7 +172,7 @@ const Sidebar: React.FC = () => {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {filteredNavItems.map((item) => (
+            {navItems.map((item) => (
               <SidebarMenuItem key={item.route}>
                 <SidebarMenuButton>
                   <Link

@@ -51,6 +51,31 @@ const UserRoute = ({ children }: { children: JSX.Element }) => {
   return children;
 };
 
+// Special route component for ActiveRequests that redirects support users to SupportDashboard
+const ActiveRequestsRoute = ({ children }: { children: JSX.Element }) => {
+  const { getSupportAccess } = useProfileAccess();
+  const hasAccess = getSupportAccess();
+  
+  // Get the status from URL if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const statusParam = urlParams.get("status");
+  
+  if (hasAccess) {
+    // If there's a status param, redirect to support dashboard with that status
+    if (statusParam) {
+      console.log(`Support user detected, redirecting to /support?status=${statusParam}`);
+      return <Navigate to={`/support?status=${statusParam}`} replace />;
+    }
+    // Otherwise just redirect to main support dashboard
+    console.log("Support user detected, redirecting to support dashboard");
+    return <Navigate to="/support" replace />;
+  }
+  
+  // Regular users can access the ActiveRequests page
+  console.log("Regular user detected, allowing access to active requests");
+  return children;
+};
+
 // Route guard for verified users only
 const VerifiedRoute = ({ children }: { children: JSX.Element }) => {
   // Check if user is verified (has email verified)
@@ -133,7 +158,9 @@ function App() {
             } />
             <Route path="/active" element={
               <VerifiedRoute>
-                <ActiveRequests />
+                <ActiveRequestsRoute>
+                  <ActiveRequests />
+                </ActiveRequestsRoute>
               </VerifiedRoute>
             } />
             <Route path="/profile" element={<Profile />} />
