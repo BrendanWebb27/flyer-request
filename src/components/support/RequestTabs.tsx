@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 interface RequestTabsProps {
   children: React.ReactNode;
   defaultValue?: string;
-  onTabChange?: () => void;
+  onTabChange?: (value: string) => void; // Updated to accept a value parameter
 }
 
 const RequestTabs: React.FC<RequestTabsProps> = ({ 
@@ -44,7 +44,7 @@ const RequestTabs: React.FC<RequestTabsProps> = ({
     
     // Notify parent about tab change
     if (onTabChange) {
-      onTabChange();
+      onTabChange(value);
     }
   };
 

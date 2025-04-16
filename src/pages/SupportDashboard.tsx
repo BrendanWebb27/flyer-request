@@ -28,6 +28,7 @@ const SupportDashboard: React.FC = () => {
   const [hasAccess, setHasAccess] = useState(false);
   const [syncTimer, setSyncTimer] = useState(0); // Timer state to trigger updates
   const [newRequestCount, setNewRequestCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<string>("all"); // Add state for active tab
   
   const { 
     requests, 
@@ -49,7 +50,15 @@ const SupportDashboard: React.FC = () => {
   // Extract status from URL query params
   const urlParams = new URLSearchParams(location.search);
   const statusParam = urlParams.get("status") as RequestStatus | "all" | null;
-  const activeTab = statusParam || "all";
+  
+  // Update activeTab state when URL changes
+  useEffect(() => {
+    if (statusParam) {
+      setActiveTab(statusParam);
+    } else {
+      setActiveTab("all");
+    }
+  }, [statusParam]);
   
   // Force sync requests periodically
   const forceSyncRequests = useCallback(() => {
