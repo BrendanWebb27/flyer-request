@@ -77,3 +77,6 @@ export const mockRequests: Request[] = [
     assetType: "safety"
   }
 ];
+
+// Export the mock requests as initialRequests for persistence
+export const initialRequests = mockRequests;
