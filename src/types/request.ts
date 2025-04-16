@@ -3,6 +3,7 @@ export type RequestFormData = {
   location: string;
   details: string;
   assetType: string;
+  secondUser?: string;
 };
 
 export interface Note {
@@ -24,4 +25,6 @@ export interface Request {
   requestedBy: string;
   completedAt?: string;
   notes: Note[];
+  assetType: string;
+  secondUser?: string;
 }

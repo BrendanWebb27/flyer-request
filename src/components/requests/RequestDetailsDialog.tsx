@@ -128,6 +128,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
   // Check request status - use this to determine which buttons to show
   const isPending = request.status === "pending";
   const isActive = request.status === "active";
+  const isToolTurnover = request.assetType === "tool-turnover";
 
   return (
     <>
@@ -145,6 +146,16 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
         <RequestDetailsItem label="Location">
           {request.location}
         </RequestDetailsItem>
+        
+        <RequestDetailsItem label="Asset Type">
+          {request.assetType}
+        </RequestDetailsItem>
+        
+        {isToolTurnover && request.secondUser && (
+          <RequestDetailsItem label="Receiving User">
+            {request.secondUser}
+          </RequestDetailsItem>
+        )}
         
         <RequestDetailsItem label="Details">
           {request.details}

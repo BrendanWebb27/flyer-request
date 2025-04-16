@@ -84,6 +84,7 @@ const RequestRow: React.FC<RequestRowProps> = ({
                 </SheetHeader>
                 <CompletionForm 
                   requestId={request.id}
+                  request={request}
                   completeRequest={completeRequest}
                   addNote={addNote}
                 />

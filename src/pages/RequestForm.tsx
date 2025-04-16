@@ -16,7 +16,8 @@ const RequestForm: React.FC = () => {
     defaultValues: {
       location: "",
       details: "",
-      assetType: "apg-ctk"
+      assetType: "apg-ctk",
+      secondUser: ""
     }
   });
   const [loading, setLoading] = useState(false);

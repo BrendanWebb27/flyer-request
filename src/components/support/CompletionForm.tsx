@@ -3,21 +3,28 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText } from "lucide-react";
+import { FileText, UsersRound } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Request } from "@/types/request";
 
 interface CompletionFormProps {
   requestId: string;
+  request?: Request;
   completeRequest: (id: string, note?: { text: string, author: string }) => void;
   addNote?: (id: string, note: { text: string, author: string }) => void;
 }
 
 const CompletionForm: React.FC<CompletionFormProps> = ({ 
   requestId, 
+  request,
   completeRequest, 
   addNote 
 }) => {
   const [completionNote, setCompletionNote] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState<Array<{ text: string }>>([]);
+  const [secondUser, setSecondUser] = useState(request?.secondUser || "");
+  
+  const isToolTurnover = request?.assetType === "tool-turnover";
   
   const addAdditionalNote = () => {
     setAdditionalNotes([...additionalNotes, { text: "" }]);
@@ -43,9 +50,16 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
   };
   
   const handleCompleteWithNote = (id: string) => {
-    if (completionNote.trim()) {
+    let noteText = completionNote.trim();
+    
+    // For tool turnover, include the second user in the completion note
+    if (isToolTurnover && secondUser.trim()) {
+      noteText = `Tool turnover to: ${secondUser}\n\n${noteText}`;
+    }
+    
+    if (noteText) {
       completeRequest(id, { 
-        text: completionNote, 
+        text: noteText, 
         author: "Support Staff" // In a real app, this would be the current user
       });
     } else {
@@ -57,6 +71,21 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
 
   return (
     <div className="space-y-4 mt-4">
+      {isToolTurnover && (
+        <div className="space-y-2">
+          <Label htmlFor="secondUser" className="flex items-center gap-2">
+            <UsersRound size={16} className="text-flyerPurple-500" />
+            Receiving User
+          </Label>
+          <Input 
+            id="secondUser"
+            placeholder="Enter receiving user's ID"
+            value={secondUser}
+            onChange={(e) => setSecondUser(e.target.value)}
+          />
+        </div>
+      )}
+      
       <div className="space-y-2">
         <Label htmlFor="completionNote" className="flex items-center gap-2">
           <FileText size={16} className="text-flyerPurple-500" />

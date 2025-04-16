@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Package, UserRound } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,8 @@ import { RequestFormData } from '@/types/request';
 
 const RequestFormFields: React.FC = () => {
   const form = useFormContext<RequestFormData>();
+  const assetType = form.watch('assetType');
+  const isToolTurnover = assetType === 'tool-turnover';
 
   return (
     <div className="space-y-6">
@@ -41,6 +43,26 @@ const RequestFormFields: React.FC = () => {
           />
         )}
       />
+      
+      {isToolTurnover && (
+        <FormField
+          control={form.control}
+          name="secondUser"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <UserRound size={16} className="text-flyerPurple-500" /> Receiving User
+              </FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Enter receiving user's ID" 
+                  {...field}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      )}
       
       <div className="space-y-2">
         <FormField
