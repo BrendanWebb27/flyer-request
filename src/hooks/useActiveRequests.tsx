@@ -1,43 +1,27 @@
+
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { useSupportRequests } from "@/hooks/useSupportRequests";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
-import { RequestStatus } from "@/types/request";
+import { useRequestTab } from "@/hooks/useRequestTab";
+import { useRequestActions } from "@/hooks/useRequestActions";
 
 export const useActiveRequests = () => {
-  const { toast } = useToast();
-  const { 
-    requests, 
-    formatDate, 
-    clearRequest, 
-    undoClearRequest, 
-    acceptRequest,
-    completeRequest
-  } = useSupportRequests();
-  const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { requests, formatDate } = useSupportRequests();
+  const { activeTab, setActiveTab, updateUrlWithActiveTab } = useRequestTab();
   const refreshTriggerRef = useRef(0);
   const [refreshCount, setRefreshCount] = useState(0);
   
   const { isSupport } = useProfileAccess();
   const currentUserId = "user123";
   
-  const urlParams = new URLSearchParams(location.search);
-  const statusParam = urlParams.get("status") as RequestStatus | null;
-  const [activeTab, setActiveTab] = useState<string>(statusParam || "all");
+  // Initialize the request actions
+  const { 
+    handleClearRequest, 
+    handleAcceptRequest, 
+    handleCompleteRequest 
+  } = useRequestActions(setRefreshCount, setActiveTab);
 
-  useEffect(() => {
-    if (statusParam !== activeTab && statusParam) {
-      console.log("Syncing activeTab with URL param:", statusParam);
-      setActiveTab(statusParam);
-    } else if (!statusParam && activeTab !== "all") {
-      console.log("No status in URL, setting activeTab to all");
-      setActiveTab("all");
-    }
-  }, [statusParam, location.search]);
-
+  // Handle request update events
   useEffect(() => {
     const handleStatusChange = (event: Event) => {
       console.log("Request status change detected, updating UI");
@@ -50,10 +34,8 @@ export const useActiveRequests = () => {
         
         if (customEvent.detail.newStatus === 'active') {
           setActiveTab('active');
-          navigate(`/active?status=active`, { replace: true });
         } else if (customEvent.detail.newStatus === 'completed') {
           setActiveTab('completed');
-          navigate(`/active?status=completed`, { replace: true });
         }
         
         if (customEvent.detail.forceUpdate) {
@@ -66,118 +48,16 @@ export const useActiveRequests = () => {
     
     window.addEventListener('requestStatusChanged', handleStatusChange);
     return () => window.removeEventListener('requestStatusChanged', handleStatusChange);
-  }, [navigate]);
+  }, [setActiveTab]);
 
-  const updateUrlWithActiveTab = useCallback(() => {
-    if (statusParam !== activeTab && activeTab !== "all") {
-      navigate(`/active?status=${activeTab}`, { replace: true });
-    } else if (statusParam !== activeTab && activeTab === "all") {
-      navigate(`/active`, { replace: true });
-    }
-  }, [activeTab, navigate, statusParam]);
-
-  const handleClearRequest = useCallback((id: string) => {
-    const requestIndex = requests.findIndex(req => req.id === id);
-    clearRequest(id);
-    
-    setRecentlyCleared({ id, index: requestIndex });
-    
-    toast({
-      title: "Request Cleared",
-      description: "Request has been cleared from your view",
-      action: (
-        <button 
-          className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          onClick={() => {
-            if (recentlyCleared) {
-              undoClearRequest(recentlyCleared.id, recentlyCleared.index);
-              setRecentlyCleared(null);
-              toast({
-                title: "Request Restored",
-                description: "Request has been restored to your view"
-              });
-            }
-          }}
-        >
-          Undo
-        </button>
-      )
-    });
-    
-    setTimeout(() => {
-      setRecentlyCleared(null);
-    }, 10000);
-  }, [requests, clearRequest, toast, recentlyCleared, undoClearRequest]);
-
-  const handleAcceptRequest = useCallback((id: string, data: { estimatedTime: string }) => {
-    console.log("useActiveRequests: Handling accept for request", { id, data });
-    
-    try {
-      acceptRequest(id, { 
-        assignedTo: "Current Support Staff", 
-        estimatedTime: data.estimatedTime 
-      });
-      
-      toast({
-        title: "Request Accepted",
-        description: `You'll arrive in ${data.estimatedTime}.`,
-      });
-      
-      setActiveTab("active");
-      setTimeout(() => {
-        navigate(`/active?status=active`, { replace: true });
-        
-        setRefreshCount(prev => prev + 1);
-        
-        window.dispatchEvent(new CustomEvent('requestStatusChanged', {
-          detail: { id, newStatus: 'active', forceUpdate: true }
-        }));
-      }, 300);
-      
-    } catch (error) {
-      console.error("Error in handleAcceptRequest:", error);
-      toast({
-        title: "Error",
-        description: "Failed to accept request. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [acceptRequest, navigate, toast]);
-
-  const handleCompleteRequest = useCallback((id: string, note: { text: string, author: string }) => {
-    console.log("useActiveRequests: Handling complete for request", { id, note });
-    
-    try {
-      completeRequest(id, note);
-      
-      toast({
-        title: "Request Completed",
-        description: "The request has been marked as completed.",
-      });
-      
-      setActiveTab("completed");
-      setTimeout(() => {
-        navigate(`/active?status=completed`, { replace: true });
-        
-        setRefreshCount(prev => prev + 1);
-      }, 300);
-      
-    } catch (error) {
-      console.error("Error in handleCompleteRequest:", error);
-      toast({
-        title: "Error",
-        description: "Failed to complete request. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [completeRequest, navigate, toast]);
-
+  // Handle request updates
   const handleRequestUpdated = useCallback(() => {
     console.log("ActiveRequests: Request update detected");
     refreshTriggerRef.current += 1;
     setRefreshCount(prev => prev + 1);
   }, []);
 
+  // Filter requests for current user if not support
   const filteredRequests = requests.filter(req => {
     if (!isSupport) {
       return req.requestedBy === currentUserId;
@@ -185,6 +65,7 @@ export const useActiveRequests = () => {
     return true;
   });
 
+  // Define available tabs based on user role
   const availableTabs = isSupport 
     ? ["all", "pending", "active", "completed"] 
     : ["all", "pending", "active"];
