@@ -1,27 +1,11 @@
 
-import React, { useState, useEffect, useRef } from "react";
-import { Trash2, Eye, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
-} from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import React, { useState } from "react";
 import { Request } from "@/types/request";
-import RequestDetailsDialog from "./RequestDetailsDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
+import ClearRequestAlert from "./ClearRequestAlert";
+import RequestDetailsButton from "./RequestDetailsButton";
+import CompleteRequestButton from "./CompleteRequestButton";
 
 interface RequestActionsProps {
   requestId: string;
@@ -41,10 +25,8 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   onRequestUpdated
 }) => {
   const [open, setOpen] = useState(false);
-  const [alertOpen, setAlertOpen] = useState(false);
   const { toast } = useToast();
   const { isSupport } = useProfileAccess();
-  const dialogActionRef = useRef<HTMLButtonElement>(null);
   
   // Prevent auto-closing of dialogs by stopping propagation
   const handleDialogClick = (e: React.MouseEvent) => {
@@ -121,7 +103,6 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 
   const handleClearRequest = () => {
     onClear(requestId);
-    setAlertOpen(false);
   };
 
   // Check if the request is active to show complete button directly
@@ -138,85 +119,25 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   return (
     <div className="flex gap-2 self-end md:self-center" onClick={handleDialogClick}>
       {showClearButton && (
-        <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-          <AlertDialogTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="text-red-500 border-red-200 hover:bg-red-50"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <Trash2 size={16} />
-              Clear
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent onClick={handleDialogClick}>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Clear this request?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will remove the request from your view. You can undo this action for a short time after clearing.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={(e) => {
-                e.stopPropagation();
-                handleClearRequest();
-              }}>
-                Clear Request
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ClearRequestAlert onClear={handleClearRequest} />
       )}
       
       {canCompleteRequest && (
-        <Button 
-          size="sm" 
-          className="bg-green-600 hover:bg-green-700"
+        <CompleteRequestButton 
           onClick={(e) => {
             e.stopPropagation();
             setOpen(true);
           }}
-        >
-          <Check size={16} className="mr-1" />
-          Complete
-        </Button>
+        />
       )}
       
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button 
-            size="sm" 
-            className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
-            ref={dialogActionRef}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setOpen(true);
-            }}
-          >
-            <Eye size={16} className="mr-1" />
-            View Details
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto" onClick={handleDialogClick}>
-          {request ? (
-            <RequestDetailsDialog 
-              request={request} 
-              onAccept={isSupport ? handleAccept : undefined}
-              onComplete={isSupport ? handleComplete : undefined}
-              onClose={() => setOpen(false)}
-            />
-          ) : (
-            <div className="py-8 text-center">
-              <p>Request details not available</p>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <RequestDetailsButton 
+        request={request}
+        open={open}
+        setOpen={setOpen}
+        handleAccept={isSupport ? handleAccept : undefined}
+        handleComplete={isSupport ? handleComplete : undefined}
+      />
     </div>
   );
 };
