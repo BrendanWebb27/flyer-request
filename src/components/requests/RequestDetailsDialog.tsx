@@ -4,7 +4,7 @@ import { Clock, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
+import { DialogTitle, DialogHeader, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Request } from "@/types/request";
 import RequestDetailsItem from "./RequestDetailsItem";
@@ -67,8 +67,13 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
   // Time options for support staff
   const timeOptions = ["5 minutes", "10 minutes", "15 minutes", "20 minutes", "30 minutes", "45 minutes", "1 hour"];
   
+  const stopPropagation = (e: React.UIEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
   return (
-    <>
+    <div onClick={stopPropagation}>
       <DialogHeader>
         <DialogTitle>Request {request.id}</DialogTitle>
       </DialogHeader>
@@ -145,6 +150,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
                 onClick={handleAccept}
                 className="w-full bg-flyerPurple-600 hover:bg-flyerPurple-700"
                 disabled={!estimatedTime}
+                id="acceptRequestButton"
               >
                 <Check size={16} className="mr-2" />
                 Accept Request
@@ -180,9 +186,11 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
         </div>
       </div>
       <DialogFooter>
-        <Button variant="outline" onClick={onClose}>Close</Button>
+        <DialogClose asChild>
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        </DialogClose>
       </DialogFooter>
-    </>
+    </div>
   );
 };
 

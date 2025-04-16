@@ -44,28 +44,7 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
       navigate(`/request/${requestId}`);
     }
   };
-  
-  // Enhanced dialog open state control
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      // Only close if it's an explicit close action
-      const activeElement = document.activeElement as HTMLElement;
-      
-      // Check if clicked element is a dialog close action
-      const isDialogCloseAction = 
-        activeElement?.hasAttribute('data-dialog-close') || 
-        activeElement?.closest('[data-dialog-close="true"]') ||
-        activeElement?.getAttribute('role') === 'button' && 
-        !activeElement?.closest('[data-prevent-close="true"]');
-        
-      if (isDialogCloseAction) {
-        setOpen(false);
-      }
-    } else {
-      setOpen(true);
-    }
-  };
-  
+
   return (
     <>
       <Button 
@@ -80,27 +59,15 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
 
       {/* Only render dialog if we have request data */}
       {request && (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent 
             className="max-h-[80vh] overflow-y-auto"
-            // Prevent dialog from closing when clicking inside it
-            onClick={stopAllEvents}
-            onMouseDown={stopAllEvents}
-            onPointerDown={stopAllEvents}
-            onPointerDownOutside={e => {
-              // Prevent closing when clicking inside elements with data-prevent-close attribute
-              e.preventDefault();
-            }}
-            onEscapeKeyDown={e => e.preventDefault()}
-            onInteractOutside={e => e.preventDefault()}
-            data-prevent-close="true"
           >
             <RequestDetailsDialog 
               request={request}
               onClose={() => setOpen(false)}
               onAccept={onAccept}
               onComplete={onComplete}
-              data-prevent-close="true"
             />
           </DialogContent>
         </Dialog>

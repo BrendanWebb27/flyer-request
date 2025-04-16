@@ -53,20 +53,6 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
       if (acceptButton) acceptButton.click();
     }, 100);
   };
-  
-  // Enhanced open state management
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      // Check if we're clicking on an explicit close action
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement?.hasAttribute('data-sheet-close') || 
-          activeElement?.closest('[data-sheet-close="true"]')) {
-        setIsOpen(false);
-      }
-    } else {
-      setIsOpen(true);
-    }
-  };
 
   return (
     <div 
@@ -74,7 +60,6 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
       onMouseDown={stopAllEvents}
       onPointerDown={stopAllEvents}
       className="relative"
-      data-prevent-close="true"
     >
       <ActionButtonSheet
         buttonText="View Details"
@@ -83,23 +68,11 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
         title="Request Details"
         open={isOpen}
-        onOpenChange={handleOpenChange}
+        onOpenChange={setIsOpen}
       >
-        <div 
-          className="full-sheet-content" 
-          onClick={stopAllEvents} 
-          onMouseDown={stopAllEvents}
-          onPointerDown={stopAllEvents}
-          data-prevent-close="true"
-        >
+        <div className="full-sheet-content">
           {request ? (
-            <div 
-              className="space-y-4" 
-              onClick={stopAllEvents} 
-              onMouseDown={stopAllEvents}
-              onPointerDown={stopAllEvents}
-              data-prevent-close="true"
-            >
+            <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <div className="font-semibold">ID:</div>
                 <div>{request.id}</div>
@@ -156,10 +129,10 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
               {isSupport && (
                 <div className="flex justify-end gap-2 mt-6">
                   {request.status === "pending" && onAccept && (
-                    <SheetClose asChild data-sheet-close="true">
+                    <SheetClose asChild>
                       <Button 
                         onClick={handleAcceptButtonClick}
-                        data-sheet-close="true"
+                        id="acceptRequestButton"
                       >
                         Accept Request
                       </Button>
@@ -167,7 +140,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                   )}
                   
                   {request.status === "active" && onComplete && (
-                    <SheetClose asChild data-sheet-close="true">
+                    <SheetClose asChild>
                       <Button 
                         onClick={(e) => {
                           stopAllEvents(e);
@@ -176,7 +149,6 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                             handleComplete(requestId, notes);
                           }
                         }}
-                        data-sheet-close="true"
                       >
                         Complete Request
                       </Button>
