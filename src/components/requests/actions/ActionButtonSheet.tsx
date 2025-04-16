@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +24,8 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   children,
   onButtonClick
 }) => {
+  const [open, setOpen] = useState(false);
+  
   // Prevent event bubbling to parent elements
   const handleButtonClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,8 +36,8 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   };
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild onClick={(e) => e.stopPropagation()}>
         <Button 
           variant={buttonVariant}
           size={buttonSize}
@@ -46,7 +48,12 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
           {buttonText}
         </Button>
       </SheetTrigger>
-      <SheetContent onClick={(e) => e.stopPropagation()} onPointerDownOutside={(e) => e.preventDefault()}>
+      <SheetContent 
+        onClick={(e) => e.stopPropagation()} 
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>

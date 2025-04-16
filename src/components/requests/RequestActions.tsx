@@ -98,6 +98,12 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     }
   };
 
+  // Prevent event propagation
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   // Check if the request is active to show complete button directly
   const isActive = request?.status === "active";
   // Only show the complete button if user is support staff
@@ -111,10 +117,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   return (
     <div 
       className="flex gap-2 self-end md:self-center" 
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-      }}
+      onClick={stopPropagation}
     >
       {/* Clear button */}
       {showClearButton && (
@@ -154,10 +157,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       {/* Show the complete button directly in action area */}
       {canCompleteRequest && (
         <CompleteRequestButton 
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }} 
+          onClick={stopPropagation} 
         />
       )}
     </div>

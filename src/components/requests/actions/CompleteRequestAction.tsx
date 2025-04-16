@@ -14,8 +14,14 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
   requestId, 
   onComplete 
 }) => {
-  const handleComplete = (e: React.MouseEvent, note: string) => {
+  // Define a handler to stop propagation
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
+  };
+  
+  const handleComplete = (e: React.MouseEvent, note: string) => {
+    stopPropagation(e);
     onComplete(requestId, { 
       text: note || "Request completed", 
       author: "Support Staff" 
@@ -23,7 +29,7 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
   };
 
   return (
-    <div onClick={(e) => e.stopPropagation()}>
+    <div onClick={stopPropagation}>
       <ActionButtonSheet
         buttonText="Complete"
         buttonIcon={<CheckCircle size={16} />}
@@ -32,19 +38,18 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
         buttonClass="text-green-500 border-green-200 hover:bg-green-50"
         title={`Complete Request ${requestId}`}
       >
-        <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
+        <div className="space-y-4" onClick={stopPropagation}>
           <textarea 
             className="w-full p-2 border rounded-md" 
             placeholder="Add completion notes..."
             rows={4}
             id="completionNotes"
-            onClick={(e) => e.stopPropagation()}
+            onClick={stopPropagation}
           />
           <SheetClose asChild>
             <Button
               className="w-full"
               onClick={(e) => {
-                e.stopPropagation();
                 const notes = document.getElementById('completionNotes') as HTMLTextAreaElement;
                 handleComplete(e, notes?.value || "Request completed");
               }}

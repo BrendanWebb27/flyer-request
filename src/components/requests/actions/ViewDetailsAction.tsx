@@ -24,6 +24,12 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
 }) => {
   const { isSupport } = useProfileAccess();
   
+  // Define a handler to stop propagation
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
   const handleComplete = (requestId: string, notes: string) => {
     if (onComplete) {
       onComplete(requestId, { 
@@ -34,7 +40,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
   };
 
   const handleAcceptButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    stopPropagation(e);
     if (setDetailsOpen) setDetailsOpen(true);
     
     // Add a short delay to ensure the first dialog is closed
@@ -46,7 +52,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
   };
 
   return (
-    <div onClick={(e) => e.stopPropagation()}>
+    <div onClick={stopPropagation}>
       <ActionButtonSheet
         buttonText="View Details"
         buttonIcon={<Eye size={16} />}
@@ -54,7 +60,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
         title="Request Details"
       >
-        <div onClick={(e) => e.stopPropagation()}>
+        <div onClick={stopPropagation}>
           {request ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
@@ -124,7 +130,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                     <SheetClose asChild>
                       <Button 
                         onClick={(e) => {
-                          e.stopPropagation();
+                          stopPropagation(e);
                           const notes = prompt("Add completion notes (optional):");
                           if (notes !== null) { // Only if not cancelled
                             handleComplete(requestId, notes);
