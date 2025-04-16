@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Undo } from "lucide-react";
 import ActionButtonSheet from "./ActionButtonSheet";
 import { SheetClose } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
@@ -24,9 +24,26 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({ requestId, onCl
     
     onClear(requestId);
     
+    // Add an undo option to the toast
     toast({
       title: "Request Cleared",
       description: `Request ${requestId} has been removed from your view.`,
+      action: (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="border-green-500 text-green-600 hover:bg-green-50"
+          onClick={() => {
+            // This relies on the existing undoClearRequest method in useSupportRequests hook
+            window.dispatchEvent(new CustomEvent('undoClearRequest', {
+              detail: { id: requestId }
+            }));
+          }}
+        >
+          <Undo size={16} className="mr-1" />
+          Undo
+        </Button>
+      ),
     });
   };
 
