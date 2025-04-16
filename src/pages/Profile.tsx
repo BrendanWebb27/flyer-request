@@ -1,15 +1,11 @@
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
 import { updateUserActivityTimestamp } from "@/utils/userDataExpiration";
 import { UserProfile } from "@/types/profile";
 import ProfileHeader from "@/components/profile/ProfileHeader";
-import ProfileAvatar from "@/components/profile/ProfileAvatar";
-import ProfileForm from "@/components/profile/ProfileForm";
-import FlyerStatusForm from "@/components/profile/FlyerStatusForm";
-import ProfileActions from "@/components/profile/ProfileActions";
+import ProfileCard from "@/components/profile/ProfileCard";
 import NotificationsForm from "@/components/profile/NotificationsForm";
 import OrganizationAccessControl from "@/components/OrganizationAccessControl";
 import ProfileDebugger from "@/components/profile/ProfileDebugger";
@@ -161,69 +157,16 @@ const Profile: React.FC = () => {
       {/* Add the ProfileDebugger component */}
       <ProfileDebugger />
       
-      <Card>
-        <CardHeader>
-          <CardTitle>User Information</CardTitle>
-          <CardDescription>Manage your account details and preferences</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <ProfileAvatar profile={profile} />
-          
-          <ProfileForm 
-            profile={profile}
-            setProfile={setProfile}
-            isEditing={isEditing}
-            organizations={organizations}
-          />
-          
-          {/* Show Flyer Status for everyone */}
-          <FlyerStatusForm 
-            profile={profile}
-            setProfile={setProfile}
-            isEditing={isEditing}
-          />
-          
-          {/* Email verification status indicator */}
-          <div className="pt-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-medium">Email Verification</h4>
-                <p className="text-xs text-muted-foreground">
-                  {isEmailVerified ? "Your email has been verified" : "Email verification required for system access"}
-                </p>
-              </div>
-              <div className={`px-2 py-1 rounded ${isEmailVerified ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
-                <span className="text-xs font-medium">
-                  {isEmailVerified ? "Verified" : "Not Verified"}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Organization verification button - for all users who haven't verified email */}
-          {!isEmailVerified && (
-            <div className="pt-4">
-              <button
-                className="text-sm text-flyerPurple-600 hover:text-flyerPurple-700 font-medium"
-                onClick={handleVerifyOrganization}
-              >
-                Verify Organization Access
-              </button>
-              <p className="text-xs text-muted-foreground mt-1">
-                Verify your organization access to gain system privileges
-              </p>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-end gap-4">
-          <ProfileActions 
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
-            onSave={handleSaveProfile}
-            isSupport={profile.isSupport}
-          />
-        </CardFooter>
-      </Card>
+      <ProfileCard 
+        profile={profile}
+        setProfile={setProfile}
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
+        onSave={handleSaveProfile}
+        isEmailVerified={isEmailVerified}
+        handleVerifyOrganization={handleVerifyOrganization}
+        organizations={organizations}
+      />
       
       {/* Add the notifications form */}
       <NotificationsForm isEditing={isEditing} />
