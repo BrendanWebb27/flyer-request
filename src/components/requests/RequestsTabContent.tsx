@@ -11,6 +11,7 @@ interface RequestsTabContentProps {
   onClearRequest: (id: string) => void;
   currentUserId: string;
   onAcceptRequest?: (id: string, data: { estimatedTime: string }) => void;
+  onCompleteRequest?: (id: string, note: { text: string, author: string }) => void;
   onRequestUpdated?: () => void; // Callback to notify parent of updates
 }
 
@@ -21,6 +22,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
   onClearRequest,
   currentUserId,
   onAcceptRequest,
+  onCompleteRequest,
   onRequestUpdated
 }) => {
   // Filter requests based on tab - using useMemo to prevent unnecessary recalculations
@@ -52,6 +54,7 @@ const RequestsTabContent: React.FC<RequestsTabContentProps> = ({
           formatDate={formatDate}
           onClearRequest={onClearRequest}
           onAcceptRequest={onAcceptRequest}
+          onCompleteRequest={onCompleteRequest}
           onRequestUpdated={onRequestUpdated}
         />
       ) : (

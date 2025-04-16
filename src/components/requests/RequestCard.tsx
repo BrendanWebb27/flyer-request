@@ -12,6 +12,7 @@ interface RequestCardProps {
   formatDate: (date: string) => string;
   onClearRequest: (id: string) => void;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
+  onComplete?: (id: string, note: { text: string, author: string }) => void;
   onRequestUpdated?: () => void; // New callback to trigger UI updates
 }
 
@@ -20,6 +21,7 @@ const RequestCard: React.FC<RequestCardProps> = ({
   formatDate, 
   onClearRequest, 
   onAccept,
+  onComplete,
   onRequestUpdated
 }) => {
   return (
@@ -54,6 +56,7 @@ const RequestCard: React.FC<RequestCardProps> = ({
           onClear={onClearRequest}
           request={request}
           onAccept={onAccept}
+          onComplete={onComplete}
           onRequestUpdated={onRequestUpdated}
         />
       </CardFooter>

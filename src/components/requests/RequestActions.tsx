@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Eye, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   AlertDialog, 
@@ -27,6 +27,7 @@ interface RequestActionsProps {
   onClear: (id: string) => void;
   request?: Request;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
+  onComplete?: (id: string, note: { text: string, author: string }) => void;
   onRequestUpdated?: () => void;  // Callback to trigger parent updates
 }
 
@@ -35,6 +36,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
   onClear, 
   request,
   onAccept,
+  onComplete,
   onRequestUpdated
 }) => {
   const [open, setOpen] = useState(false);
@@ -74,6 +76,43 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     }
   };
 
+  const handleComplete = (id: string, note: { text: string, author: string }) => {
+    if (onComplete) {
+      console.log("RequestActions: Completing request with ID:", id);
+      
+      try {
+        // First close the dialog to avoid UI glitches
+        setOpen(false);
+        
+        // Call the complete function
+        onComplete(id, note);
+        
+        // Trigger event to update all components
+        window.dispatchEvent(new Event('requestUpdated'));
+        
+        // Also call the callback directly if available
+        if (onRequestUpdated) {
+          onRequestUpdated();
+        }
+        
+        toast({
+          title: "Request Completed",
+          description: "The request has been marked as completed.",
+        });
+      } catch (error) {
+        console.error("Error completing request:", error);
+        toast({
+          title: "Error",
+          description: "Failed to complete request. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  // Check if the request is active to show complete button directly
+  const isActive = request?.status === "active";
+
   return (
     <div className="flex gap-2 self-end md:self-center">
       <AlertDialog>
@@ -103,6 +142,17 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
         </AlertDialogContent>
       </AlertDialog>
       
+      {isActive && onComplete && (
+        <Button 
+          size="sm" 
+          className="bg-green-600 hover:bg-green-700"
+          onClick={() => setOpen(true)}
+        >
+          <Check size={16} className="mr-1" />
+          Complete
+        </Button>
+      )}
+      
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button 
@@ -118,6 +168,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
             <RequestDetailsDialog 
               request={request} 
               onAccept={handleAccept}
+              onComplete={handleComplete}
               onClose={() => setOpen(false)}
             />
           ) : (

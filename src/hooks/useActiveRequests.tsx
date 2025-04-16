@@ -12,7 +12,8 @@ export const useActiveRequests = () => {
     formatDate, 
     clearRequest, 
     undoClearRequest, 
-    acceptRequest 
+    acceptRequest,
+    completeRequest
   } = useSupportRequests();
   const [recentlyCleared, setRecentlyCleared] = useState<{id: string, index: number} | null>(null);
   const location = useLocation();
@@ -55,6 +56,18 @@ export const useActiveRequests = () => {
         if (customEvent.detail.newStatus === 'active') {
           setActiveTab('active');
           navigate(`/active?status=active`, { replace: true });
+        }
+        // If this is a request completion, update the tab to completed
+        else if (customEvent.detail.newStatus === 'completed') {
+          setActiveTab('completed');
+          navigate(`/active?status=completed`, { replace: true });
+        }
+        
+        // If forceUpdate flag is set, do an immediate refresh
+        if (customEvent.detail.forceUpdate) {
+          setTimeout(() => {
+            setRefreshCount(prev => prev + 1);
+          }, 100);
         }
       }
     };
@@ -129,7 +142,7 @@ export const useActiveRequests = () => {
         
         // Dispatch event for any other components that need to know
         window.dispatchEvent(new CustomEvent('requestStatusChanged', {
-          detail: { id, newStatus: 'active' }
+          detail: { id, newStatus: 'active', forceUpdate: true }
         }));
       }, 300);
       
@@ -143,6 +156,37 @@ export const useActiveRequests = () => {
     }
     
   }, [acceptRequest, navigate, toast]);
+
+  const handleCompleteRequest = useCallback((id: string, note: { text: string, author: string }) => {
+    console.log("useActiveRequests: Handling complete for request", { id, note });
+    
+    try {
+      // Complete the request
+      completeRequest(id, note);
+      
+      toast({
+        title: "Request Completed",
+        description: "The request has been marked as completed.",
+      });
+      
+      // Update the active tab to show completed requests
+      setActiveTab("completed");
+      setTimeout(() => {
+        navigate(`/active?status=completed`, { replace: true });
+        
+        // Force refresh to ensure UI updates
+        setRefreshCount(prev => prev + 1);
+      }, 300);
+      
+    } catch (error) {
+      console.error("Error in handleCompleteRequest:", error);
+      toast({
+        title: "Error",
+        description: "Failed to complete request. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [completeRequest, navigate, toast]);
 
   const handleRequestUpdated = useCallback(() => {
     console.log("ActiveRequests: Request update detected");
@@ -169,6 +213,7 @@ export const useActiveRequests = () => {
     refreshCount,
     handleClearRequest,
     handleAcceptRequest,
+    handleCompleteRequest,
     handleRequestUpdated,
     updateUrlWithActiveTab,
     formatDate,

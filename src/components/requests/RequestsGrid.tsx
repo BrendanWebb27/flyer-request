@@ -8,6 +8,7 @@ interface RequestsGridProps {
   formatDate: (date: string) => string;
   onClearRequest: (id: string) => void;
   onAcceptRequest?: (id: string, data: { estimatedTime: string }) => void;
+  onCompleteRequest?: (id: string, note: { text: string, author: string }) => void;
   onRequestUpdated?: () => void;
 }
 
@@ -16,6 +17,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   formatDate,
   onClearRequest,
   onAcceptRequest,
+  onCompleteRequest,
   onRequestUpdated
 }) => {
   // Handle request acceptance with proper notification
@@ -23,6 +25,22 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
     if (onAcceptRequest) {
       console.log("RequestsGrid: Handling accept for request:", id);
       onAcceptRequest(id, data);
+      
+      // Notify parent components about the update
+      if (onRequestUpdated) {
+        console.log("RequestsGrid: Notifying parent of update");
+        setTimeout(() => {
+          onRequestUpdated();
+        }, 100);
+      }
+    }
+  };
+  
+  // Handle request completion with proper notification
+  const handleCompleteRequest = (id: string, note: { text: string, author: string }) => {
+    if (onCompleteRequest) {
+      console.log("RequestsGrid: Handling complete for request:", id);
+      onCompleteRequest(id, note);
       
       // Notify parent components about the update
       if (onRequestUpdated) {
@@ -53,6 +71,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
           formatDate={formatDate}
           onClearRequest={onClearRequest}
           onAccept={handleAcceptRequest}
+          onComplete={handleCompleteRequest}
           onRequestUpdated={onRequestUpdated}
         />
       ))}

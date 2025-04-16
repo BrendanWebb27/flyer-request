@@ -43,7 +43,7 @@ export const acceptRequest = (
   // Dispatch an event to notify other components about the status change
   setTimeout(() => {
     window.dispatchEvent(new CustomEvent('requestStatusChanged', {
-      detail: { id, newStatus: 'active', data }
+      detail: { id, newStatus: 'active', data, forceUpdate: true }
     }));
   }, 100);
   
@@ -82,7 +82,7 @@ export const completeRequest = (
   
   // Dispatch an event for the status change
   window.dispatchEvent(new CustomEvent('requestStatusChanged', {
-    detail: { id, newStatus: 'completed' }
+    detail: { id, newStatus: 'completed', forceUpdate: true }
   }));
   
   return updatedRequests;
