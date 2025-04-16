@@ -3,16 +3,15 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Trash2, Check } from "lucide-react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from "@/components/ui/dialog";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface ClearRequestButtonProps {
@@ -25,15 +24,21 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
   handleClearRequest
 }) => {
   const { isSupport } = useProfileAccess();
+  const [open, setOpen] = React.useState(false);
   
   // Determine button style based on user role
   const buttonStyle = isSupport 
     ? "text-red-500 border-red-200 hover:bg-red-50" 
     : "text-gray-500 border-gray-200 hover:bg-gray-50";
 
+  const handleConfirmClear = () => {
+    handleClearRequest();
+    setOpen(false);
+  };
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
@@ -43,23 +48,23 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
           <Trash2 size={16} className="mr-1" />
           Clear
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Clear this request?</AlertDialogTitle>
-          <AlertDialogDescription>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Clear this request?</DialogTitle>
+          <DialogDescription>
             This will remove request {requestId} from your view. You'll have the option to undo this action.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleClearRequest}>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={handleConfirmClear}>
             <Check size={16} className="mr-1" />
             Confirm
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -62,7 +62,10 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
       
       {/* View Details always available to all users */}
       <ViewDetailsButton 
-        requestId={request.id} 
+        requestId={request.id}
+        request={request}
+        onAccept={acceptRequest}
+        onComplete={completeRequest}
         onClick={() => setActiveRequest(request.id)}
       />
     </div>
