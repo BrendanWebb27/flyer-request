@@ -24,7 +24,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
 }) => {
   const { isSupport } = useProfileAccess();
   
-  // Define a handler to stop propagation
+  // Enhanced event handling to stop propagation
   const stopPropagation = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -52,7 +52,11 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
   };
 
   return (
-    <div onClick={stopPropagation} onMouseDown={stopPropagation}>
+    <div 
+      onClick={stopPropagation} 
+      onMouseDown={stopPropagation}
+      data-prevent-close="true"
+    >
       <ActionButtonSheet
         buttonText="View Details"
         buttonIcon={<Eye size={16} />}
@@ -60,9 +64,19 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
         title="Request Details"
       >
-        <div className="full-sheet-content" onClick={stopPropagation} onMouseDown={stopPropagation}>
+        <div 
+          className="full-sheet-content" 
+          onClick={stopPropagation} 
+          onMouseDown={stopPropagation}
+          data-prevent-close="true"
+        >
           {request ? (
-            <div className="space-y-4" onClick={stopPropagation} onMouseDown={stopPropagation}>
+            <div 
+              className="space-y-4" 
+              onClick={stopPropagation} 
+              onMouseDown={stopPropagation}
+              data-prevent-close="true"
+            >
               <div className="grid grid-cols-2 gap-2">
                 <div className="font-semibold">ID:</div>
                 <div>{request.id}</div>

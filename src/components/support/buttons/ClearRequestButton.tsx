@@ -46,20 +46,32 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
     return null;
   }
 
+  // Enhanced handling for confirm dialog actions
   const handleConfirmClear = (e: React.MouseEvent) => {
-    // Prevent event from propagating
+    // Prevent event from propagating and causing side effects
+    e.preventDefault();
     e.stopPropagation();
     
     handleClearRequest();
     setOpen(false);
   };
 
-  // Handle dialog open state explicitly
+  // Enhanced dialog open state control
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      // Only allow closing when explicit close action or outside click
+      // Allow closing when the user explicitly closes the dialog
       const target = document.activeElement as HTMLElement;
-      setOpen(false);
+      
+      // Check if it's a dialog close action or clicking outside
+      const isDialogCloseAction = 
+        target?.hasAttribute('data-dialog-close') || 
+        target?.closest('[data-dialog-close="true"]');
+        
+      if (isDialogCloseAction || !target?.closest('[role="dialog"]')) {
+        setOpen(false);
+      } else {
+        return; // Prevent closing in other cases
+      }
     } else {
       setOpen(true);
     }
@@ -73,6 +85,7 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
           size="sm"
           className={`whitespace-nowrap flex-shrink-0 ${buttonStyle}`}
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             setOpen(true);
           }}
@@ -84,6 +97,7 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
       <DialogContent
         onClick={e => e.stopPropagation()}
         onPointerDownOutside={e => e.preventDefault()}
+        data-prevent-close="true"
       >
         <DialogHeader>
           <DialogTitle>Clear this request?</DialogTitle>
@@ -92,8 +106,20 @@ const ClearRequestButton: React.FC<ClearRequestButtonProps> = ({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleConfirmClear}>
+          <Button 
+            variant="outline" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(false);
+            }}
+            data-dialog-close="true"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmClear}
+            data-dialog-close="true"
+          >
             <Check size={16} className="mr-1" />
             Confirm
           </Button>

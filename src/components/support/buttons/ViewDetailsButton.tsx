@@ -29,6 +29,7 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
   
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     
     if (onClick) {
       onClick();
@@ -41,16 +42,19 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
     }
   };
   
-  // Define function for controlling when the dialog can close
+  // Enhanced dialog open state control
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      // Only allow closing via the close button or clicking outside
+      // Only close if it's an explicit close action
       const target = document.activeElement as HTMLElement;
+      
+      // Check if clicked element is a dialog close action or outside the dialog
       const isDialogCloseAction = 
         target?.closest('[data-dialog-close="true"]') || 
-        target?.getAttribute('role') === 'button';
+        target?.getAttribute('role') === 'button' ||
+        !target?.closest('[role="dialog"]');
         
-      if (isDialogCloseAction || !target?.closest('[role="dialog"]')) {
+      if (isDialogCloseAction) {
         setOpen(false);
       }
     } else {
@@ -75,13 +79,18 @@ const ViewDetailsButton: React.FC<ViewDetailsButtonProps> = ({
         <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogContent 
             className="max-h-[80vh] overflow-y-auto"
+            // Prevent dialog from closing when clicking inside it
+            onClick={e => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
             onPointerDownOutside={e => {
-              // Prevent closing when clicking inside elements
+              // Prevent closing when clicking inside elements with data-prevent-close attribute
               if (e.target && (e.target as Element).closest('[data-prevent-close="true"]')) {
                 e.preventDefault();
               }
             }}
-            onClick={e => e.stopPropagation()}
+            data-prevent-close="true"
           >
             <RequestDetailsDialog 
               request={request}

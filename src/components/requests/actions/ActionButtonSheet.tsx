@@ -37,18 +37,24 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
 
+  // Enhanced handling of sheet open state
   const handleOpenChange = (newOpen: boolean) => {
+    // Only allow sheet to be closed when specific close elements are clicked
     if (newOpen === false) {
-      // Only close when explicit close action is triggered
+      // Check if the active element is a close button or has a close attribute
       const target = document.activeElement as HTMLElement;
+      
+      // Look for elements with data-sheet-close attribute or inside elements with that attribute
       const isCloseAction = 
         target?.hasAttribute('data-sheet-close') || 
         target?.closest('[data-sheet-close="true"]');
       
+      // Only allow close if an explicit close action is detected
       if (isCloseAction) {
         setOpen(false);
       }
     } else {
+      // Always allow opening
       setOpen(true);
     }
   };
@@ -74,6 +80,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       <SheetContent 
         side="right"
         className="overflow-y-auto max-h-screen"
+        // Prevent propagation and closing on all interaction events
         onClick={e => e.stopPropagation()}
         onPointerDownOutside={e => e.preventDefault()}
         onEscapeKeyDown={e => e.preventDefault()}
@@ -84,7 +91,12 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        <div className="mt-4" onClick={e => e.stopPropagation()} data-prevent-close="true">
+        <div 
+          className="mt-4" 
+          onClick={e => e.stopPropagation()}
+          onMouseDown={e => e.stopPropagation()}
+          data-prevent-close="true"
+        >
           {children}
         </div>
       </SheetContent>
