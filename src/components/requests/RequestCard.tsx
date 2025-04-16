@@ -13,7 +13,7 @@ interface RequestCardProps {
   onClearRequest: (id: string) => void;
   onAccept?: (id: string, data: { estimatedTime: string }) => void;
   onComplete?: (id: string, note: { text: string, author: string }) => void;
-  onRequestUpdated?: () => void; // New callback to trigger UI updates
+  onRequestUpdated?: () => void; // Callback to trigger UI updates
 }
 
 const RequestCard: React.FC<RequestCardProps> = ({ 

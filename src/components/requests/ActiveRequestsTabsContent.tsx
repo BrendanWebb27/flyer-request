@@ -11,6 +11,7 @@ interface ActiveRequestsTabsContentProps {
   onClearRequest: (id: string) => void;
   currentUserId: string;
   onAcceptRequest?: (id: string, data: { estimatedTime: string }) => void;
+  onCompleteRequest?: (id: string, note: { text: string, author: string }) => void;
   onRequestUpdated: () => void;
   refreshCount: number;
 }
@@ -22,6 +23,7 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
   onClearRequest,
   currentUserId,
   onAcceptRequest,
+  onCompleteRequest,
   onRequestUpdated,
   refreshCount
 }) => {
@@ -44,6 +46,7 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
             onClearRequest={onClearRequest}
             currentUserId={currentUserId}
             onAcceptRequest={onAcceptRequest}
+            onCompleteRequest={onCompleteRequest}
             onRequestUpdated={onRequestUpdated}
           />
         </TabsContent>
