@@ -170,6 +170,11 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
           <Button 
             size="sm" 
             className="bg-flyerPurple-600 hover:bg-flyerPurple-700"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setOpen(true);
+            }}
           >
             <Eye size={16} className="mr-1" />
             View Details

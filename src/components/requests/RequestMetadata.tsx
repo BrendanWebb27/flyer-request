@@ -1,6 +1,7 @@
 
 import React from "react";
 import { MapPin, Clock, User, Calendar } from "lucide-react";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface RequestMetadataProps {
   location: string;
@@ -23,6 +24,20 @@ export const RequestMetadata: React.FC<RequestMetadataProps> = ({
   requestedBy,
   completedAt
 }) => {
+  const { findProfileByUsername } = useProfileAccess();
+  
+  // Get username from email
+  const getDisplayName = (email?: string) => {
+    if (!email) return "";
+    
+    const profile = findProfileByUsername(email);
+    if (profile && profile.name) {
+      return profile.name;
+    }
+    // Fallback to just the username part of the email if no profile found
+    return email.split('@')[0];
+  };
+
   return (
     <div className="space-y-2">
       <h3 className="font-semibold text-lg flex items-center gap-2">
@@ -41,14 +56,14 @@ export const RequestMetadata: React.FC<RequestMetadataProps> = ({
         {requestedBy && (
           <div className="flex items-center gap-1">
             <User size={14} />
-            <span>Requested by: {requestedBy}</span>
+            <span>Requested by: {getDisplayName(requestedBy)}</span>
           </div>
         )}
         
         {assignedTo && (
           <div className="flex items-center gap-1">
             <User size={14} />
-            <span>Assigned to: {assignedTo}</span>
+            <span>Assigned to: {getDisplayName(assignedTo)}</span>
           </div>
         )}
 

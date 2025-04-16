@@ -9,11 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Request } from "@/types/request";
 import RequestDetailsItem from "./RequestDetailsItem";
 import RequestDetailsNotes from "./RequestDetailsNotes";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface RequestDetailsDialogProps {
   request: Request;
   onClose: () => void;
-  onAccept?: (id: string, data: { estimatedTime: string }) => void;
+  onAccept?: (id: string, data: { assignedTo: string; estimatedTime: string }) => void;
   onComplete?: (id: string, note: { text: string, author: string }) => void;
 }
 
@@ -25,10 +26,21 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
 }) => {
   const [estimatedTime, setEstimatedTime] = useState("");
   const [note, setNote] = useState("");
+  const { findProfileByUsername } = useProfileAccess();
   
   // Determine status to show acceptance or completion options
   const isPending = request.status === "pending";
   const isActive = request.status === "active";
+  
+  // Get username from email
+  const getDisplayName = (email: string) => {
+    const profile = findProfileByUsername(email);
+    if (profile && profile.name) {
+      return profile.name;
+    }
+    // Fallback to just the username part of the email if no profile found
+    return email.split('@')[0];
+  };
   
   // Create completion note
   const handleComplete = () => {
@@ -80,7 +92,7 @@ const RequestDetailsDialog: React.FC<RequestDetailsDialogProps> = ({
           />
           <RequestDetailsItem 
             label="Requested By"
-            value={request.requestedBy}
+            value={getDisplayName(request.requestedBy)}
           />
           {request.assignedTo && (
             <RequestDetailsItem 
