@@ -1,3 +1,4 @@
+
 import { Request, RequestStatus, Note } from "@/types/request";
 import { saveRequests } from "./requestPersistence";
 
@@ -19,6 +20,7 @@ export const acceptRequest = (
   
   console.log("Found request to update:", requestToUpdate);
   
+  // Create a new array with the updated request
   const updatedRequests = requests.map(request => 
     request.id === id 
       ? { 
@@ -35,12 +37,12 @@ export const acceptRequest = (
     updatedRequests.find(req => req.id === id)
   );
   
-  // Force save to localStorage
+  // Save to localStorage to ensure persistence
   saveRequests(updatedRequests);
   
-  // Dispatch a custom event to trigger UI updates
+  // Dispatch an event to notify other components about the status change
   window.dispatchEvent(new CustomEvent('requestStatusChanged', {
-    detail: { id, newStatus: 'active' }
+    detail: { id, newStatus: 'active', data }
   }));
   
   return updatedRequests;
@@ -75,6 +77,11 @@ export const completeRequest = (
   });
   
   saveRequests(updatedRequests);
+  
+  // Dispatch an event for the status change
+  window.dispatchEvent(new CustomEvent('requestStatusChanged', {
+    detail: { id, newStatus: 'completed' }
+  }));
   
   return updatedRequests;
 };

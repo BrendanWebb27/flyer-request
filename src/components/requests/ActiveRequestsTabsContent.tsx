@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { Request, RequestStatus } from "@/types/request";
 import RequestsTabContent from "./RequestsTabContent";
@@ -26,12 +26,14 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
   refreshCount
 }) => {
   console.log("ActiveRequestsTabsContent rendering with refreshCount:", refreshCount);
-  console.log("ActiveRequestsTabsContent filteredRequests:", filteredRequests);
+  
+  // Create a stable key for the TabsContent components
+  const tabContentKey = useMemo(() => `tabs-content-${refreshCount}`, [refreshCount]);
   
   return (
-    <div key={`tabs-content-${refreshCount}-${Date.now()}`}>
+    <div key={tabContentKey}>
       {availableTabs.map((tab) => (
-        <TabsContent key={`${tab}-content-${refreshCount}-${Date.now()}`} value={tab}>
+        <TabsContent key={`${tab}-content-${refreshCount}`} value={tab}>
           <RequestsTabContent
             requests={filteredRequests}
             status={tab as RequestStatus | "all"}

@@ -31,16 +31,45 @@ const RequestTabs: React.FC<RequestTabsProps> = ({
         navigate("/support", { replace: true });
       }
     }
+    
+    if (location.pathname === "/active") {
+      if (value !== "all") {
+        navigate(`/active?status=${value}`, { replace: true });
+      } else {
+        navigate("/active", { replace: true });
+      }
+    }
   };
 
   // Update active tab when URL changes
   useEffect(() => {
-    if (statusParam && ["pending", "active", "completed", "all"].includes(statusParam)) {
-      setActiveTab(statusParam);
-    } else if (!statusParam && location.pathname === "/support") {
-      setActiveTab("all");
+    const currentStatus = urlParams.get("status");
+    
+    if (currentStatus && ["pending", "active", "completed", "all"].includes(currentStatus)) {
+      if (currentStatus !== activeTab) {
+        setActiveTab(currentStatus);
+      }
+    } else if (!currentStatus) {
+      if (activeTab !== "all") {
+        setActiveTab("all");
+      }
     }
-  }, [statusParam, location.pathname]);
+  }, [location.search, urlParams]);
+
+  // Listen for status change events
+  useEffect(() => {
+    const handleStatusChange = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail && customEvent.detail.newStatus === 'active') {
+        if (location.pathname === "/active") {
+          setActiveTab('active');
+        }
+      }
+    };
+    
+    window.addEventListener('requestStatusChanged', handleStatusChange);
+    return () => window.removeEventListener('requestStatusChanged', handleStatusChange);
+  }, [location.pathname]);
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">

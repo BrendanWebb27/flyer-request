@@ -38,24 +38,28 @@ const Sidebar: React.FC = () => {
     setUserRole(hasAccess ? "support" : "general");
   }, [location.pathname]); // Re-check on route change
 
+  // Fixed isActiveRoute function that properly checks for exact route matches
   const isActiveRoute = (route: string) => {
     if (route.includes("?")) {
-      // For routes with query parameters, check the pathname and the search params
+      // For routes with query parameters, check the pathname matches and query params match exactly
       const [path, query] = route.split("?");
-      const queryParams = new URLSearchParams(query);
-      const currentParams = new URLSearchParams(location.search);
       
-      // Check if the pathnames match
+      // Check if pathname matches
       if (location.pathname !== path) return false;
       
-      // Check if the query parameter exists with the correct value
-      for (const [key, value] of queryParams.entries()) {
-        if (currentParams.get(key) !== value) return false;
-      }
+      // For status param routes, check exact match
+      const routeParams = new URLSearchParams(query);
+      const currentParams = new URLSearchParams(location.search);
       
-      return true;
+      const routeStatus = routeParams.get("status");
+      const currentStatus = currentParams.get("status");
+      
+      // Only return true if the status matches exactly
+      return routeStatus === currentStatus;
     }
-    return location.pathname === route;
+    
+    // For routes without query params, must be exact path match with no query params
+    return location.pathname === route && location.search === "";
   };
 
   const navItems = [

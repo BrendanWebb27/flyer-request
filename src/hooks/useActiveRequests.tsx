@@ -29,22 +29,39 @@ export const useActiveRequests = () => {
 
   // This effect ensures we're always in sync with URL parameters
   useEffect(() => {
-    if (statusParam && statusParam !== activeTab) {
+    if (statusParam !== activeTab && statusParam) {
       console.log("Syncing activeTab with URL param:", statusParam);
       setActiveTab(statusParam);
+    } else if (!statusParam && activeTab !== "all") {
+      console.log("No status in URL, setting activeTab to all");
+      setActiveTab("all");
     }
-  }, [statusParam, activeTab]);
+  }, [statusParam, location.search]);
 
   // Listen for request status changes 
   useEffect(() => {
-    const handleStatusChange = () => {
+    const handleStatusChange = (event: Event) => {
       console.log("Request status change detected, updating UI");
+      
+      // Force a refresh after status changes
       setRefreshCount(prev => prev + 1);
+      
+      // Get details from the event if available
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail) {
+        console.log("Status change details:", customEvent.detail);
+        
+        // If this is a request acceptance, update the tab to match
+        if (customEvent.detail.newStatus === 'active') {
+          setActiveTab('active');
+          navigate(`/active?status=active`, { replace: true });
+        }
+      }
     };
     
     window.addEventListener('requestStatusChanged', handleStatusChange);
     return () => window.removeEventListener('requestStatusChanged', handleStatusChange);
-  }, []);
+  }, [navigate]);
 
   const updateUrlWithActiveTab = useCallback(() => {
     if (statusParam !== activeTab && activeTab !== "all") {
@@ -89,7 +106,6 @@ export const useActiveRequests = () => {
 
   const handleAcceptRequest = useCallback((id: string, data: { estimatedTime: string }) => {
     console.log("useActiveRequests: Handling accept for request", { id, data });
-    console.log("Current requests before accept:", requests);
     
     try {
       // Accept the request
@@ -98,30 +114,23 @@ export const useActiveRequests = () => {
         estimatedTime: data.estimatedTime 
       });
       
-      console.log("After accept - Request should be updated");
-      
       toast({
         title: "Request Accepted",
         description: `You'll arrive in ${data.estimatedTime}.`,
       });
       
-      // Important: Force a refresh to update the component state
+      // Update the active tab to show active requests
+      setActiveTab("active");
+      navigate(`/active?status=active`, { replace: true });
+      
+      // Force refresh to ensure UI updates
       setRefreshCount(prev => prev + 1);
       
-      // Switch to active tab with a slight delay to allow state updates
-      setTimeout(() => {
-        console.log("Switching to active tab");
-        setActiveTab("active");
-        navigate(`/active?status=active`, { replace: true });
-        
-        // Force components to re-render again after navigation
-        setRefreshCount(prev => prev + 1);
-        
-        console.log("After tab switch - Active tab:", "active");
-        
-        // Dispatch global event
-        window.dispatchEvent(new Event('requestUpdated'));
-      }, 300);
+      // Dispatch event for any other components that need to know
+      window.dispatchEvent(new CustomEvent('requestStatusChanged', {
+        detail: { id, newStatus: 'active' }
+      }));
+      
     } catch (error) {
       console.error("Error in handleAcceptRequest:", error);
       toast({
@@ -131,7 +140,7 @@ export const useActiveRequests = () => {
       });
     }
     
-  }, [acceptRequest, navigate, toast, requests]);
+  }, [acceptRequest, navigate, toast]);
 
   const handleRequestUpdated = useCallback(() => {
     console.log("ActiveRequests: Request update detected");
