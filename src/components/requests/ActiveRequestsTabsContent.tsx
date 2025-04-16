@@ -25,6 +25,7 @@ const ActiveRequestsTabsContent: React.FC<ActiveRequestsTabsContentProps> = ({
   onRequestUpdated,
   refreshCount
 }) => {
+  // Using key={refreshCount} to force re-render when requests are updated
   return (
     <div key={`tabs-content-${refreshCount}`}>
       {availableTabs.map((tab) => (

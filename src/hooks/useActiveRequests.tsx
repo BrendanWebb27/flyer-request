@@ -80,26 +80,36 @@ export const useActiveRequests = () => {
   const handleAcceptRequest = useCallback((id: string, data: { estimatedTime: string }) => {
     console.log("ActiveRequests: Accepting request", id, data);
     
-    acceptRequest(id, { 
-      assignedTo: "Current Support Staff", // In a real app, you'd get the current user's name
-      estimatedTime: data.estimatedTime 
-    });
-    
-    // Show a toast notification first
-    toast({
-      title: "Request Accepted",
-      description: `You'll arrive in ${data.estimatedTime}.`,
-    });
-    
-    // After accepting, navigate to active tab with a small delay to prevent UI glitches
-    setTimeout(() => {
-      setActiveTab("active");
-      navigate(`/active?status=active`, { replace: true });
+    try {
+      // Call the accept function to update the request status
+      acceptRequest(id, { 
+        assignedTo: "Current Support Staff", // In a real app, you'd get the current user's name
+        estimatedTime: data.estimatedTime 
+      });
       
-      // Update the refresh counter to trigger a re-render
-      refreshTriggerRef.current += 1;
+      // Show a toast notification
+      toast({
+        title: "Request Accepted",
+        description: `You'll arrive in ${data.estimatedTime}.`,
+      });
+      
+      // Force an immediate state refresh
       setRefreshCount(prev => prev + 1);
-    }, 200);
+      
+      // Switch to active tab with a small delay to allow state updates to complete
+      setTimeout(() => {
+        setActiveTab("active");
+        navigate(`/active?status=active`, { replace: true });
+        refreshTriggerRef.current += 1;
+      }, 300);
+    } catch (error) {
+      console.error("Error accepting request:", error);
+      toast({
+        title: "Error",
+        description: "Failed to accept request. Please try again.",
+        variant: "destructive"
+      });
+    }
     
   }, [acceptRequest, navigate, toast]);
 
