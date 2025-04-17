@@ -34,26 +34,6 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   const isControlled = externalOpen !== undefined;
   const isOpen = isControlled ? externalOpen : internalOpen;
   
-  const handleButtonClick = (e: React.MouseEvent) => {
-    // Prevent bubbling to avoid triggering parent click handlers
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Update internal state
-    if (!isControlled) {
-      setInternalOpen(true);
-    }
-    
-    // Call external handlers
-    if (onButtonClick) {
-      onButtonClick(e);
-    }
-    
-    if (externalOnOpenChange) {
-      externalOnOpenChange(true);
-    }
-  };
-
   // Handle open state changes
   const handleOpenChange = (newOpen: boolean) => {
     // Update internal state if uncontrolled
@@ -77,12 +57,17 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       open={isOpen} 
       onOpenChange={handleOpenChange}
     >
-      <SheetTrigger asChild onClick={handleButtonClick}>
+      <SheetTrigger asChild>
         <Button 
           variant={buttonVariant}
           size={buttonSize}
           width="auto"
           className={`whitespace-nowrap flex-shrink-0 ${buttonClass}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (onButtonClick) onButtonClick(e);
+          }}
         >
           {buttonIcon && <span className="mr-1">{buttonIcon}</span>}
           {buttonText}

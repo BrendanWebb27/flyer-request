@@ -18,21 +18,19 @@ const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({
   addNote,
   setActiveRequest
 }) => {
-  // This handler ensures the click doesn't bubble up and cause parent components to close the menu
-  const handleTriggerClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setActiveRequest(request.id);
-  };
-
   return (
     <Sheet>
-      <SheetTrigger asChild onClick={handleTriggerClick}>
+      <SheetTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
           width="auto"
           className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200 whitespace-nowrap"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setActiveRequest(request.id);
+          }}
         >
           Complete
         </Button>
