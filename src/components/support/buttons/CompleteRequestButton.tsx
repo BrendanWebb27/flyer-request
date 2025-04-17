@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Request } from "@/types/request";
@@ -18,24 +18,35 @@ const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({
   addNote,
   setActiveRequest
 }) => {
+  const [open, setOpen] = useState(false);
+  
+  // Handle button click - set active request and open sheet
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveRequest(request.id);
+    setOpen(true);
+  };
+  
+  // Prevent clicks inside content from propagating
+  const handleContentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
           width="auto"
           className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200 whitespace-nowrap"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setActiveRequest(request.id);
-          }}
+          onClick={handleButtonClick}
         >
           Complete
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" onClick={(e) => e.stopPropagation()}>
+      <SheetContent side="right" onClick={handleContentClick}>
         <SheetHeader>
           <SheetTitle>Complete Request {request.id}</SheetTitle>
         </SheetHeader>

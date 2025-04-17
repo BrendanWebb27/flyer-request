@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import ActionButtonSheet from "./ActionButtonSheet";
 import { Button } from "@/components/ui/button";
 import { SheetClose } from "@/components/ui/sheet";
@@ -14,6 +14,8 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
   requestId, 
   onComplete 
 }) => {
+  const [open, setOpen] = useState(false);
+  
   // Define a handler to stop propagation
   const stopPropagation = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -26,6 +28,12 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
       text: note || "Request completed", 
       author: "Support Staff" 
     });
+    setOpen(false);
+  };
+
+  const handleButtonClick = (e: React.MouseEvent) => {
+    stopPropagation(e);
+    setOpen(true);
   };
 
   return (
@@ -37,6 +45,9 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
         buttonVariant="outline"
         buttonClass="text-green-500 border-green-200 hover:bg-green-50"
         title={`Complete Request ${requestId}`}
+        open={open}
+        onOpenChange={setOpen}
+        onButtonClick={handleButtonClick}
       >
         <div className="p-4 space-y-4" onClick={stopPropagation}>
           <textarea 

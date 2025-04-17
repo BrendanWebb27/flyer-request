@@ -51,6 +51,20 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
+  
+  // Handle button click separately from SheetTrigger
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Call the provided click handler if it exists
+    if (onButtonClick) {
+      onButtonClick(e);
+    } else {
+      // If no external handler, toggle the sheet directly
+      handleOpenChange(!isOpen);
+    }
+  };
 
   return (
     <Sheet 
@@ -63,11 +77,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
           size={buttonSize}
           width="auto"
           className={`whitespace-nowrap flex-shrink-0 ${buttonClass}`}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (onButtonClick) onButtonClick(e);
-          }}
+          onClick={handleClick}
         >
           {buttonIcon && <span className="mr-1">{buttonIcon}</span>}
           {buttonText}
