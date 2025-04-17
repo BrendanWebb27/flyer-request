@@ -13,12 +13,20 @@ const AcceptRequestAction: React.FC<AcceptRequestActionProps> = ({
   requestId, 
   onAccept 
 }) => {
+  // State to control the sheet visibility
+  const [open, setOpen] = React.useState(false);
+  
   return (
-    <Sheet modal={true}>
+    <Sheet 
+      modal={true} 
+      open={open}
+      onOpenChange={setOpen}
+    >
       <SheetTrigger asChild>
         <Button
           id="acceptRequestButton"
           className="hidden"
+          onClick={() => setOpen(true)}
         >
           Hidden Accept
         </Button>
@@ -30,7 +38,10 @@ const AcceptRequestAction: React.FC<AcceptRequestActionProps> = ({
         <div className="mt-4">
           <RequestActionPanel 
             requestId={requestId} 
-            onAccept={(data) => onAccept(requestId, data)} 
+            onAccept={(data) => {
+              onAccept(requestId, data);
+              setOpen(false);
+            }} 
           />
         </div>
       </SheetContent>

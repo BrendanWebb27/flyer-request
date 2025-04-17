@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Eye } from "lucide-react";
 import { Request } from "@/types/request";
@@ -41,17 +40,11 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
     }
   };
 
-  const handleAcceptButtonClick = (e: React.MouseEvent) => {
+  // Modified: Only open the dialog, don't auto-click accept button
+  const handleViewDetailsClick = (e: React.MouseEvent) => {
     stopAllEvents(e);
     if (setDetailsOpen) setDetailsOpen(true);
     setIsOpen(false);
-    
-    // Add a short delay to ensure the first dialog is closed
-    setTimeout(() => {
-      // Open the accept dialog - simulate clicking the accept button
-      const acceptButton = document.getElementById('acceptRequestButton');
-      if (acceptButton) acceptButton.click();
-    }, 100);
   };
 
   return (
@@ -131,10 +124,9 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                   {request.status === "pending" && onAccept && (
                     <SheetClose asChild>
                       <Button 
-                        onClick={handleAcceptButtonClick}
-                        id="acceptRequestButton"
+                        onClick={handleViewDetailsClick}
                       >
-                        Accept Request
+                        View Details
                       </Button>
                     </SheetClose>
                   )}
