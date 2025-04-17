@@ -48,15 +48,19 @@ const RequestButtonGroup: React.FC<RequestButtonGroupProps> = ({
         />
       )}
       
-      <ViewRequestButton
-        request={request}
-        onAccept={acceptRequest}
-        onComplete={completeRequest}
-        setActiveRequest={setActiveRequest}
-        isPending={isPending}
-      />
+      {/* Only show ViewRequestButton if the request is not active and can be completed */}
+      {!showCompleteButton && (
+        <ViewRequestButton
+          request={request}
+          onAccept={acceptRequest}
+          onComplete={completeRequest}
+          setActiveRequest={setActiveRequest}
+          isPending={isPending}
+        />
+      )}
     </>
   );
 };
 
 export default RequestButtonGroup;
+
