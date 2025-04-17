@@ -72,18 +72,10 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({
     });
   };
 
-  // Enhanced open state management
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      // Check if we're clicking on an explicit close action
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement?.hasAttribute('data-sheet-close') || 
-          activeElement?.closest('[data-sheet-close="true"]')) {
-        setIsOpen(false);
-      }
-    } else {
-      setIsOpen(true);
-    }
+  // Enhanced handling for sheets
+  const handleButtonClick = (e: React.MouseEvent) => {
+    stopAllEvents(e);
+    setIsOpen(true);
   };
 
   return (
@@ -91,7 +83,7 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({
       onClick={stopAllEvents}
       onMouseDown={stopAllEvents}
       onPointerDown={stopAllEvents}
-      className="relative"
+      className="relative z-10"
       data-prevent-close="true"
     >
       <ActionButtonSheet
@@ -101,7 +93,9 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({
         buttonClass="text-red-500 border-red-200 hover:bg-red-50"
         title={`Clear Request ${requestId}`}
         open={isOpen}
-        onOpenChange={handleOpenChange}
+        onOpenChange={setIsOpen}
+        onButtonClick={handleButtonClick}
+        preventAutoClose={true}
       >
         <div 
           className="p-4" 
@@ -112,26 +106,21 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({
         >
           <p className="mb-6">Are you sure you want to clear this request? This will remove it from your view.</p>
           <div className="flex justify-end gap-3 mt-6">
-            <SheetClose asChild>
-              <Button 
-                variant="outline" 
-                onClick={stopAllEvents}
-                data-sheet-close="true"
-              >
-                Cancel
-              </Button>
-            </SheetClose>
-            <SheetClose asChild>
-              <Button 
-                variant="destructive" 
-                onClick={(e) => {
-                  handleClearRequest(e);
-                }}
-                data-sheet-close="true"
-              >
-                Clear Request
-              </Button>
-            </SheetClose>
+            <Button 
+              variant="outline" 
+              onClick={(e) => {
+                stopAllEvents(e);
+                setIsOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={(e) => handleClearRequest(e)}
+            >
+              Clear Request
+            </Button>
           </div>
         </div>
       </ActionButtonSheet>

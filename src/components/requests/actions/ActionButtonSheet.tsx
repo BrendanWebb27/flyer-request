@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
 interface ActionButtonSheetProps {
@@ -14,6 +14,7 @@ interface ActionButtonSheetProps {
   onButtonClick?: (e: React.MouseEvent) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  preventAutoClose?: boolean;
 }
 
 const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
@@ -26,7 +27,8 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   children,
   onButtonClick,
   open: externalOpen,
-  onOpenChange: externalOnOpenChange
+  onOpenChange: externalOnOpenChange,
+  preventAutoClose = false
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   
@@ -36,6 +38,21 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   
   // Handle open state changes
   const handleOpenChange = (newOpen: boolean) => {
+    // If we want to prevent auto-close and are trying to close without explicit user action
+    if (preventAutoClose && !newOpen && isOpen) {
+      // Check if the close was triggered by a click inside the content
+      // by looking at the active element and its parents
+      const activeElement = document.activeElement as HTMLElement;
+      const isExplicitClose = 
+        activeElement?.hasAttribute('data-explicit-close') || 
+        activeElement?.closest('[data-explicit-close="true"]');
+      
+      // Only allow closing if it's an explicit close action
+      if (!isExplicitClose) {
+        return; // Prevent close
+      }
+    }
+    
     // Update internal state if uncontrolled
     if (!isControlled) {
       setInternalOpen(newOpen);
@@ -47,12 +64,12 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
   
-  // Add this handler to stop propagation on the sheet content
+  // Handle content clicks to stop propagation
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
   
-  // Handle button click separately from SheetTrigger
+  // Handle button click
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -75,7 +92,6 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         <Button 
           variant={buttonVariant}
           size={buttonSize}
-          width="auto"
           className={`whitespace-nowrap flex-shrink-0 ${buttonClass}`}
           onClick={handleClick}
         >
@@ -87,6 +103,9 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         side="right"
         className="overflow-y-auto max-h-screen"
         onClick={handleContentClick}
+        onOpenAutoFocus={(e) => preventAutoClose && e.preventDefault()}
+        onPointerDownOutside={(e) => preventAutoClose && e.preventDefault()}
+        onInteractOutside={(e) => preventAutoClose && e.preventDefault()}
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>

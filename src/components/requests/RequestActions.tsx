@@ -82,7 +82,8 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
     }
   };
 
-  const stopPropagation = (e: React.MouseEvent) => {
+  // Enhanced stopPropagation function to prevent all event bubbling
+  const stopPropagation = (e: React.UIEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
@@ -101,8 +102,10 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
 
   return (
     <div 
-      className="flex gap-2 justify-end w-full flex-wrap sm:flex-nowrap"
+      className="flex gap-2 justify-end w-full flex-wrap sm:flex-nowrap z-10"
       onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerDown={stopPropagation}
     >
       {showClearButton && (
         <ClearRequestAction 

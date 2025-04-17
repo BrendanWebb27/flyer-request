@@ -1,9 +1,9 @@
+
 import React from "react";
 import { Eye } from "lucide-react";
 import { Request } from "@/types/request";
 import { Button } from "@/components/ui/button";
 import ActionButtonSheet from "./ActionButtonSheet";
-import { SheetClose } from "@/components/ui/sheet";
 import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface ViewDetailsActionProps {
@@ -40,11 +40,16 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
     }
   };
 
-  // Modified: Only open the dialog, don't auto-click accept button
+  // Modified to just handle the click correctly
   const handleViewDetailsClick = (e: React.MouseEvent) => {
     stopAllEvents(e);
     if (setDetailsOpen) setDetailsOpen(true);
-    setIsOpen(false);
+  };
+  
+  // Explicitly handle button click to open dialog
+  const handleOpenDetails = (e: React.MouseEvent) => {
+    stopAllEvents(e);
+    setIsOpen(true);
   };
 
   return (
@@ -52,7 +57,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
       onClick={stopAllEvents} 
       onMouseDown={stopAllEvents}
       onPointerDown={stopAllEvents}
-      className="relative"
+      className="relative z-10"
     >
       <ActionButtonSheet
         buttonText="View Details"
@@ -62,6 +67,8 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         title="Request Details"
         open={isOpen}
         onOpenChange={setIsOpen}
+        onButtonClick={handleOpenDetails}
+        preventAutoClose={!isSupport} // Prevent auto-close for non-support users
       >
         <div className="full-sheet-content">
           {request ? (
@@ -122,30 +129,48 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
               {isSupport && (
                 <div className="flex justify-end gap-2 mt-6">
                   {request.status === "pending" && onAccept && (
-                    <SheetClose asChild>
-                      <Button 
-                        onClick={handleViewDetailsClick}
-                      >
-                        View Details
-                      </Button>
-                    </SheetClose>
+                    <Button 
+                      onClick={(e) => {
+                        stopAllEvents(e);
+                        handleViewDetailsClick(e);
+                        setIsOpen(false);
+                      }}
+                      data-explicit-close="true"
+                    >
+                      View Details
+                    </Button>
                   )}
                   
                   {request.status === "active" && onComplete && (
-                    <SheetClose asChild>
-                      <Button 
-                        onClick={(e) => {
-                          stopAllEvents(e);
-                          const notes = prompt("Add completion notes (optional):");
-                          if (notes !== null) { // Only if not cancelled
-                            handleComplete(requestId, notes);
-                          }
-                        }}
-                      >
-                        Complete Request
-                      </Button>
-                    </SheetClose>
+                    <Button 
+                      onClick={(e) => {
+                        stopAllEvents(e);
+                        const notes = prompt("Add completion notes (optional):");
+                        if (notes !== null) { // Only if not cancelled
+                          handleComplete(requestId, notes);
+                        }
+                      }}
+                      data-explicit-close="true"
+                    >
+                      Complete Request
+                    </Button>
                   )}
+                </div>
+              )}
+              
+              {/* Close button for non-support users */}
+              {!isSupport && (
+                <div className="flex justify-end gap-2 mt-6">
+                  <Button 
+                    variant="outline" 
+                    onClick={(e) => {
+                      stopAllEvents(e);
+                      setIsOpen(false);
+                    }}
+                    data-explicit-close="true"
+                  >
+                    Close
+                  </Button>
                 </div>
               )}
             </div>
