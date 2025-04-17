@@ -40,8 +40,8 @@ const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({
         // Only allow explicit user actions to close the sheet
         // Don't close on internal component clicks
         if (newOpenState === false && open === true) {
-          // This is only when closing the sheet
-          console.log("Sheet closing event");
+          // This is only when closing the sheet - we don't auto-complete
+          console.log("Sheet closing event - manual close");
         }
         setOpen(newOpenState);
       }}
@@ -64,8 +64,12 @@ const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({
         <CompletionForm 
           requestId={request.id}
           request={request}
-          completeRequest={completeRequest}
+          completeRequest={(id, note) => {
+            completeRequest(id, note);
+            setOpen(false); // Only close when explicitly completing
+          }}
           addNote={addNote}
+          onCancel={() => setOpen(false)}
         />
       </SheetContent>
     </Sheet>

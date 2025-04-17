@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -86,7 +87,7 @@ export const useRequestActions = (setRefreshCount: React.Dispatch<React.SetState
     }
   }, [acceptRequestApi, navigate, toast, setActiveTab, setRefreshCount]);
 
-  // Handle completing requests
+  // Handle completing requests - removed auto-navigation to completed tab
   const handleCompleteRequest = useCallback((id: string, note: { text: string, author: string }) => {
     console.log("useRequestActions: Handling complete for request", { id, note });
     
@@ -98,12 +99,13 @@ export const useRequestActions = (setRefreshCount: React.Dispatch<React.SetState
         description: "The request has been marked as completed.",
       });
       
-      setActiveTab("completed");
-      setTimeout(() => {
-        navigate(`/active?status=completed`, { replace: true });
-        
-        setRefreshCount(prev => prev + 1);
-      }, 300);
+      // Refresh the data without changing tabs or navigating
+      setRefreshCount(prev => prev + 1);
+      
+      // Notify other components about the status change
+      window.dispatchEvent(new CustomEvent('requestStatusChanged', {
+        detail: { id, newStatus: 'completed', forceUpdate: true }
+      }));
       
     } catch (error) {
       console.error("Error in handleCompleteRequest:", error);
@@ -113,7 +115,7 @@ export const useRequestActions = (setRefreshCount: React.Dispatch<React.SetState
         variant: "destructive"
       });
     }
-  }, [completeRequestApi, navigate, toast, setActiveTab, setRefreshCount]);
+  }, [completeRequestApi, toast, setRefreshCount]);
 
   return {
     handleClearRequest,

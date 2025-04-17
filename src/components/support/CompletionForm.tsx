@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, UsersRound } from "lucide-react";
+import { FileText, UsersRound, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Request } from "@/types/request";
 
@@ -12,13 +12,15 @@ interface CompletionFormProps {
   request?: Request;
   completeRequest: (id: string, note?: { text: string, author: string }) => void;
   addNote?: (id: string, note: { text: string, author: string }) => void;
+  onCancel?: () => void;
 }
 
 const CompletionForm: React.FC<CompletionFormProps> = ({ 
   requestId, 
   request,
   completeRequest, 
-  addNote 
+  addNote,
+  onCancel
 }) => {
   const [completionNote, setCompletionNote] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState<Array<{ text: string }>>([]);
@@ -53,12 +55,10 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
     }
   };
   
-  const handleCompleteWithNote = (id: string, e?: React.MouseEvent) => {
-    // Prevent default button behavior and stop propagation if event is provided
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handleCompleteWithNote = (e: React.MouseEvent) => {
+    // Prevent default button behavior and stop propagation
+    e.preventDefault();
+    e.stopPropagation();
     
     let noteText = completionNote.trim();
     
@@ -67,16 +67,27 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
       noteText = `Tool turnover to: ${secondUser}\n\n${noteText}`;
     }
     
+    // Submit additional notes first
+    submitAdditionalNotes(requestId);
+    
+    // Then complete the request with the main note
     if (noteText) {
-      completeRequest(id, { 
+      completeRequest(requestId, { 
         text: noteText, 
         author: "Support Staff" // In a real app, this would be the current user
       });
     } else {
-      completeRequest(id);
+      completeRequest(requestId);
     }
+    
     setCompletionNote("");
     setAdditionalNotes([]);
+  };
+  
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onCancel) onCancel();
   };
 
   // Handler to prevent the sheet from closing when content is clicked
@@ -133,7 +144,7 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
         </div>
       ))}
       
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button 
           type="button"
           variant="outline"
@@ -143,15 +154,21 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
         </Button>
       </div>
       
-      <Button 
-        className="w-full"
-        onClick={(e) => {
-          handleCompleteWithNote(requestId, e);
-          submitAdditionalNotes(requestId);
-        }}
-      >
-        Mark as Complete
-      </Button>
+      <div className="flex justify-between gap-2 mt-6">
+        <Button 
+          type="button"
+          variant="outline"
+          onClick={handleCancel}
+        >
+          <XCircle size={16} className="mr-1" />
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleCompleteWithNote}
+        >
+          Mark as Complete
+        </Button>
+      </div>
     </div>
   );
 };
