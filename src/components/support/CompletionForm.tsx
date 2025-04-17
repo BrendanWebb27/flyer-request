@@ -26,7 +26,11 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
   
   const isToolTurnover = request?.assetType === "tool-turnover";
   
-  const addAdditionalNote = () => {
+  const addAdditionalNote = (e: React.MouseEvent) => {
+    // Prevent default button behavior and stop propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
     setAdditionalNotes([...additionalNotes, { text: "" }]);
   };
   
@@ -49,7 +53,13 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
     }
   };
   
-  const handleCompleteWithNote = (id: string) => {
+  const handleCompleteWithNote = (id: string, e?: React.MouseEvent) => {
+    // Prevent default button behavior and stop propagation if event is provided
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     let noteText = completionNote.trim();
     
     // For tool turnover, include the second user in the completion note
@@ -127,8 +137,8 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
       
       <Button 
         className="w-full"
-        onClick={() => {
-          handleCompleteWithNote(requestId);
+        onClick={(e) => {
+          handleCompleteWithNote(requestId, e);
           submitAdditionalNotes(requestId);
         }}
       >
