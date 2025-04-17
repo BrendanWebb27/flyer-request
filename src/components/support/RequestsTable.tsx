@@ -30,6 +30,15 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
 }) => {
   const [activeRequest, setActiveRequest] = React.useState<string | null>(null);
 
+  // Filter requests based on the active tab
+  const filteredRequests = React.useMemo(() => {
+    if (activeTab === "all") {
+      return requests;
+    } else {
+      return requests.filter(request => request.status === activeTab);
+    }
+  }, [requests, activeTab]);
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -43,8 +52,8 @@ const RequestsTable: React.FC<RequestsTableProps> = ({
         <Table>
           <RequestTableHeader />
           <TableBody>
-            {requests.length > 0 ? (
-              requests.map((request, index) => (
+            {filteredRequests.length > 0 ? (
+              filteredRequests.map((request, index) => (
                 <RequestRow 
                   key={request.id}
                   request={request}
