@@ -27,18 +27,17 @@ const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild onClick={handleTriggerClick}>
         <Button 
           variant="outline" 
           size="sm"
           width="auto"
           className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200 whitespace-nowrap"
-          onClick={handleTriggerClick}
         >
           Complete
         </Button>
       </SheetTrigger>
-      <SheetContent onClick={(e) => e.stopPropagation()}>
+      <SheetContent side="right" onClick={(e) => e.stopPropagation()}>
         <SheetHeader>
           <SheetTitle>Complete Request {request.id}</SheetTitle>
         </SheetHeader>

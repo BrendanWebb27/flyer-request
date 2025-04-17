@@ -77,13 +77,12 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       open={isOpen} 
       onOpenChange={handleOpenChange}
     >
-      <SheetTrigger asChild>
+      <SheetTrigger asChild onClick={handleButtonClick}>
         <Button 
           variant={buttonVariant}
           size={buttonSize}
           width="auto"
           className={`whitespace-nowrap flex-shrink-0 ${buttonClass}`}
-          onClick={handleButtonClick}
         >
           {buttonIcon && <span className="mr-1">{buttonIcon}</span>}
           {buttonText}

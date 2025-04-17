@@ -27,6 +27,11 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
       author: "Support Staff" 
     });
   };
+  
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   return (
     <div onClick={stopPropagation}>
@@ -37,6 +42,7 @@ const CompleteRequestAction: React.FC<CompleteRequestActionProps> = ({
         buttonVariant="outline"
         buttonClass="text-green-500 border-green-200 hover:bg-green-50"
         title={`Complete Request ${requestId}`}
+        onButtonClick={handleButtonClick}
       >
         <div className="p-4 space-y-4" onClick={stopPropagation}>
           <textarea 
