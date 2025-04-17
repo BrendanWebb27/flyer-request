@@ -30,8 +30,14 @@ const RequestButtonGroup: React.FC<RequestButtonGroupProps> = ({
   showClearButton,
   isPending
 }) => {
+  // Add a handler to stop event propagation
+  const handleGroupClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
   return (
-    <>
+    <div onClick={handleGroupClick}>
       {showCompleteButton && (
         <CompleteRequestButton 
           request={request}
@@ -58,9 +64,8 @@ const RequestButtonGroup: React.FC<RequestButtonGroupProps> = ({
           isPending={isPending}
         />
       )}
-    </>
+    </div>
   );
 };
 
 export default RequestButtonGroup;
-

@@ -32,9 +32,18 @@ const RequestActionButtons: React.FC<RequestActionButtonsProps> = ({
     showClearButton,
     isPending
   } = useActionTypeSelector(request);
+  
+  // Add a handler to stop event propagation
+  const handleContainerClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
     
   return (
-    <div className="flex items-center gap-2 flex-nowrap justify-end">
+    <div 
+      className="flex items-center gap-2 flex-nowrap justify-end"
+      onClick={handleContainerClick}
+    >
       <RequestButtonGroup 
         request={request}
         requestIndex={requestIndex}

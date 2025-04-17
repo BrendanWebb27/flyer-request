@@ -66,6 +66,11 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       externalOnOpenChange(newOpen);
     }
   };
+  
+  // Add this handler to stop propagation on the sheet content
+  const handleContentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <Sheet 
@@ -87,6 +92,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
       <SheetContent 
         side="right"
         className="overflow-y-auto max-h-screen"
+        onClick={handleContentClick}
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
