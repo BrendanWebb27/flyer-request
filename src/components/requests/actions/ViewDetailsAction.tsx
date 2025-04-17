@@ -58,6 +58,7 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
       onMouseDown={stopAllEvents}
       onPointerDown={stopAllEvents}
       className="relative z-10"
+      data-prevent-close="true"
     >
       <ActionButtonSheet
         buttonText="View Details"
@@ -68,9 +69,15 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
         open={isOpen}
         onOpenChange={setIsOpen}
         onButtonClick={handleOpenDetails}
-        preventAutoClose={!isSupport} // Prevent auto-close for non-support users
+        preventAutoClose={true} // Always prevent auto-close for detail views
       >
-        <div className="full-sheet-content">
+        <div 
+          className="full-sheet-content"
+          onClick={stopAllEvents}
+          onMouseDown={stopAllEvents}
+          onPointerDown={stopAllEvents}
+          data-prevent-close="true"
+        >
           {request ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
@@ -158,21 +165,19 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
                 </div>
               )}
               
-              {/* Close button for non-support users */}
-              {!isSupport && (
-                <div className="flex justify-end gap-2 mt-6">
-                  <Button 
-                    variant="outline" 
-                    onClick={(e) => {
-                      stopAllEvents(e);
-                      setIsOpen(false);
-                    }}
-                    data-explicit-close="true"
-                  >
-                    Close
-                  </Button>
-                </div>
-              )}
+              {/* Close button for all users */}
+              <div className="flex justify-end gap-2 mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={(e) => {
+                    stopAllEvents(e);
+                    setIsOpen(false);
+                  }}
+                  data-explicit-close="true"
+                >
+                  Close
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="py-8 text-center">

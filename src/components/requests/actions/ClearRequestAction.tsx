@@ -112,12 +112,14 @@ const ClearRequestAction: React.FC<ClearRequestActionProps> = ({
                 stopAllEvents(e);
                 setIsOpen(false);
               }}
+              data-explicit-close="true"
             >
               Cancel
             </Button>
             <Button 
               variant="destructive" 
               onClick={(e) => handleClearRequest(e)}
+              data-explicit-close="true"
             >
               Clear Request
             </Button>

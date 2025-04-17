@@ -106,6 +106,7 @@ export const RequestActions: React.FC<RequestActionsProps> = ({
       onClick={stopPropagation}
       onMouseDown={stopPropagation}
       onPointerDown={stopPropagation}
+      data-prevent-close="true"
     >
       {showClearButton && (
         <ClearRequestAction 

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface ActionButtonSheetProps {
   buttonText: string;
@@ -30,7 +31,11 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   onOpenChange: externalOnOpenChange,
   preventAutoClose = false
 }) => {
+  const { isSupport } = useProfileAccess();
   const [internalOpen, setInternalOpen] = useState(false);
+  
+  // Always prevent auto-close for non-support users
+  const shouldPreventAutoClose = preventAutoClose || !isSupport;
   
   // Use either controlled or uncontrolled state
   const isControlled = externalOpen !== undefined;
@@ -39,7 +44,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
   // Handle open state changes
   const handleOpenChange = (newOpen: boolean) => {
     // If we want to prevent auto-close and are trying to close without explicit user action
-    if (preventAutoClose && !newOpen && isOpen) {
+    if (shouldPreventAutoClose && !newOpen && isOpen) {
       // Check if the close was triggered by a click inside the content
       // by looking at the active element and its parents
       const activeElement = document.activeElement as HTMLElement;
@@ -64,7 +69,7 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
     }
   };
   
-  // Handle content clicks to stop propagation
+  // Enhanced handling for content clicks
   const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -103,9 +108,10 @@ const ActionButtonSheet: React.FC<ActionButtonSheetProps> = ({
         side="right"
         className="overflow-y-auto max-h-screen"
         onClick={handleContentClick}
-        onOpenAutoFocus={(e) => preventAutoClose && e.preventDefault()}
-        onPointerDownOutside={(e) => preventAutoClose && e.preventDefault()}
-        onInteractOutside={(e) => preventAutoClose && e.preventDefault()}
+        onOpenAutoFocus={(e) => shouldPreventAutoClose && e.preventDefault()}
+        onPointerDownOutside={(e) => shouldPreventAutoClose && e.preventDefault()}
+        onInteractOutside={(e) => shouldPreventAutoClose && e.preventDefault()}
+        onEscapeKeyDown={(e) => shouldPreventAutoClose && e.preventDefault()}
       >
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
