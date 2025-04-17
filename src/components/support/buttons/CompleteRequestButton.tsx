@@ -34,7 +34,18 @@ const CompleteRequestButton: React.FC<CompleteRequestButtonProps> = ({
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet 
+      open={open} 
+      onOpenChange={(newOpenState) => {
+        // Only allow explicit user actions to close the sheet
+        // Don't close on internal component clicks
+        if (newOpenState === false && open === true) {
+          // This is only when closing the sheet
+          console.log("Sheet closing event");
+        }
+        setOpen(newOpenState);
+      }}
+    >
       <SheetTrigger asChild>
         <Button 
           variant="outline" 

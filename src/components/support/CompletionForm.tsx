@@ -79,8 +79,13 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
     setAdditionalNotes([]);
   };
 
+  // Handler to prevent the sheet from closing when content is clicked
+  const handleFormClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); 
+  };
+
   return (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-4 mt-4" onClick={handleFormClick}>
       {isToolTurnover && (
         <div className="space-y-2">
           <Label htmlFor="secondUser" className="flex items-center gap-2">
@@ -92,6 +97,7 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
             placeholder="Enter receiving user's ID"
             value={secondUser}
             onChange={(e) => setSecondUser(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
       )}
@@ -106,6 +112,7 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
           placeholder="What was done to complete this request?"
           value={completionNote}
           onChange={(e) => setCompletionNote(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
           rows={4}
         />
       </div>
@@ -120,6 +127,7 @@ const CompletionForm: React.FC<CompletionFormProps> = ({
             placeholder="Add more details..."
             value={note.text}
             onChange={(e) => updateAdditionalNote(index, e.target.value)}
+            onClick={(e) => e.stopPropagation()}
             rows={3}
           />
         </div>
