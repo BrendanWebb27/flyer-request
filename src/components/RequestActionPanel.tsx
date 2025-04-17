@@ -22,7 +22,11 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
   const [estimatedTime, setEstimatedTime] = React.useState("");
   const { getAllSupportProfiles } = useProfileAccess();
   
-  const handleAccept = () => {
+  const handleAccept = (e: React.MouseEvent) => {
+    // Prevent any event propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!assignedTo || !estimatedTime) {
       toast({
         title: "Missing information",
@@ -62,8 +66,19 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
     "1 hour"
   ];
   
+  // Stop propagation for the entire component
+  const stopAllEvents = (e: React.UIEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
   return (
-    <Card>
+    <Card 
+      onClick={stopAllEvents}
+      onMouseDown={stopAllEvents}
+      onPointerDown={stopAllEvents}
+      data-prevent-close="true"
+    >
       <CardHeader>
         <CardTitle className="text-lg">Accept Request</CardTitle>
       </CardHeader>
@@ -80,7 +95,7 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
             <SelectTrigger id="assignedTo">
               <SelectValue placeholder="Select support personnel" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-white" onPointerDownOutside={(e) => e.preventDefault()}>
               {supportProfiles.length > 0 ? (
                 supportProfiles.map((profile, index) => (
                   <SelectItem key={`support-${index}`} value={profile.name || `Support Staff ${index + 1}`}>
@@ -106,7 +121,7 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
             <SelectTrigger id="estimatedTime">
               <SelectValue placeholder="Select estimated time" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-white" onPointerDownOutside={(e) => e.preventDefault()}>
               {timeOptions.map((time) => (
                 <SelectItem key={time} value={time}>
                   {time}
@@ -120,6 +135,7 @@ const RequestActionPanel: React.FC<RequestActionPanelProps> = ({
           onClick={handleAccept}
           width="full"
           className="bg-flyerPurple-600 hover:bg-flyerPurple-700 mt-2"
+          data-explicit-close="true"
         >
           <Check size={16} className="mr-2" />
           Accept Request

@@ -34,8 +34,20 @@ const AcceptRequestSection: React.FC<AcceptRequestSectionProps> = ({
   // Time options for support staff
   const timeOptions = ["5 minutes", "10 minutes", "15 minutes", "20 minutes", "30 minutes", "45 minutes", "1 hour"];
   
+  // Stop event propagation to prevent unwanted closures
+  const stopAllEvents = (e: React.UIEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
   return (
-    <div className={`space-y-4 border-t pt-4 mt-4 ${highlightAccept ? 'bg-flyerPurple-50 p-4 rounded-lg border border-flyerPurple-200' : ''}`}>
+    <div 
+      className={`space-y-4 border-t pt-4 mt-4 ${highlightAccept ? 'bg-flyerPurple-50 p-4 rounded-lg border border-flyerPurple-200' : ''}`}
+      onClick={stopAllEvents}
+      onMouseDown={stopAllEvents}
+      onPointerDown={stopAllEvents}
+      data-prevent-close="true"
+    >
       <h4 className={`font-medium ${highlightAccept ? 'text-flyerPurple-700' : ''}`}>
         {highlightAccept ? 'Accept This Request' : 'Accept Request'}
       </h4>
@@ -48,10 +60,10 @@ const AcceptRequestSection: React.FC<AcceptRequestSectionProps> = ({
           value={estimatedTime}
           onValueChange={setEstimatedTime}
         >
-          <SelectTrigger id="estimatedTime">
+          <SelectTrigger id="estimatedTime" onClick={stopAllEvents}>
             <SelectValue placeholder="Select estimated time" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent onPointerDownOutside={(e) => e.preventDefault()}>
             {timeOptions.map((time) => (
               <SelectItem key={time} value={time}>
                 {time}
@@ -66,6 +78,7 @@ const AcceptRequestSection: React.FC<AcceptRequestSectionProps> = ({
         className={`w-full ${highlightAccept ? 'bg-flyerPurple-600 hover:bg-flyerPurple-700 text-lg py-6' : 'bg-flyerPurple-600 hover:bg-flyerPurple-700'}`}
         disabled={!estimatedTime}
         id="acceptRequestButton"
+        data-explicit-close="true"
       >
         <Check size={highlightAccept ? 20 : 16} className="mr-2" />
         {highlightAccept ? 'Accept Request Now' : 'Accept Request'}

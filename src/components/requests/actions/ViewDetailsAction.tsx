@@ -1,10 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { Request } from "@/types/request";
-import { Button } from "@/components/ui/button";
+import RequestDetailsDialog from "@/components/requests/RequestDetailsDialog";
 import ActionButtonSheet from "./ActionButtonSheet";
-import { useProfileAccess } from "@/hooks/useProfileAccess";
 
 interface ViewDetailsActionProps {
   request: Request;
@@ -21,169 +22,64 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
   onComplete,
   setDetailsOpen
 }) => {
-  const { isSupport } = useProfileAccess();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   
-  // Enhanced event handling to stop propagation of all events
-  const stopAllEvents = (e: React.UIEvent) => {
-    e.preventDefault();
+  // Update parent state if provided
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (setDetailsOpen) {
+      setDetailsOpen(open);
+    }
+  };
+  
+  // For dialog content clicks, prevent bubbling
+  const handleContentClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
   
-  const handleComplete = (requestId: string, notes: string) => {
-    if (onComplete) {
-      onComplete(requestId, { 
-        text: notes || "Request completed", 
-        author: "Support Staff" 
-      });
-      setIsOpen(false);
-    }
-  };
-
-  // Modified to just handle the click correctly
-  const handleViewDetailsClick = (e: React.MouseEvent) => {
-    stopAllEvents(e);
-    if (setDetailsOpen) setDetailsOpen(true);
-  };
+  // Check if this is a pending request that can be accepted
+  const isPendingAndAcceptable = request.status === "pending" && onAccept;
   
-  // Explicitly handle button click to open dialog
-  const handleOpenDetails = (e: React.MouseEvent) => {
-    stopAllEvents(e);
+  // Enhanced handling for view detail buttons with click propagation prevention
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsOpen(true);
   };
-
+  
   return (
     <div 
-      onClick={stopAllEvents} 
-      onMouseDown={stopAllEvents}
-      onPointerDown={stopAllEvents}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
       className="relative z-10"
       data-prevent-close="true"
     >
       <ActionButtonSheet
-        buttonText="View Details"
+        buttonText={isPendingAndAcceptable ? "Accept/Details" : "Details"}
         buttonIcon={<Eye size={16} />}
-        buttonVariant="default"
-        buttonClass="bg-flyerPurple-600 hover:bg-flyerPurple-700"
-        title="Request Details"
+        buttonVariant={isPendingAndAcceptable ? "default" : "ghost"}
+        buttonClass={isPendingAndAcceptable ? "bg-flyerPurple-600 hover:bg-flyerPurple-700 text-white" : ""}
+        title={`Request ${requestId} Details`}
         open={isOpen}
-        onOpenChange={setIsOpen}
-        onButtonClick={handleOpenDetails}
-        preventAutoClose={true} // Always prevent auto-close for detail views
+        onOpenChange={handleOpenChange}
+        onButtonClick={handleButtonClick}
+        preventAutoClose={true}
       >
         <div 
-          className="full-sheet-content"
-          onClick={stopAllEvents}
-          onMouseDown={stopAllEvents}
-          onPointerDown={stopAllEvents}
+          className="p-4"
+          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
           data-prevent-close="true"
         >
-          {request ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="font-semibold">ID:</div>
-                <div>{request.id}</div>
-                
-                <div className="font-semibold">Location:</div>
-                <div>{request.location}</div>
-                
-                <div className="font-semibold">Status:</div>
-                <div>{request.status}</div>
-                
-                <div className="font-semibold">Created:</div>
-                <div>{new Date(request.createdAt).toLocaleString()}</div>
-                
-                <div className="font-semibold">Requested By:</div>
-                <div>{request.requestedBy || "Unknown"}</div>
-                
-                {request.assignedTo && (
-                  <>
-                    <div className="font-semibold">Assigned To:</div>
-                    <div>{request.assignedTo}</div>
-                  </>
-                )}
-                
-                {request.estimatedArrival && (
-                  <>
-                    <div className="font-semibold">ETA:</div>
-                    <div>{request.estimatedArrival}</div>
-                  </>
-                )}
-              </div>
-              
-              <div>
-                <div className="font-semibold mb-1">Details:</div>
-                <div className="p-2 bg-gray-50 rounded-md">{request.details}</div>
-              </div>
-              
-              {request.notes && request.notes.length > 0 && (
-                <div>
-                  <div className="font-semibold mb-1">Notes:</div>
-                  <div className="space-y-2">
-                    {request.notes.map((note, index) => (
-                      <div key={index} className="p-2 bg-gray-50 rounded-md">
-                        <div className="text-sm text-gray-500">
-                          {note.author} - {new Date(note.timestamp).toLocaleString()}
-                        </div>
-                        <div>{note.text}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Action buttons for support users */}
-              {isSupport && (
-                <div className="flex justify-end gap-2 mt-6">
-                  {request.status === "pending" && onAccept && (
-                    <Button 
-                      onClick={(e) => {
-                        stopAllEvents(e);
-                        handleViewDetailsClick(e);
-                        setIsOpen(false);
-                      }}
-                      data-explicit-close="true"
-                    >
-                      View Details
-                    </Button>
-                  )}
-                  
-                  {request.status === "active" && onComplete && (
-                    <Button 
-                      onClick={(e) => {
-                        stopAllEvents(e);
-                        const notes = prompt("Add completion notes (optional):");
-                        if (notes !== null) { // Only if not cancelled
-                          handleComplete(requestId, notes);
-                        }
-                      }}
-                      data-explicit-close="true"
-                    >
-                      Complete Request
-                    </Button>
-                  )}
-                </div>
-              )}
-              
-              {/* Close button for all users */}
-              <div className="flex justify-end gap-2 mt-6">
-                <Button 
-                  variant="outline" 
-                  onClick={(e) => {
-                    stopAllEvents(e);
-                    setIsOpen(false);
-                  }}
-                  data-explicit-close="true"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="py-8 text-center">
-              <p>Request details not available</p>
-            </div>
-          )}
+          <RequestDetailsDialog
+            request={request}
+            onClose={() => handleOpenChange(false)}
+            onAccept={onAccept}
+            onComplete={onComplete}
+            highlightAccept={isPendingAndAcceptable}
+          />
         </div>
       </ActionButtonSheet>
     </div>
