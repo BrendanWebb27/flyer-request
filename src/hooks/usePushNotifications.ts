@@ -16,7 +16,7 @@ export const usePushNotifications = () => {
   const [isSupported, setIsSupported] = useState(false);
   const { toast } = useToast();
 
-  // Check if notifications are supported and get current subscription
+  // Check if notifications are supported
   useEffect(() => {
     const supported = isPushSupported();
     setIsSupported(supported);
@@ -58,19 +58,7 @@ export const usePushNotifications = () => {
   // Unsubscribe from push notifications
   const unsubscribe = useCallback(async () => {
     try {
-      // Unregister with Supabase
-      if (subscription) {
-        await fetch('https://your-app-id.supabase.co/functions/v1/unregister-push', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('supabaseAccessToken')}`
-          },
-          body: JSON.stringify({ endpoint: subscription.endpoint })
-        });
-      }
-      
-      // Unsubscribe locally
+      // Remove subscription
       removeSubscription();
       setSubscription(null);
       setIsSubscribed(false);
@@ -91,7 +79,7 @@ export const usePushNotifications = () => {
       });
       return false;
     }
-  }, [subscription, toast]);
+  }, [toast]);
 
   return {
     isSupported,
