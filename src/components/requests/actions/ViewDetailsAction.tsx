@@ -76,9 +76,9 @@ const ViewDetailsAction: React.FC<ViewDetailsActionProps> = ({
           <RequestDetailsDialog
             request={request}
             onClose={() => handleOpenChange(false)}
-            onAccept={onAccept}
+            onAccept={isPendingAndAcceptable ? onAccept : undefined}
             onComplete={onComplete}
-            highlightAccept={isPendingAndAcceptable}
+            highlightAccept={!!isPendingAndAcceptable}
           />
         </div>
       </ActionButtonSheet>
